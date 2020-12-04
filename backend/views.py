@@ -30,13 +30,17 @@ def register(request):
 def sessions(request):
     print(request.user)
     if request.method == 'POST':
-        body = json.loads(request.body)
-        print(body)
+        try:
+            body = json.loads(request.body)
+            print(body)
 
-        username = body['username']
-        password = body['password']
+            username = body['username']
+            password = body['password']
 
-        user = authenticate(username=username, password=password)
+            user = authenticate(username=username, password=password)
+        except (json.decoder.JSONDecodeError, KeyError):
+            return HttpResponse(status=403)
+
         if user:
             login(request, user)
             return HttpResponse(status=200)
