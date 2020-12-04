@@ -2,6 +2,7 @@ import json
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from backend.models import UserProfile
+from django.contrib.auth import authenticate, login, logout
 
 
 def register(request):
@@ -24,3 +25,28 @@ def register(request):
             return HttpResponse(status=201)
         else:
             return HttpResponse(status=401)
+
+
+def sessions(request):
+    print(request.user)
+    if request.method == 'POST':
+        body = json.loads(request.body)
+        print(body)
+
+        username = body['username']
+        password = body['password']
+
+        user = authenticate(username=username, password=password)
+        if user:
+            login(request, user)
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=403)
+
+    if request.method == 'DELETE':
+        if request.user.is_authenticated:
+            logout(request)
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=403)
+
