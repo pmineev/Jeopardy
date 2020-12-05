@@ -1,5 +1,5 @@
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from backend.models import UserProfile
 from django.contrib.auth import authenticate, login, logout
@@ -54,3 +54,24 @@ def sessions(request):
         else:
             return HttpResponse(status=403)
 
+
+def users(request, username):
+    print(request.user, username)
+    if username == request.user.username and request.user.is_authenticated:
+        user = UserProfile.objects.get(user__username=username)
+        if request.method == 'GET':
+            nickname = user.nickname
+            return JsonResponse({'username': username,
+                                 'nickname': nickname})
+
+        if request.method == 'PATCH':
+            try:
+                body = json.loads(request.body)
+                request_nickname = body['nickname']
+                user.nickname = request_nickname
+                user.save()
+                return HttpResponse(status=200)
+            except (json.decoder.JSONDecodeError, KeyError):
+                return HttpResponse(status=403)
+    else:
+        return HttpResponse(status=403)
