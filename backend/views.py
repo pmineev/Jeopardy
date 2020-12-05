@@ -97,6 +97,16 @@ def add_game(game_dict, user):
         game.rounds.add(round)
 
 
+def get_game_descriptions():
+    game_list = list()
+    for game in Game.objects.all():
+        desc = {'name': game.name,
+                'author': game.author.username,
+                'rounds_count': str(game.rounds.count()+1)}
+        game_list.append(desc)
+    return game_list
+
+
 def games(request):
     print(request.user, 'games')
     user = request.user
@@ -108,5 +118,8 @@ def games(request):
                 return HttpResponse(status=200)
             except (json.decoder.JSONDecodeError, KeyError):
                 return HttpResponse(status=403)
+        if request.method == 'GET':
+            game_list = get_game_descriptions()
+            return JsonResponse(game_list, safe=False)
     else:
         return HttpResponse(status=403)
