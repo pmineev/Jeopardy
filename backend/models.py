@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db.models import Model, CharField, TextField, IntegerField,\
-    ForeignKey, ManyToManyField, OneToOneField, CASCADE
+    ForeignKey, ManyToManyField, OneToOneField, CASCADE, PROTECT
 
 
 class UserProfile(Model):
@@ -34,8 +34,10 @@ class Game(Model):
 
 
 class GameSession(Model):
-    creator = ForeignKey(User,
-                         on_delete=CASCADE)
+    creator = OneToOneField(User,
+                            primary_key=True,
+                            on_delete=PROTECT)
     game = ForeignKey(Game, on_delete=CASCADE)
     max_players = IntegerField()
-    players = ManyToManyField(UserProfile)
+    players = ManyToManyField(User,
+                              related_name='players')

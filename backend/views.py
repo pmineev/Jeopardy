@@ -1,8 +1,9 @@
 import json
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
-from backend.models import UserProfile, Game, Round, Theme, Question
+from backend.models import UserProfile, Game, Round, Theme, Question, GameSession
 from django.contrib.auth import authenticate, login, logout
+from django.db import IntegrityError
 
 
 def register(request):
@@ -121,5 +122,29 @@ def games(request):
         if request.method == 'GET':
             game_list = get_game_descriptions()
             return JsonResponse(game_list, safe=False)
+    else:
+        return HttpResponse(status=403)
+
+
+def start_game(request, game_name):
+    print(request.user, 'start_game')
+    user = request.user
+    if user.is_authenticated:
+        if request.method == 'POST':
+            try:
+                max_players = int(json.loads(request.body)['max_players'])
+                game = Game.objects.filter(name=game_name).first()
+                if game:
+                    game_session = GameSession.objects.create(creator=user,
+                                                              game=game,
+                                                              max_players=max_players)
+                    game_session.players.add(user)
+                    return HttpResponse(status=200)
+                else:
+                    return HttpResponse(status=404)
+            except (json.decoder.JSONDecodeError, KeyError):
+                return HttpResponse(status=403)
+            except IntegrityError:
+                return HttpResponse(status=409)
     else:
         return HttpResponse(status=403)
