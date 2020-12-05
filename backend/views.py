@@ -79,7 +79,7 @@ def users(request, username):
 
 def add_game(game_dict, user):
     final_round = Question.objects.create(order=0, **game_dict['final_round'])
-    game = Game.objects.create(author=user, final_round=final_round)
+    game = Game.objects.create(name=game_dict['name'], author=user, final_round=final_round)
 
     for round_order, round_dict in enumerate(game_dict['rounds']):
         round = Round.objects.create(order=round_order)

@@ -26,6 +26,7 @@ class Round(Model):
 
 
 class Game(Model):
+    name = CharField(max_length=50, primary_key=True)
     author = ForeignKey(User,
                         on_delete=CASCADE)
     rounds = ManyToManyField(Round)
