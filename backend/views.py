@@ -1,7 +1,7 @@
 import json
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
-from backend.models import UserProfile
+from backend.models import UserProfile, Game, Round, Theme, Question
 from django.contrib.auth import authenticate, login, logout
 
 
@@ -70,6 +70,41 @@ def users(request, username):
                 request_nickname = body['nickname']
                 user.nickname = request_nickname
                 user.save()
+                return HttpResponse(status=200)
+            except (json.decoder.JSONDecodeError, KeyError):
+                return HttpResponse(status=403)
+    else:
+        return HttpResponse(status=403)
+
+
+def add_game(game_dict, user):
+    final_round = Question.objects.create(order=0, **game_dict['final_round'])
+    game = Game.objects.create(author=user, final_round=final_round)
+
+    for round_order, round_dict in enumerate(game_dict['rounds']):
+        round = Round.objects.create(order=round_order)
+
+        for theme_order, theme_dict in enumerate(round_dict['themes']):
+            theme = Theme.objects.create(name=theme_dict['name'], order=theme_order)
+
+            for question_order, question_dict in enumerate(theme_dict['questions']):
+                question = Question.objects.create(order=question_order, **question_dict)
+
+                theme.questions.add(question)
+
+            round.themes.add(theme)
+
+        game.rounds.add(round)
+
+
+def games(request):
+    print(request.user, 'games')
+    user = request.user
+    if user.is_authenticated:
+        if request.method == 'POST':
+            try:
+                game = json.loads(request.body)
+                add_game(game, user)
                 return HttpResponse(status=200)
             except (json.decoder.JSONDecodeError, KeyError):
                 return HttpResponse(status=403)
