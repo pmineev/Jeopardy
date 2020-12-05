@@ -15,10 +15,13 @@ class Question(Model):
 
 
 class Theme(Model):
+    name = CharField(max_length=50)
+    order = IntegerField()
     questions = ManyToManyField(Question)
 
 
 class Round(Model):
+    order = IntegerField()
     themes = ManyToManyField(Theme)
 
 
