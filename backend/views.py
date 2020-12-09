@@ -1,52 +1,52 @@
 import json
 from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.models import User
-from backend.models import UserProfile, Game, Round, Theme, Question, GameSession
-from django.contrib.auth import authenticate, login, logout
-from django.db import IntegrityError
-
+from django.contrib.auth import login, logout
+from backend.factories import UserFactory, GameFactory, GameSessionFactory
+from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists
+from django.contrib.auth.models import User as ORMUser
 
 def register(request):
     print(request.body)
     if request.method == 'POST':
-        body = json.loads(request.body)
-        print(body)
+        user_dict = json.loads(request.body)
+        print(user_dict)
 
-        username = body['username']
-        nickname = body['nickname'] if 'nickname' in body else username
-        password = body['password']
+        if 'username' not in user_dict or 'password' not in user_dict:
+            return HttpResponse(status=400)
 
-        if username and password:
-            if User.objects.filter(username=username).exists():
-                return HttpResponse(status=409)
-            else:
-                user = UserProfile(user=User.objects.create_user(username=username, password=password),
-                                   nickname=nickname)
-                user.save()
-            return HttpResponse(status=201)
-        else:
+        interactor = UserFactory.get()
+
+        try:
+            interactor.create(user_dict)
+        except UserAlreadyExists:
+            return HttpResponse(status=409)
+        except InvalidCredentials:
             return HttpResponse(status=401)
+
+        return HttpResponse(status=201)
 
 
 def sessions(request):
     print(request.user)
     if request.method == 'POST':
+        user_dict = json.loads(request.body)
+        print(user_dict)
+
+        if 'username' not in user_dict or 'password' not in user_dict:
+            return HttpResponse(status=400)
+
+        interactor = UserFactory.get()
+
         try:
-            body = json.loads(request.body)
-            print(body)
+            interactor.create_session(user_dict)
+        except (InvalidCredentials, UserNotFound):
+            print('invalid')
+            return HttpResponse(status=404)
 
-            username = body['username']
-            password = body['password']
-
-            user = authenticate(username=username, password=password)
-        except (json.decoder.JSONDecodeError, KeyError):
-            return HttpResponse(status=403)
-
-        if user:
-            login(request, user)
-            return HttpResponse(status=200)
-        else:
-            return HttpResponse(status=403)
+        #убрать после jwt
+        user_orm = ORMUser.objects.get(username=user_dict['username'])
+        login(request, user_orm)
+        return HttpResponse(status=200)
 
     if request.method == 'DELETE':
         if request.user.is_authenticated:
@@ -58,93 +58,62 @@ def sessions(request):
 
 def users(request, username):
     print(request.user, username)
-    if username == request.user.username and request.user.is_authenticated:
-        user = UserProfile.objects.get(user__username=username)
-        if request.method == 'GET':
-            nickname = user.nickname
-            return JsonResponse({'username': username,
-                                 'nickname': nickname})
-
-        if request.method == 'PATCH':
-            try:
-                body = json.loads(request.body)
-                request_nickname = body['nickname']
-                user.nickname = request_nickname
-                user.save()
-                return HttpResponse(status=200)
-            except (json.decoder.JSONDecodeError, KeyError):
-                return HttpResponse(status=403)
-    else:
+    if username != request.user.username or not request.user.is_authenticated:
         return HttpResponse(status=403)
 
+    interactor = UserFactory.get()
 
-def add_game(game_dict, user):
-    final_round = Question.objects.create(order=0, **game_dict['final_round'])
-    game = Game.objects.create(name=game_dict['name'], author=user, final_round=final_round)
+    if request.method == 'GET':
+        user = interactor.get(username)
 
-    for round_order, round_dict in enumerate(game_dict['rounds']):
-        round = Round.objects.create(order=round_order)
+        return JsonResponse({'username': user.username,
+                             'nickname': user.nickname})
 
-        for theme_order, theme_dict in enumerate(round_dict['themes']):
-            theme = Theme.objects.create(name=theme_dict['name'], order=theme_order)
+    if request.method == 'PATCH':
+        body = json.loads(request.body)
 
-            for question_order, question_dict in enumerate(theme_dict['questions']):
-                question = Question.objects.create(order=question_order, **question_dict)
+        if 'password' not in body and 'nickname' not in body:
+            return HttpResponse(status=403)
 
-                theme.questions.add(question)
+        interactor.update(body)
 
-            round.themes.add(theme)
-
-        game.rounds.add(round)
-
-
-def get_game_descriptions():
-    game_list = list()
-    for game in Game.objects.all():
-        desc = {'name': game.name,
-                'author': game.author.username,
-                'rounds_count': str(game.rounds.count()+1)}
-        game_list.append(desc)
-    return game_list
+        return HttpResponse(status=200)
 
 
 def games(request):
     print(request.user, 'games')
-    user = request.user
-    if user.is_authenticated:
-        if request.method == 'POST':
-            try:
-                game = json.loads(request.body)
-                add_game(game, user)
-                return HttpResponse(status=200)
-            except (json.decoder.JSONDecodeError, KeyError):
-                return HttpResponse(status=403)
-        if request.method == 'GET':
-            game_list = get_game_descriptions()
-            return JsonResponse(game_list, safe=False)
-    else:
+    if not request.user.is_authenticated:
         return HttpResponse(status=403)
+
+    interactor = GameFactory.get()
+
+    if request.method == 'POST':
+        game_dict = json.loads(request.body)
+        try:
+            interactor.create(game_dict, request.user.username)
+        except GameAlreadyExists:
+            return HttpResponse(status=409)
+
+        return HttpResponse(status=201)
+    if request.method == 'GET':
+        game_descriptions = interactor.get_all_descriptions()
+
+        # не работает, нужен сериализатор
+        return JsonResponse(game_descriptions, safe=False)
 
 
 def start_game(request, game_name):
     print(request.user, 'start_game')
-    user = request.user
-    if user.is_authenticated:
-        if request.method == 'POST':
-            try:
-                max_players = int(json.loads(request.body)['max_players'])
-                game = Game.objects.filter(name=game_name).first()
-                if game:
-                    game_session = GameSession.objects.create(creator=user,
-                                                              game=game,
-                                                              max_players=max_players)
-                    game_session.players.add(user)
-                    return HttpResponse(status=200)
-                else:
-                    return HttpResponse(status=404)
-            except (json.decoder.JSONDecodeError, KeyError):
-                return HttpResponse(status=403)
-            except IntegrityError:
-                return HttpResponse(status=409)
-    else:
+    if not request.user.is_authenticated:
         return HttpResponse(status=403)
+
+    if request.method == 'POST':
+        game_session_dict = json.loads(request.body)
+
+        if 'max_players' not in game_session_dict:
+            return HttpResponse(status=403)
+
+        interactor = GameSessionFactory.get()
+        interactor.create(game_session_dict, game_name, request.user.username)
+
+        return HttpResponse(status=201)

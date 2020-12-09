@@ -1,43 +1,46 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User as ORMUser
 from django.db.models import Model, CharField, TextField, IntegerField,\
     ForeignKey, ManyToManyField, OneToOneField, CASCADE, PROTECT
 
 
-class UserProfile(Model):
-    user = OneToOneField(User, on_delete=CASCADE)
+class ORMUserProfile(Model):
+    user = OneToOneField(ORMUser,
+                         on_delete=CASCADE)
     nickname = CharField(max_length=50)
 
 
-class Question(Model):
-    order = IntegerField()
+class ORMQuestion(Model):
+    order = IntegerField(null=True)
     text = TextField()
     answer = TextField()
 
 
-class Theme(Model):
+class ORMTheme(Model):
     name = CharField(max_length=50)
     order = IntegerField()
-    questions = ManyToManyField(Question)
+    questions = ManyToManyField(ORMQuestion)
 
 
-class Round(Model):
+class ORMRound(Model):
     order = IntegerField()
-    themes = ManyToManyField(Theme)
+    themes = ManyToManyField(ORMTheme)
 
 
-class Game(Model):
-    name = CharField(max_length=50, primary_key=True)
-    author = ForeignKey(User,
+class ORMGame(Model):
+    name = CharField(max_length=50,
+                     primary_key=True)
+    author = ForeignKey(ORMUserProfile,
                         on_delete=CASCADE)
-    rounds = ManyToManyField(Round)
-    final_round = ForeignKey(Question, on_delete=CASCADE)
+    rounds = ManyToManyField(ORMRound)
+    final_round = ForeignKey(ORMQuestion, on_delete=CASCADE)
 
 
-class GameSession(Model):
-    creator = OneToOneField(User,
+class ORMGameSession(Model):
+    creator = OneToOneField(ORMUserProfile,
                             primary_key=True,
                             on_delete=PROTECT)
-    game = ForeignKey(Game, on_delete=CASCADE)
+    game = ForeignKey(ORMGame,
+                      on_delete=PROTECT)
     max_players = IntegerField()
-    players = ManyToManyField(User,
+    players = ManyToManyField(ORMUserProfile,
                               related_name='players')
