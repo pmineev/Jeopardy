@@ -1,9 +1,9 @@
 import json
 from django.http import HttpResponse, JsonResponse
-from django.contrib.auth import login, logout
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists
-from django.contrib.auth.models import User as ORMUser
+from rest_framework.views import APIView
+
 
 def register(request):
     print(request.body)
@@ -38,44 +38,36 @@ def sessions(request):
         interactor = UserFactory.get()
 
         try:
-            interactor.create_session(user_dict)
+            session = interactor.create_session(user_dict)
         except (InvalidCredentials, UserNotFound):
             print('invalid')
             return HttpResponse(status=404)
 
-        #убрать после jwt
-        user_orm = ORMUser.objects.get(username=user_dict['username'])
-        login(request, user_orm)
-        return HttpResponse(status=200)
-
-    if request.method == 'DELETE':
-        if request.user.is_authenticated:
-            logout(request)
-            return HttpResponse(status=200)
-        else:
-            return HttpResponse(status=403)
+        return JsonResponse({'access_token': session.access_token,
+                             'refresh_token': session.refresh_token})
 
 
-def users(request, username):
-    print(request.user, username)
-    if username != request.user.username or not request.user.is_authenticated:
-        return HttpResponse(status=403)
-
+class UserView(APIView):
     interactor = UserFactory.get()
 
-    if request.method == 'GET':
-        user = interactor.get(username)
+    def get(self, request, username):
+        if username != request.user.username:
+            return HttpResponse(status=403)
 
+        user = UserView.interactor.get(username)
         return JsonResponse({'username': user.username,
                              'nickname': user.nickname})
 
-    if request.method == 'PATCH':
+    def patch(self, request, username):
+        if username != request.user.username:
+            return HttpResponse(status=403)
+
         body = json.loads(request.body)
 
         if 'password' not in body and 'nickname' not in body:
             return HttpResponse(status=403)
 
-        interactor.update(body)
+        UserView.interactor.update(body)
 
         return HttpResponse(status=200)
 

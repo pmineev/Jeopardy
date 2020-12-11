@@ -1,8 +1,9 @@
-from backend.entities import Game, GameDescription, UserProfile, GameSession
+from backend.entities import Game, GameDescription, UserProfile, Session, GameSession
 from backend.models import ORMUserProfile, ORMQuestion, ORMTheme, ORMRound, ORMGame, ORMGameSession
 from django.contrib.auth.models import User as ORMUser
 from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists
 from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class UserRepo:
@@ -55,6 +56,10 @@ class UserRepo:
         if not orm_user:
             print('not found')
             raise UserNotFound
+
+        tokens = RefreshToken.for_user(orm_user)
+        return Session(refresh_token=str(tokens),
+                       access_token=str(tokens.access_token))
 
 
 class GameRepo:

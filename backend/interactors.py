@@ -15,7 +15,7 @@ class UserInteractor:
             user = UserProfile(username=user_data['username'],
                                password=user_data['password'])
 
-            if 'nickname' in user_data and user['nickname']:
+            if 'nickname' in user_data and user_data['nickname']:
                 user.nickname = user_data['nickname']
 
             self.repo.create(user)
@@ -38,7 +38,7 @@ class UserInteractor:
             user = UserProfile(username=user_data['username'],
                                password=user_data['password'])
 
-            self.repo.create_session(user)
+            return self.repo.create_session(user)
         else:
             print('inter inv')
             raise InvalidCredentials

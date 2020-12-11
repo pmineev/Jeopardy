@@ -10,6 +10,12 @@ class UserProfile:
 
 
 @dataclass
+class Session:
+    access_token: str
+    refresh_token: str = None
+
+
+@dataclass
 class Question:
     text: str
     order: int = None
