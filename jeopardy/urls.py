@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', register),
     path('users/<str:username>/', UserView.as_view()),
-    path('games/<str:game_name>', start_game),
-    path('games/', games),
-    path('sessions/', sessions),
+    path('games/<str:game_name>', GameSessionView.as_view()),
+    path('games/', GameView.as_view()),
+    path('sessions/', SessionView.as_view()),
 ]

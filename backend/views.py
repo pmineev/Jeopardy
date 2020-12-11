@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 
 
 def register(request):
@@ -26,19 +27,20 @@ def register(request):
         return HttpResponse(status=201)
 
 
-def sessions(request):
-    print(request.user)
-    if request.method == 'POST':
+class SessionView(APIView):
+    permission_classes = [AllowAny]
+
+    interactor = UserFactory.get()
+
+    def post(self, request):
         user_dict = json.loads(request.body)
         print(user_dict)
 
         if 'username' not in user_dict or 'password' not in user_dict:
             return HttpResponse(status=400)
 
-        interactor = UserFactory.get()
-
         try:
-            session = interactor.create_session(user_dict)
+            session = SessionView.interactor.create_session(user_dict)
         except (InvalidCredentials, UserNotFound):
             print('invalid')
             return HttpResponse(status=404)
@@ -72,40 +74,37 @@ class UserView(APIView):
         return HttpResponse(status=200)
 
 
-def games(request):
-    print(request.user, 'games')
-    if not request.user.is_authenticated:
-        return HttpResponse(status=403)
-
+class GameView(APIView):
     interactor = GameFactory.get()
 
-    if request.method == 'POST':
+    def post(self, request):
+        print(request.user, 'games')
         game_dict = json.loads(request.body)
+
         try:
-            interactor.create(game_dict, request.user.username)
+            GameView.interactor.create(game_dict, request.user.username)
         except GameAlreadyExists:
             return HttpResponse(status=409)
 
         return HttpResponse(status=201)
-    if request.method == 'GET':
-        game_descriptions = interactor.get_all_descriptions()
+
+    def get(self, request):
+        game_descriptions = GameView.interactor.get_all_descriptions()
 
         # не работает, нужен сериализатор
         return JsonResponse(game_descriptions, safe=False)
 
 
-def start_game(request, game_name):
-    print(request.user, 'start_game')
-    if not request.user.is_authenticated:
-        return HttpResponse(status=403)
+class GameSessionView(APIView):
+    interactor = GameSessionFactory.get()
 
-    if request.method == 'POST':
+    def post(self, request, game_name):
+        print(request.user, 'start_game')
         game_session_dict = json.loads(request.body)
 
         if 'max_players' not in game_session_dict:
             return HttpResponse(status=403)
 
-        interactor = GameSessionFactory.get()
-        interactor.create(game_session_dict, game_name, request.user.username)
+        GameSessionView.interactor.create(game_session_dict, game_name, request.user.username)
 
         return HttpResponse(status=201)
