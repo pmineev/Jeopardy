@@ -11,16 +11,16 @@ class UserInteractor:
         return user
 
     def create(self, user_data):
-        if user_data['username'] and user_data['password']:
-            user = UserProfile(username=user_data['username'],
-                               password=user_data['password'])
-
-            if 'nickname' in user_data and user_data['nickname']:
-                user.nickname = user_data['nickname']
-
-            self.repo.create(user)
-        else:
+        if not user_data['username'] or not user_data['password']:
             raise InvalidCredentials
+
+        user = UserProfile(username=user_data['username'],
+                           password=user_data['password'])
+
+        if 'nickname' in user_data and user_data['nickname']:
+            user.nickname = user_data['nickname']
+
+        self.repo.create(user)
 
     def update(self, user_data):
         user = UserProfile(username=user_data['username'])
@@ -34,14 +34,13 @@ class UserInteractor:
         return self.repo.update(user)
 
     def create_session(self, user_data):
-        if user_data['username'] and user_data['password']:
-            user = UserProfile(username=user_data['username'],
-                               password=user_data['password'])
-
-            return self.repo.create_session(user)
-        else:
-            print('inter inv')
+        if not user_data['username'] or not user_data['password']:
             raise InvalidCredentials
+
+        user = UserProfile(username=user_data['username'],
+                           password=user_data['password'])
+
+        return self.repo.create_session(user)
 
 
 class GameInteractor:

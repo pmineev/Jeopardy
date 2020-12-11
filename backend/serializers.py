@@ -1,4 +1,4 @@
-from rest_framework.serializers import Serializer, CharField, IntegerField, ListField
+from rest_framework.serializers import Serializer, CharField, IntegerField
 
 
 class SessionSerializer(Serializer):

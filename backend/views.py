@@ -1,12 +1,14 @@
 import json
-from backend.factories import UserFactory, GameFactory, GameSessionFactory
-from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists
-from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.exceptions import ParseError, AuthenticationFailed, PermissionDenied
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists
+from backend.factories import UserFactory, GameFactory, GameSessionFactory
+from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer
 
 
 class UserListView(APIView):
@@ -15,9 +17,7 @@ class UserListView(APIView):
     interactor = UserFactory.get()
 
     def post(self, request):
-        print(request.body)
         user_dict = json.loads(request.body)
-        print(user_dict)
 
         if 'username' not in user_dict or 'password' not in user_dict:
             return ParseError()
@@ -39,7 +39,6 @@ class SessionView(APIView):
 
     def post(self, request):
         user_dict = json.loads(request.body)
-        print(user_dict)
 
         if 'username' not in user_dict or 'password' not in user_dict:
             return ParseError()
@@ -47,7 +46,6 @@ class SessionView(APIView):
         try:
             session = SessionView.interactor.create_session(user_dict)
         except (InvalidCredentials, UserNotFound):
-            print('invalid')
             return AuthenticationFailed()
 
         session_serializer = SessionSerializer(session)
@@ -86,7 +84,6 @@ class GameView(APIView):
     interactor = GameFactory.get()
 
     def post(self, request):
-        print(request.user, 'games')
         game_dict = json.loads(request.body)
 
         try:
@@ -109,7 +106,6 @@ class GameSessionView(APIView):
     interactor = GameSessionFactory.get()
 
     def post(self, request, game_name):
-        print(request.user, 'start_game')
         game_session_dict = json.loads(request.body)
 
         if 'max_players' not in game_session_dict:

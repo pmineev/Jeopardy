@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User as ORMUser
-from django.db.models import Model, CharField, TextField, IntegerField,\
+from django.db.models import Model, CharField, TextField, IntegerField, \
     ForeignKey, ManyToManyField, OneToOneField, CASCADE, PROTECT
 
 
@@ -32,7 +32,8 @@ class ORMGame(Model):
     author = ForeignKey(ORMUserProfile,
                         on_delete=CASCADE)
     rounds = ManyToManyField(ORMRound)
-    final_round = ForeignKey(ORMQuestion, on_delete=CASCADE)
+    final_round = ForeignKey(ORMQuestion,
+                             on_delete=CASCADE)
 
 
 class ORMGameSession(Model):

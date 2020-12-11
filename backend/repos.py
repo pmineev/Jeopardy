@@ -1,9 +1,10 @@
-from backend.entities import Game, GameDescription, UserProfile, Session, GameSession
-from backend.models import ORMUserProfile, ORMQuestion, ORMTheme, ORMRound, ORMGame, ORMGameSession
-from django.contrib.auth.models import User as ORMUser
-from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User as ORMUser
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from backend.entities import Game, GameDescription, UserProfile, Session, GameSession
+from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists
+from backend.models import ORMUserProfile, ORMQuestion, ORMTheme, ORMRound, ORMGame, ORMGameSession
 
 
 class UserRepo:
@@ -52,9 +53,7 @@ class UserRepo:
     def create_session(user: UserProfile):
         orm_user = authenticate(username=user.username,
                                 password=user.password)
-        print(user, orm_user)
         if not orm_user:
-            print('not found')
             raise UserNotFound
 
         tokens = RefreshToken.for_user(orm_user)
@@ -99,7 +98,7 @@ class GameRepo:
         for orm_game in ORMGame.objects.all():
             game_description = GameDescription(name=orm_game.name,
                                                author=orm_game.author.nickname,
-                                               rounds_count=orm_game.rounds.count()+1)
+                                               rounds_count=orm_game.rounds.count() + 1)
             game_descriptions.append(game_description)
 
         return game_descriptions
