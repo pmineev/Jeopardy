@@ -9,19 +9,21 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ParseError, AuthenticationFailed, PermissionDenied
 
 
-def register(request):
-    print(request.body)
-    if request.method == 'POST':
+class UserListView(APIView):
+    permission_classes = [AllowAny]
+
+    interactor = UserFactory.get()
+
+    def post(self, request):
+        print(request.body)
         user_dict = json.loads(request.body)
         print(user_dict)
 
         if 'username' not in user_dict or 'password' not in user_dict:
-            return HttpResponse(status=400)
-
-        interactor = UserFactory.get()
+            return ParseError()
 
         try:
-            interactor.create(user_dict)
+            UserListView.interactor.create(user_dict)
         except UserAlreadyExists:
             return Response(status=status.HTTP_409_CONFLICT)
         except InvalidCredentials:
@@ -60,6 +62,7 @@ class UserView(APIView):
             return PermissionDenied()
 
         user = UserView.interactor.get(username)
+
         return JsonResponse({'username': user.username,
                              'nickname': user.nickname})
 

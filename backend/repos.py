@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 class UserRepo:
     @staticmethod
     def _to_entity(orm_user_profile):
-        user = UserProfile(username=orm_user_profile.username,
+        user = UserProfile(username=orm_user_profile.user.username,
                            nickname=orm_user_profile.nickname)
         return user
 
