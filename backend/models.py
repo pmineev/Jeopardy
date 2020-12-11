@@ -5,6 +5,7 @@ from django.db.models import Model, CharField, TextField, IntegerField, \
 
 class ORMUserProfile(Model):
     user = OneToOneField(ORMUser,
+                         primary_key=True,
                          on_delete=CASCADE)
     nickname = CharField(max_length=50)
 

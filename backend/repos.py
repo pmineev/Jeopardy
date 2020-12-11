@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User as ORMUser
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from backend.entities import Game, GameDescription, UserProfile, Session, GameSession
+from backend.entities import Game, GameDescription, UserProfile, Session, GameSession, GameSessionDescription
 from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists
 from backend.models import ORMUserProfile, ORMQuestion, ORMTheme, ORMRound, ORMGame, ORMGameSession
 
@@ -115,3 +115,16 @@ class GameSessionRepo:
                                                          game=orm_game,
                                                          max_players=game_session.max_players)
         orm_game_session.players.add(orm_user_profile)
+
+    @staticmethod
+    def get_all_descriptions():
+        game_session_descriptions = list()
+        for orm_game_session in ORMGameSession.objects.all():
+            desc = GameSessionDescription(id=orm_game_session.pk,
+                                          creator=orm_game_session.creator.nickname,
+                                          game_name=orm_game_session.game.name,
+                                          max_players=orm_game_session.max_players,
+                                          current_players=orm_game_session.players.count())
+            game_session_descriptions.append(desc)
+
+        return game_session_descriptions

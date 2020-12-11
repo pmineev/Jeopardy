@@ -15,3 +15,11 @@ class GameDescriptionSerializer(Serializer):
     name = CharField()
     author = CharField()
     rounds_count = IntegerField()
+
+
+class GameSessionDescriptionSerializer(Serializer):
+    id = IntegerField()
+    creator = CharField()
+    game_name = CharField()
+    max_players = IntegerField()
+    current_players = IntegerField()

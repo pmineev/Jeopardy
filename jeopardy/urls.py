@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from backend.views import UserListView, UserView, SessionView, GameView, GameSessionView
+from backend.views import UserListView, UserView, SessionView, GameView, GameSessionView, GameSessionListView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,4 +25,5 @@ urlpatterns = [
     path('sessions/', SessionView.as_view()),
     path('games/', GameView.as_view()),
     path('games/<str:game_name>', GameSessionView.as_view()),
+    path('lobby/', GameSessionListView.as_view()),
 ]

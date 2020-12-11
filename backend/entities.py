@@ -56,3 +56,12 @@ class GameSession:
     game: Game
     max_players: int
     players: List[UserProfile] = None
+
+
+@dataclass
+class GameSessionDescription:
+    id: int
+    creator: str
+    game_name: str
+    max_players: int
+    current_players: int

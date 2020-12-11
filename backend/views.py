@@ -8,7 +8,8 @@ from rest_framework.views import APIView
 
 from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
-from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer
+from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer, \
+    GameSessionDescriptionSerializer
 
 
 class UserListView(APIView):
@@ -99,6 +100,7 @@ class GameView(APIView):
         game_descriptions_serialized = list()
         for desc in game_descriptions:
             game_descriptions_serialized.append(GameDescriptionSerializer(desc).data)
+
         return Response(game_descriptions_serialized)
 
 
@@ -114,3 +116,16 @@ class GameSessionView(APIView):
         GameSessionView.interactor.create(game_session_dict, game_name, request.user.username)
 
         return Response(status=status.HTTP_201_CREATED)
+
+
+class GameSessionListView(APIView):
+    interactor = GameSessionFactory.get()
+
+    def get(self, request):
+        game_session_descriptions = GameSessionView.interactor.get_all_descriptions()
+
+        game_session_descriptions_serialized = list()
+        for desc in game_session_descriptions:
+            game_session_descriptions_serialized.append(GameSessionDescriptionSerializer(desc).data)
+
+        return Response(game_session_descriptions_serialized)

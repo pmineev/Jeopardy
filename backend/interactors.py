@@ -93,3 +93,6 @@ class GameSessionInteractor:
                                    max_players=game_session_data['max_players'])
 
         self.repo.create(game_session)
+
+    def get_all_descriptions(self):
+        return self.repo.get_all_descriptions()
