@@ -1,7 +1,7 @@
 import json
-from django.http import JsonResponse
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists
+from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework import status
@@ -50,8 +50,9 @@ class SessionView(APIView):
             print('invalid')
             return AuthenticationFailed()
 
-        return JsonResponse({'access_token': session.access_token,
-                             'refresh_token': session.refresh_token})
+        session_serializer = SessionSerializer(session)
+
+        return Response(session_serializer.data)
 
 
 class UserView(APIView):
@@ -63,8 +64,9 @@ class UserView(APIView):
 
         user = UserView.interactor.get(username)
 
-        return JsonResponse({'username': user.username,
-                             'nickname': user.nickname})
+        user_serializer = UserSerializer(user)
+
+        return Response(user_serializer.data)
 
     def patch(self, request, username):
         if username != request.user.username:
@@ -97,8 +99,10 @@ class GameView(APIView):
     def get(self, request):
         game_descriptions = GameView.interactor.get_all_descriptions()
 
-        # не работает, нужен сериализатор
-        return JsonResponse(game_descriptions, safe=False)
+        game_descriptions_serialized = list()
+        for desc in game_descriptions:
+            game_descriptions_serialized.append(GameDescriptionSerializer(desc).data)
+        return Response(game_descriptions_serialized)
 
 
 class GameSessionView(APIView):
