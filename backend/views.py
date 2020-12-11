@@ -1,9 +1,12 @@
 import json
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.exceptions import ParseError, AuthenticationFailed, PermissionDenied
 
 
 def register(request):
@@ -20,11 +23,11 @@ def register(request):
         try:
             interactor.create(user_dict)
         except UserAlreadyExists:
-            return HttpResponse(status=409)
+            return Response(status=status.HTTP_409_CONFLICT)
         except InvalidCredentials:
-            return HttpResponse(status=401)
+            return AuthenticationFailed()
 
-        return HttpResponse(status=201)
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class SessionView(APIView):
@@ -37,13 +40,13 @@ class SessionView(APIView):
         print(user_dict)
 
         if 'username' not in user_dict or 'password' not in user_dict:
-            return HttpResponse(status=400)
+            return ParseError()
 
         try:
             session = SessionView.interactor.create_session(user_dict)
         except (InvalidCredentials, UserNotFound):
             print('invalid')
-            return HttpResponse(status=404)
+            return AuthenticationFailed()
 
         return JsonResponse({'access_token': session.access_token,
                              'refresh_token': session.refresh_token})
@@ -54,7 +57,7 @@ class UserView(APIView):
 
     def get(self, request, username):
         if username != request.user.username:
-            return HttpResponse(status=403)
+            return PermissionDenied()
 
         user = UserView.interactor.get(username)
         return JsonResponse({'username': user.username,
@@ -62,16 +65,16 @@ class UserView(APIView):
 
     def patch(self, request, username):
         if username != request.user.username:
-            return HttpResponse(status=403)
+            return PermissionDenied()
 
         body = json.loads(request.body)
 
         if 'password' not in body and 'nickname' not in body:
-            return HttpResponse(status=403)
+            return ParseError()
 
         UserView.interactor.update(body)
 
-        return HttpResponse(status=200)
+        return Response()
 
 
 class GameView(APIView):
@@ -84,9 +87,9 @@ class GameView(APIView):
         try:
             GameView.interactor.create(game_dict, request.user.username)
         except GameAlreadyExists:
-            return HttpResponse(status=409)
+            return Response(status=status.HTTP_409_CONFLICT)
 
-        return HttpResponse(status=201)
+        return Response(status=status.HTTP_201_CREATED)
 
     def get(self, request):
         game_descriptions = GameView.interactor.get_all_descriptions()
@@ -103,8 +106,8 @@ class GameSessionView(APIView):
         game_session_dict = json.loads(request.body)
 
         if 'max_players' not in game_session_dict:
-            return HttpResponse(status=403)
+            return ParseError()
 
         GameSessionView.interactor.create(game_session_dict, game_name, request.user.username)
 
-        return HttpResponse(status=201)
+        return Response(status=status.HTTP_201_CREATED)
