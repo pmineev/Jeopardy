@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists
+from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists, TooManyPlayers
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer, \
     GameSessionDescriptionSerializer
@@ -129,3 +129,11 @@ class GameSessionListView(APIView):
             game_session_descriptions_serialized.append(GameSessionDescriptionSerializer(desc).data)
 
         return Response(game_session_descriptions_serialized)
+
+    def post(self, request, game_session_id):
+        try:
+            GameSessionListView.interactor.join(game_session_id, request.user.username)
+        except TooManyPlayers:
+            return Response(status=status.HTTP_409_CONFLICT)
+
+        return Response(status=status.HTTP_201_CREATED)

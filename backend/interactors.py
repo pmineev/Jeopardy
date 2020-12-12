@@ -96,3 +96,6 @@ class GameSessionInteractor:
 
     def get_all_descriptions(self):
         return self.repo.get_all_descriptions()
+
+    def join(self, game_session_id, username):
+        self.repo.join(game_session_id, username)

@@ -16,3 +16,6 @@ class InvalidCredentials(Exception):
 
 class InvalidGameData(Exception):
     pass
+
+class TooManyPlayers(Exception):
+    pass

@@ -26,4 +26,5 @@ urlpatterns = [
     path('games/', GameView.as_view()),
     path('games/<str:game_name>', GameSessionView.as_view()),
     path('lobby/', GameSessionListView.as_view()),
+    path('lobby/<int:game_session_id>/chosen/', GameSessionListView.as_view()),
 ]
