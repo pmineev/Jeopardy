@@ -81,21 +81,21 @@ class UserView(APIView):
         return Response()
 
 
-class GameView(APIView):
+class GameListView(APIView):
     interactor = GameFactory.get()
 
     def post(self, request):
         game_dict = json.loads(request.body)
 
         try:
-            GameView.interactor.create(game_dict, request.user.username)
+            GameListView.interactor.create(game_dict, request.user.username)
         except GameAlreadyExists:
             return Response(status=status.HTTP_409_CONFLICT)
 
         return Response(status=status.HTTP_201_CREATED)
 
     def get(self, request):
-        game_descriptions = GameView.interactor.get_all_descriptions()
+        game_descriptions = GameListView.interactor.get_all_descriptions()
 
         game_descriptions_serialized = list()
         for desc in game_descriptions:
