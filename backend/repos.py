@@ -1,10 +1,14 @@
+import random
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User as ORMUser
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from backend.entities import Game, GameDescription, UserProfile, Session, GameSession, GameSessionDescription
-from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists, TooManyPlayers
-from backend.models import ORMUserProfile, ORMQuestion, ORMTheme, ORMRound, ORMGame, ORMGameSession
+from backend.entities import Game, GameDescription, Round, Theme, Question, UserProfile, Session, GameSession, \
+    GameSessionDescription
+from backend.enums import State
+from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists, TooManyPlayers, WrongQuestionRequest
+from backend.models import ORMUserProfile, ORMQuestion, ORMTheme, ORMRound, ORMGame, ORMGameSession, ORMPlayer
 
 
 class UserRepo:
@@ -68,8 +72,9 @@ class GameRepo:
             raise GameAlreadyExists
 
         orm_final_round = ORMQuestion.objects.create(text=game.final_round.text,
-                                                     answer=game.final_round.answer)
-        orm_user = ORMUserProfile.objects.get(user__username=game.author)
+                                                     answer=game.final_round.answer,
+                                                     value=game.final_round.value)
+        orm_user = ORMUserProfile.objects.get(user__username=game.author.username)
         orm_game = ORMGame.objects.create(name=game.name,
                                           author=orm_user,
                                           final_round=orm_final_round)
@@ -84,13 +89,50 @@ class GameRepo:
                 for question_order, question in enumerate(theme.questions):
                     orm_question = ORMQuestion.objects.create(order=question_order,
                                                               text=question.text,
-                                                              answer=question.answer)
+                                                              answer=question.answer,
+                                                              value=question.value)
 
                     orm_theme.questions.add(orm_question)
 
                 orm_round.themes.add(orm_theme)
 
             orm_game.rounds.add(orm_round)
+
+    @staticmethod
+    def get(game_name):
+        orm_game = ORMGame.objects.get(name=game_name)
+
+        orm_final_round = orm_game.final_round
+        final_round = Question(text=orm_final_round.text,
+                               answer=orm_final_round.answer,
+                               value=orm_final_round.value)
+        game = Game(name=game_name,
+                    author=UserProfile(username=orm_game.author.user.username),
+                    final_round=final_round,
+                    rounds=list())
+
+        for orm_round in orm_game.rounds.all():
+            round = Round(order=orm_round.order,
+                          themes=list())
+
+            for orm_theme in orm_round.themes.all():
+                theme = Theme(name=orm_theme.name,
+                              order=orm_theme.order,
+                              questions=list())
+
+                for orm_question in orm_theme.questions.all():
+                    question = Question(order=orm_question.order,
+                                        text=orm_question.text,
+                                        answer=orm_question.answer,
+                                        value=orm_question.value)
+
+                    theme.questions.append(question)
+
+                round.themes.append(theme)
+
+            game.rounds.append(round)
+
+        return game
 
     @staticmethod
     def get_all_descriptions():
@@ -108,13 +150,16 @@ class GameSessionRepo:
     @staticmethod
     def create(game_session: GameSession):
         orm_user_profile = ORMUserProfile.objects.get(user__username=game_session.creator)
+        orm_player = ORMPlayer.objects.create(user=orm_user_profile)
 
         orm_game = ORMGame.objects.get(name=game_session.game.name)
 
         orm_game_session = ORMGameSession.objects.create(creator=orm_user_profile,
                                                          game=orm_game,
                                                          max_players=game_session.max_players)
-        orm_game_session.players.add(orm_user_profile)
+        orm_game_session.players.add(orm_player)
+        orm_game_session.current_round = orm_game_session.game.rounds.get(order=0)
+        orm_game_session.save()
 
     @staticmethod
     def get_all_descriptions():
@@ -133,8 +178,152 @@ class GameSessionRepo:
     def join(game_session_id, username):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
-        if orm_game_session.players.count()+1 > orm_game_session.max_players:
+        if orm_game_session.players.count() + 1 > orm_game_session.max_players:
             raise TooManyPlayers
 
         orm_user_profile = ORMUserProfile.objects.get(user__username=username)
-        orm_game_session.players.add(orm_user_profile)
+        orm_player = ORMPlayer.objects.create(user=orm_user_profile)
+        orm_game_session.players.add(orm_player)
+
+    @staticmethod
+    def is_all_players_joined(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        return orm_game_session.max_players == orm_game_session.players.count()
+
+    @staticmethod
+    def set_current_player(game_session_id, username):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        orm_player = orm_game_session.players.get(user__user__username=username)
+
+        orm_game_session.current_player = orm_player
+        orm_game_session.save()
+
+    @staticmethod
+    def set_random_current_player(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        orm_game_session.current_player = random.choice(orm_game_session.players.all())
+        print(f'current player: {orm_game_session.current_player.user.user.username}')
+        orm_game_session.save()
+
+    @staticmethod
+    def set_winner_current_player(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        orm_game_session.current_player = orm_game_session.players.order_by('-score').first()
+        print(f'current player: {orm_game_session.current_player.user.user.username}')
+        orm_game_session.save()
+
+    @staticmethod
+    def set_state(game_session_id, state):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        orm_game_session.state = state
+        orm_game_session.save()
+
+    @staticmethod
+    def get_state(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        return orm_game_session.state
+
+    @staticmethod
+    def is_player(game_session_id, username):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        return orm_game_session.players.filter(user__user__username=username).exists()
+
+    @staticmethod
+    def is_current_player(game_session_id, username):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        return username == orm_game_session.current_player.user.user.username
+
+    @staticmethod
+    def is_correct_answer(game_session_id, answer):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        print(f'question: {orm_game_session.current_question.text}, answer: {orm_game_session.current_question.answer}')
+
+        return answer == orm_game_session.current_question.answer
+
+    @staticmethod
+    def get_current_question_value(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        return orm_game_session.current_question.value
+
+    @staticmethod
+    def change_player_score(game_session_id, username, value):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        orm_player = orm_game_session.players.get(user__user__username=username)
+        orm_player.score += value
+        print(f'score: {orm_player.score}')
+        orm_player.save()
+
+    @staticmethod
+    def mark_current_question_as_answered(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        orm_game_session.answered_questions.add(orm_game_session.current_question)
+
+    @staticmethod
+    def is_no_more_questions(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        questions_count = 0
+        for orm_theme in orm_game_session.current_round.themes.all():
+            questions_count += orm_theme.questions.count()
+
+        return questions_count == orm_game_session.answered_questions.count()
+
+    @staticmethod
+    def set_next_round(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        current_round_order = orm_game_session.current_round.order
+        if current_round_order + 1 < orm_game_session.game.rounds.count():
+            orm_game_session.current_round = orm_game_session.game.rounds.get(order=current_round_order + 1)
+            orm_game_session.answered_questions.clear()
+            orm_game_session.state = State.END_ROUND
+            print(f'new round order: {orm_game_session.current_round.order}')
+        else:
+            orm_game_session.state = State.FINAL_ROUND
+        orm_game_session.save()
+
+    @staticmethod
+    def is_next_round_final(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        return orm_game_session.current_round.order + 1 == orm_game_session.game.rounds.count()
+
+    @staticmethod
+    def set_player_answer(game_session_id, username, answer):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        orm_player = orm_game_session.players.get(user__user__username=username)
+        orm_player.answer = answer
+        orm_player.save()
+
+    @staticmethod
+    def set_current_question(game_session_id, theme_order, question_order):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        orm_theme_qs = orm_game_session.current_round.themes.filter(order=theme_order)
+        if not orm_theme_qs.exists():
+            raise WrongQuestionRequest
+        orm_theme = orm_theme_qs.first()
+
+        orm_question_qs = orm_theme.questions.filter(order=question_order)
+        if not orm_question_qs.exists():
+            raise WrongQuestionRequest
+        orm_question = orm_question_qs.first()
+
+        if orm_game_session.answered_questions.filter(pk=orm_question.pk).exists():
+            raise WrongQuestionRequest
+
+        orm_game_session.current_question = orm_question
+        print(
+            f'current question: {theme_order} {question_order} {orm_game_session.current_question.text}: {orm_game_session.current_question.answer}')
+        orm_game_session.save()

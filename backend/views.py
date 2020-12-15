@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
-from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists, TooManyPlayers
+from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists, TooManyPlayers, \
+    NotPlayer, NotCurrentPlayer, WrongQuestionRequest
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer, \
     GameSessionDescriptionSerializer
@@ -136,5 +137,33 @@ class GameSessionViewSet(ViewSet):
             GameSessionViewSet.interactor.join(game_session_id, request.user.username)
         except TooManyPlayers:
             return Response(status=status.HTTP_409_CONFLICT)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    def choose_question(self, request, game_session_id):
+        question_dict = json.loads(request.body)
+
+        if 'theme_order' not in question_dict or 'question_order' not in question_dict:
+            raise ParseError()
+
+        try:
+            GameSessionViewSet.interactor.choose_question(game_session_id, question_dict, request.user.username)
+        except (NotPlayer, NotCurrentPlayer):
+            raise PermissionDenied()
+        except WrongQuestionRequest:
+            raise ParseError()
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    def submit_answer(self, request, game_session_id):
+        answer_dict = json.loads(request.body)
+
+        if 'answer' not in answer_dict:
+            raise ParseError()
+
+        try:
+            GameSessionViewSet.interactor.submit_answer(game_session_id, request.user.username, answer_dict['answer'])
+        except (NotPlayer, NotCurrentPlayer):
+            raise PermissionDenied()
 
         return Response(status=status.HTTP_201_CREATED)

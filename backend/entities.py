@@ -1,12 +1,20 @@
 from dataclasses import dataclass
 from typing import List
 
+from backend.enums import State
+
 
 @dataclass
 class UserProfile:
     username: str
     nickname: str = None
     password: str = None
+
+
+@dataclass
+class Player:
+    user: UserProfile
+    score: int = 0
 
 
 @dataclass
@@ -20,6 +28,7 @@ class Question:
     text: str
     order: int = None
     answer: str = None
+    value: int = None
 
 
 @dataclass
@@ -55,7 +64,11 @@ class GameSession:
     creator: UserProfile
     game: Game
     max_players: int
-    players: List[UserProfile] = None
+    state: State = State.WAITING
+    players: List[Player] = None
+    current_player: Player = None
+    current_round: Round = None
+    current_question: Question = None
 
 
 @dataclass

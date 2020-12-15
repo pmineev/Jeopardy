@@ -1,0 +1,10 @@
+from enum import Enum
+
+
+class State(Enum):
+    WAITING = 'WAITING'
+    CHOOSING_QUESTION = 'CHOOSING_QUESTION'
+    ANSWERING = 'ANSWERING'
+    END_ROUND = 'END_GAME'
+    FINAL_ROUND = 'FINAL_ROUND'
+    END_GAME = 'END_GAME'

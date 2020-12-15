@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from backend.views import UserListView, UserView, SessionView, GameListView,GameSessionListView, GameSessionViewSet
+from backend.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, GameSessionViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,4 +26,6 @@ urlpatterns = [
     path('games/', GameListView.as_view()),
     path('game_sessions/', GameSessionListView.as_view()),
     path('game_sessions/chosen/<int:game_session_id>/', GameSessionViewSet.as_view({'post': 'join'})),
+    path('game_sessions/<int:game_session_id>/question/', GameSessionViewSet.as_view({'post': 'choose_question'})),
+    path('game_sessions/<int:game_session_id>/answer/', GameSessionViewSet.as_view({'post': 'submit_answer'})),
 ]
