@@ -22,14 +22,14 @@ class UserListView(APIView):
         user_dict = json.loads(request.body)
 
         if 'username' not in user_dict or 'password' not in user_dict:
-            return ParseError()
+            raise ParseError()
 
         try:
             UserListView.interactor.create(user_dict)
         except UserAlreadyExists:
             return Response(status=status.HTTP_409_CONFLICT)
         except InvalidCredentials:
-            return AuthenticationFailed()
+            raise AuthenticationFailed()
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -43,12 +43,12 @@ class SessionView(APIView):
         user_dict = json.loads(request.body)
 
         if 'username' not in user_dict or 'password' not in user_dict:
-            return ParseError()
+            raise ParseError()
 
         try:
             session = SessionView.interactor.create_session(user_dict)
         except (InvalidCredentials, UserNotFound):
-            return AuthenticationFailed()
+            raise AuthenticationFailed()
 
         session_serializer = SessionSerializer(session)
 
@@ -60,7 +60,7 @@ class UserView(APIView):
 
     def get(self, request, username):
         if username != request.user.username:
-            return PermissionDenied()
+            raise PermissionDenied()
 
         user = UserView.interactor.get(username)
 
@@ -70,14 +70,14 @@ class UserView(APIView):
 
     def patch(self, request, username):
         if username != request.user.username:
-            return PermissionDenied()
+            raise PermissionDenied()
 
-        body = json.loads(request.body)
+        update_dict = json.loads(request.body)
 
-        if 'password' not in body and 'nickname' not in body:
-            return ParseError()
+        if 'password' not in update_dict and 'nickname' not in update_dict:
+            raise ParseError()
 
-        UserView.interactor.update(body)
+        UserView.interactor.update(update_dict, username)
 
         return Response()
 

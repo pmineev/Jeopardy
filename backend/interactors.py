@@ -22,8 +22,8 @@ class UserInteractor:
 
         self.repo.create(user)
 
-    def update(self, user_data):
-        user = UserProfile(username=user_data['username'])
+    def update(self, user_data, username):
+        user = UserProfile(username=username)
 
         if 'nickname' in user_data:
             user.nickname = user_data['nickname']
@@ -52,7 +52,7 @@ class GameInteractor:
         final_round = Question(text=final_round_data['text'],
                                answer=final_round_data['answer'])
         game = Game(name=game_data['name'],
-                    author=username,
+                    author=UserProfile(username=username),
                     final_round=final_round,
                     rounds=list())
 
@@ -86,8 +86,8 @@ class GameSessionInteractor:
     def __init__(self, repo):
         self.repo = repo
 
-    def create(self, game_session_data, game_name, username):
-        game = Game(name=game_name)
+    def create(self, game_session_data, username):
+        game = Game(name=game_session_data['game_name'])
         game_session = GameSession(creator=username,
                                    game=game,
                                    max_players=game_session_data['max_players'])
