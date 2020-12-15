@@ -5,6 +5,7 @@ from rest_framework.exceptions import ParseError, AuthenticationFailed, Permissi
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 
 from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists, TooManyPlayers
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
@@ -104,25 +105,21 @@ class GameListView(APIView):
         return Response(game_descriptions_serialized)
 
 
-class GameSessionView(APIView):
-    interactor = GameSessionFactory.get()
-
-    def post(self, request, game_name):
-        game_session_dict = json.loads(request.body)
-
-        if 'max_players' not in game_session_dict:
-            return ParseError()
-
-        GameSessionView.interactor.create(game_session_dict, game_name, request.user.username)
-
-        return Response(status=status.HTTP_201_CREATED)
-
-
 class GameSessionListView(APIView):
     interactor = GameSessionFactory.get()
 
+    def post(self, request):
+        game_session_dict = json.loads(request.body)
+
+        if 'max_players' not in game_session_dict or 'game_name' not in game_session_dict:
+            raise ParseError()
+
+        GameSessionListView.interactor.create(game_session_dict, request.user.username)
+
+        return Response(status=status.HTTP_201_CREATED)
+
     def get(self, request):
-        game_session_descriptions = GameSessionView.interactor.get_all_descriptions()
+        game_session_descriptions = GameSessionListView.interactor.get_all_descriptions()
 
         game_session_descriptions_serialized = list()
         for desc in game_session_descriptions:
@@ -130,9 +127,13 @@ class GameSessionListView(APIView):
 
         return Response(game_session_descriptions_serialized)
 
-    def post(self, request, game_session_id):
+
+class GameSessionViewSet(ViewSet):
+    interactor = GameSessionFactory.get()
+
+    def join(self, request, game_session_id):
         try:
-            GameSessionListView.interactor.join(game_session_id, request.user.username)
+            GameSessionViewSet.interactor.join(game_session_id, request.user.username)
         except TooManyPlayers:
             return Response(status=status.HTTP_409_CONFLICT)
 
