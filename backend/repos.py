@@ -290,6 +290,7 @@ class GameSessionRepo:
             print(f'new round order: {orm_game_session.current_round.order}')
         else:
             orm_game_session.state = State.FINAL_ROUND
+            print(f'final round, {orm_game_session.game.final_round.text}{orm_game_session.game.final_round.answer}')
         orm_game_session.save()
 
     @staticmethod
@@ -327,3 +328,28 @@ class GameSessionRepo:
         print(
             f'current question: {theme_order} {question_order} {orm_game_session.current_question.text}: {orm_game_session.current_question.answer}')
         orm_game_session.save()
+
+    @staticmethod
+    def is_all_players_answered(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        for orm_player in orm_game_session.players.all():
+            if not orm_player.answer:
+                return False
+
+        return True
+
+    @staticmethod
+    def check_players_final_answers(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        print(f'all players answered')
+        value = orm_game_session.game.final_round.value
+        for orm_player in orm_game_session.players.all():
+            if orm_player.answer == orm_game_session.game.final_round.answer:
+                orm_player.score += value
+            else:
+                orm_player.score -= value
+            orm_player.save()
+            print(f'player {orm_player.user.user.username} final score: {orm_player.score}')
+

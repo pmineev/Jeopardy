@@ -163,15 +163,16 @@ class GameSessionInteractor:
                 print('wrong')
                 self.repo.change_player_score(game_session_id, username, -value)
 
-        elif self.repo.get_state(game_session_id) == State.FINAL_ROUND:
+        elif state == State.FINAL_ROUND:
             self.repo.set_player_answer(game_session_id, username, answer)
+            if self.repo.is_all_players_answered(game_session_id):
+                self.repo.check_players_final_answers(game_session_id)
         else:
             pass
 
     def _set_next_round(self, game_session_id):
         self.repo.set_next_round(game_session_id)
         if not self.repo.get_state(game_session_id) == State.FINAL_ROUND:
-            print('final round')
             self._set_first_player(game_session_id)
             self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
         else:
