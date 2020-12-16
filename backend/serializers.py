@@ -2,8 +2,8 @@ from rest_framework.serializers import Serializer, CharField, IntegerField
 
 
 class SessionSerializer(Serializer):
-    access_token = CharField()
-    refresh_token = CharField()
+    access = CharField()
+    refresh = CharField()
 
 
 class UserSerializer(Serializer):

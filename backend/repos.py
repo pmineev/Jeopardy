@@ -61,8 +61,8 @@ class UserRepo:
             raise UserNotFound
 
         tokens = RefreshToken.for_user(orm_user)
-        return Session(refresh_token=str(tokens),
-                       access_token=str(tokens.access_token))
+        return Session(refresh=str(tokens),
+                       access=str(tokens.access_token))
 
 
 class GameRepo:

@@ -19,8 +19,8 @@ class Player:
 
 @dataclass
 class Session:
-    access_token: str
-    refresh_token: str = None
+    access: str
+    refresh: str = None
 
 
 @dataclass
