@@ -193,10 +193,10 @@ class GameSessionRepo:
         orm_player.delete()
 
     @staticmethod
-    def mark_user_as_left(game_session_id, username):
+    def set_player_state(game_session_id, username, state):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
         orm_player = orm_game_session.players.get(user__user__username=username)
-        orm_player.is_playing = False
+        orm_player.is_playing = state
         orm_player.save()
 
     @staticmethod
