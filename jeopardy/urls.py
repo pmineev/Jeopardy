@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from backend.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, GameSessionViewSet
 
@@ -23,6 +24,7 @@ urlpatterns = [
     path('users/', UserListView.as_view()),
     path('users/<str:username>/', UserView.as_view()),
     path('sessions/', SessionView.as_view()),
+    path('sessions/new_token/', TokenRefreshView.as_view()),
     path('games/', GameListView.as_view()),
     path('game_sessions/', GameSessionListView.as_view()),
     path('game_sessions/chosen/<int:game_session_id>/', GameSessionViewSet.as_view({'post': 'join'})),
