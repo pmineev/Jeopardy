@@ -294,12 +294,6 @@ class GameSessionRepo:
         orm_game_session.save()
 
     @staticmethod
-    def is_next_round_final(game_session_id):
-        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
-
-        return orm_game_session.current_round.order + 1 == orm_game_session.game.rounds.count()
-
-    @staticmethod
     def set_player_answer(game_session_id, username, answer):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
