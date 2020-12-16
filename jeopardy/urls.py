@@ -26,6 +26,7 @@ urlpatterns = [
     path('games/', GameListView.as_view()),
     path('game_sessions/', GameSessionListView.as_view()),
     path('game_sessions/chosen/<int:game_session_id>/', GameSessionViewSet.as_view({'post': 'join'})),
+    path('game_sessions/exited/<int:game_session_id>/', GameSessionViewSet.as_view({'delete': 'leave'})),
     path('game_sessions/<int:game_session_id>/question/', GameSessionViewSet.as_view({'post': 'choose_question'})),
     path('game_sessions/<int:game_session_id>/answer/', GameSessionViewSet.as_view({'post': 'submit_answer'})),
 ]

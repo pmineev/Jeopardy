@@ -106,6 +106,21 @@ class GameSessionInteractor:
         if self.repo.is_all_players_joined(game_session_id):
             self._start_game(game_session_id)
 
+    def leave(self, game_session_id, username):
+        if not self.repo.is_player(game_session_id, username):
+            raise NotPlayer
+
+        state = self.repo.get_state(game_session_id)
+        if state == State.WAITING:
+            self.repo.leave(game_session_id, username)
+            print(f'user {username} left')
+        else:
+            self.repo.mark_user_as_left(game_session_id, username)
+
+        if self.repo.is_all_players_left(game_session_id):
+            self.repo.delete_game_session(game_session_id)
+            print(f'game deleted')
+
     def _start_game(self, game_session_id):
         print('game started')
         self._set_first_player(game_session_id)

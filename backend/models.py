@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User as ORMUser
 from django.db.models import Model, CharField, TextField, IntegerField, \
-    ForeignKey, ManyToManyField, OneToOneField, CASCADE, PROTECT
+    ForeignKey, ManyToManyField, OneToOneField, BooleanField, CASCADE, PROTECT
 from django_enum_choices.fields import EnumChoiceField
 
 from backend.enums import State
@@ -17,6 +17,7 @@ class ORMPlayer(Model):
     user = OneToOneField(ORMUserProfile,
                          primary_key=True,
                          on_delete=CASCADE)
+    is_playing = BooleanField(default=True)
     score = IntegerField(default=0)
     answer = TextField(null=True)
 
@@ -67,7 +68,7 @@ class ORMGameSession(Model):
                                      on_delete=PROTECT,
                                      null=True)
     current_player = OneToOneField(ORMPlayer,
-                                   on_delete=PROTECT,
+                                   on_delete=CASCADE,
                                    null=True)
     state = EnumChoiceField(State,
                             default=State.WAITING)

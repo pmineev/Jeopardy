@@ -140,6 +140,14 @@ class GameSessionViewSet(ViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
+    def leave(self, request, game_session_id):
+        try:
+            GameSessionViewSet.interactor.leave(game_session_id, request.user.username)
+        except NotPlayer:
+            raise PermissionDenied()
+
+        return Response()
+
     def choose_question(self, request, game_session_id):
         question_dict = json.loads(request.body)
 

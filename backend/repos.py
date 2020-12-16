@@ -186,6 +186,41 @@ class GameSessionRepo:
         orm_game_session.players.add(orm_player)
 
     @staticmethod
+    def leave(game_session_id, username):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        orm_player = orm_game_session.players.get(user__user__username=username)
+        orm_game_session.players.remove(orm_player)
+        orm_player.delete()
+
+    @staticmethod
+    def mark_user_as_left(game_session_id, username):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        orm_player = orm_game_session.players.get(user__user__username=username)
+        orm_player.is_playing = False
+        orm_player.save()
+
+    @staticmethod
+    def is_all_players_left(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        if orm_game_session.state == State.WAITING:
+            if not orm_game_session.players.exists():
+                return True
+        else:
+            for orm_player in orm_game_session.players.all():
+                if orm_player.is_playing:
+                    return False
+
+        return True
+
+    @staticmethod
+    def delete_game_session(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        for orm_player in orm_game_session.players.all():
+            orm_player.delete()
+        orm_game_session.delete()
+
+    @staticmethod
     def is_all_players_joined(game_session_id):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
