@@ -14,9 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from backend.consumers import LobbyConsumer, GameSessionConsumer
 from backend.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, GameSessionViewSet
 
 urlpatterns = [
@@ -31,4 +32,9 @@ urlpatterns = [
     path('game_sessions/exited/<int:game_session_id>/', GameSessionViewSet.as_view({'delete': 'leave'})),
     path('game_sessions/<int:game_session_id>/question/', GameSessionViewSet.as_view({'post': 'choose_question'})),
     path('game_sessions/<int:game_session_id>/answer/', GameSessionViewSet.as_view({'post': 'submit_answer'})),
+]
+
+websocket_urlpatterns = [
+    re_path(r'^ws/lobby/$', LobbyConsumer.as_asgi()),
+    re_path(r'^ws/game_sessions/(?P<game_session_id>\d+)/$', GameSessionConsumer.as_asgi()),
 ]
