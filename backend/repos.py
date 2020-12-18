@@ -256,6 +256,16 @@ class GameSessionRepo:
         return player
 
     @staticmethod
+    def get_player(game_session_id, username):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        orm_player = orm_game_session.players.get(user__user__username=username)
+
+        player = Player(nickname=orm_player.user.nickname,
+                        score=orm_player.score,
+                        is_playing=orm_player.is_playing)
+        return player
+
+    @staticmethod
     def set_random_current_player(game_session_id):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
@@ -382,6 +392,15 @@ class GameSessionRepo:
         print(
             f'current question: {theme_order} {question_order} {orm_game_session.current_question.text}: {orm_game_session.current_question.answer}')
         orm_game_session.save()
+
+    @staticmethod
+    def get_current_question(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        orm_current_question = orm_game_session.current_question
+        question_description = QuestionDescription(value=orm_current_question.value,
+                                                   text=orm_current_question.text)
+
+        return question_description
 
     @staticmethod
     def is_all_players_answered(game_session_id):

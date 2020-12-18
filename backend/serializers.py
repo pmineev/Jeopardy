@@ -33,6 +33,7 @@ class GameSessionDescriptionSerializer(Serializer):
 
 class QuestionDescriptionSerializer(Serializer):
     value = IntegerField()
+    text = CharField(required=False)
 
 
 class ThemeDescriptionSerializer(Serializer):

@@ -1,7 +1,8 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
-from backend.serializers import GameSessionDescriptionSerializer, RoundDescriptionSerializer, PlayerSerializer
+from backend.serializers import GameSessionDescriptionSerializer, RoundDescriptionSerializer, PlayerSerializer, \
+    QuestionDescriptionSerializer
 
 
 class GameSessionNotifier:
@@ -50,3 +51,27 @@ class GameSessionNotifier:
         player_dict = PlayerSerializer(player).data
 
         self._notify(str(game_session_id), player_dict, 'game_session_event', 'current_player_chosen')
+
+    def current_question_chosen(self, game_session_id, theme_order, question_order):
+        question_description = self.repo.get_current_question(game_session_id)
+        question_dict = QuestionDescriptionSerializer(question_description).data
+        question_dict.update(
+            {
+                'theme_order': theme_order,
+                'question_order': question_order
+            }
+        )
+
+        self._notify(str(game_session_id), question_dict, 'game_session_event', 'current_question_chosen')
+
+    def player_answered(self, game_session_id, username, answer, is_correct=True):
+        player = self.repo.get_player(game_session_id, username)
+        player_dict = PlayerSerializer(player).data
+        player_dict.update(
+            {
+                'answer': answer,
+                'is_correct': is_correct
+            }
+        )
+
+        self._notify(str(game_session_id), player_dict, 'game_session_event', 'player_answered')

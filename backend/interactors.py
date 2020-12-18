@@ -175,6 +175,9 @@ class GameSessionInteractor:
             theme_order = question_data['theme_order']
             question_order = question_data['question_order']
             self.repo.set_current_question(game_session_id, theme_order, question_order)
+
+            self.notifier.current_question_chosen(game_session_id, theme_order, question_order)
+
             self.repo.set_state(game_session_id, State.ANSWERING)
         else:
             pass
@@ -194,6 +197,8 @@ class GameSessionInteractor:
                 self.repo.change_player_score(game_session_id, username, value)
                 self.repo.mark_current_question_as_answered(game_session_id)
 
+                self.notifier.player_answered(game_session_id, username, answer)
+
                 if self.repo.is_no_more_questions(game_session_id):
                     print('no more questions!')
                     self._set_next_round(game_session_id)
@@ -203,6 +208,8 @@ class GameSessionInteractor:
             else:
                 print('wrong')
                 self.repo.change_player_score(game_session_id, username, -value)
+
+                self.notifier.player_answered(game_session_id, username, answer, is_correct=False)
 
         elif state == State.FINAL_ROUND:
             self.repo.set_player_answer(game_session_id, username, answer)

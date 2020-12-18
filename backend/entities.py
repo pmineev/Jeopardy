@@ -83,7 +83,8 @@ class GameSessionDescription:
 
 @dataclass
 class QuestionDescription:
-    value: int = None
+    value: int
+    text: str = None
 
 
 @dataclass
