@@ -30,15 +30,23 @@ class GameSessionNotifier:
 
         self._notify('lobby', deletion_dict, 'lobby_event', 'deleted')
 
-    def player_joined(self, game_session_id):
+    def player_joined(self, game_session_id, username):
         join_dict = dict(game_session_id=str(game_session_id))
 
-        self._notify('lobby', join_dict, 'lobby_event', 'joined')
+        player = self.repo.get_player(game_session_id, username)
+        player_dict = PlayerSerializer(player).data
 
-    def player_left(self, game_session_id):
+        self._notify('lobby', join_dict, 'lobby_event', 'joined')
+        self._notify(str(game_session_id), player_dict, 'game_session_event', 'player_joined')
+
+    def player_left(self, game_session_id, username):
         leave_dict = dict(game_session_id=str(game_session_id))
 
+        player = self.repo.get_player(game_session_id, username)
+        player_dict = PlayerSerializer(player).data
+
         self._notify('lobby', leave_dict, 'lobby_event', 'left')
+        self._notify(str(game_session_id), player_dict, 'game_session_event', 'player_left')
 
     def round_started(self, game_session_id):
         round_description = self.repo.get_current_round_description(game_session_id)

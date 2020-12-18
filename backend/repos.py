@@ -204,10 +204,10 @@ class GameSessionRepo:
         orm_player.delete()
 
     @staticmethod
-    def set_player_state(game_session_id, username, state):
+    def set_player_state(game_session_id, username, is_playing):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
         orm_player = orm_game_session.players.get(user__user__username=username)
-        orm_player.is_playing = state
+        orm_player.is_playing = is_playing
         orm_player.save()
 
     @staticmethod
