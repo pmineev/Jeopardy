@@ -47,4 +47,4 @@ class GameSessionConsumer(JsonWebsocketConsumer):
             })
 
     def game_session_event(self, event):
-        self.send_json(str({**self.scope, **event}))
+        self.send_json(event)

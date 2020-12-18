@@ -1,7 +1,7 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
-from backend.serializers import GameSessionDescriptionSerializer
+from backend.serializers import GameSessionDescriptionSerializer, RoundDescriptionSerializer, PlayerSerializer
 
 
 class GameSessionNotifier:
@@ -38,3 +38,15 @@ class GameSessionNotifier:
         leave_dict = dict(game_session_id=str(game_session_id))
 
         self._notify('lobby', leave_dict, 'lobby_event', 'left')
+
+    def round_started(self, game_session_id):
+        round_description = self.repo.get_current_round_description(game_session_id)
+        round_dict = RoundDescriptionSerializer(round_description).data
+
+        self._notify(str(game_session_id), round_dict, 'game_session_event', 'round_started')
+
+    def current_player_chosen(self, game_session_id):
+        player = self.repo.get_current_player(game_session_id)
+        player_dict = PlayerSerializer(player).data
+
+        self._notify(str(game_session_id), player_dict, 'game_session_event', 'current_player_chosen')

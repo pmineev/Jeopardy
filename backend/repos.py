@@ -5,7 +5,7 @@ from django.contrib.auth.models import User as ORMUser
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from backend.entities import Game, GameDescription, Round, Theme, Question, UserProfile, Session, GameSession, \
-    GameSessionDescription
+    GameSessionDescription, RoundDescription, ThemeDescription, QuestionDescription, Player
 from backend.enums import State
 from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists, TooManyPlayers, WrongQuestionRequest
 from backend.models import ORMUserProfile, ORMQuestion, ORMTheme, ORMRound, ORMGame, ORMGameSession, ORMPlayer
@@ -158,8 +158,6 @@ class GameSessionRepo:
                                                          game=orm_game,
                                                          max_players=game_session.max_players)
         orm_game_session.players.add(orm_player)
-        orm_game_session.current_round = orm_game_session.game.rounds.get(order=0)
-        orm_game_session.save()
 
         return orm_game_session.creator_id
 
@@ -248,6 +246,16 @@ class GameSessionRepo:
         orm_game_session.save()
 
     @staticmethod
+    def get_current_player(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        orm_player = orm_game_session.current_player
+
+        player = Player(nickname=orm_player.user.nickname,
+                        score=orm_player.score,
+                        is_playing=orm_player.is_playing)
+        return player
+
+    @staticmethod
     def set_random_current_player(game_session_id):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
@@ -330,15 +338,19 @@ class GameSessionRepo:
     def set_next_round(game_session_id):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
-        current_round_order = orm_game_session.current_round.order
-        if current_round_order + 1 < orm_game_session.game.rounds.count():
-            orm_game_session.current_round = orm_game_session.game.rounds.get(order=current_round_order + 1)
-            orm_game_session.answered_questions.clear()
-            orm_game_session.state = State.END_ROUND
-            print(f'new round order: {orm_game_session.current_round.order}')
+        if orm_game_session.state == State.WAITING:
+            orm_game_session.current_round = orm_game_session.game.rounds.get(order=0)
         else:
-            orm_game_session.state = State.FINAL_ROUND
-            print(f'final round, {orm_game_session.game.final_round.text}{orm_game_session.game.final_round.answer}')
+            current_round_order = orm_game_session.current_round.order
+            if current_round_order + 1 < orm_game_session.game.rounds.count():
+                orm_game_session.current_round = orm_game_session.game.rounds.get(order=current_round_order + 1)
+                orm_game_session.answered_questions.clear()
+                orm_game_session.state = State.END_ROUND
+                print(f'new round order: {orm_game_session.current_round.order}')
+            else:
+                orm_game_session.state = State.FINAL_ROUND
+                print(
+                    f'final round, {orm_game_session.game.final_round.text}{orm_game_session.game.final_round.answer}')
         orm_game_session.save()
 
     @staticmethod
@@ -394,3 +406,24 @@ class GameSessionRepo:
                 orm_player.score -= value
             orm_player.save()
             print(f'player {orm_player.user.user.username} final score: {orm_player.score}')
+
+    @staticmethod
+    def get_current_round_description(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        orm_current_round = orm_game_session.current_round
+
+        round_description = RoundDescription(order=orm_current_round.order,
+                                             themes=list())
+
+        for orm_theme in orm_current_round.themes.order_by('order'):
+            theme_description = ThemeDescription(name=orm_theme.name,
+                                                 questions=list())
+
+            for orm_question in orm_theme.questions.order_by('order'):
+                question_description = QuestionDescription(value=orm_question.value)
+
+                theme_description.questions.append(question_description)
+
+            round_description.themes.append(theme_description)
+
+        return round_description

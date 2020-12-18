@@ -13,8 +13,9 @@ class UserProfile:
 
 @dataclass
 class Player:
-    user: UserProfile
+    nickname: str
     score: int = 0
+    is_playing: bool = True
 
 
 @dataclass
@@ -78,3 +79,20 @@ class GameSessionDescription:
     game_name: str
     max_players: int
     current_players: int
+
+
+@dataclass
+class QuestionDescription:
+    value: int = None
+
+
+@dataclass
+class ThemeDescription:
+    name: str
+    questions: List[QuestionDescription]
+
+
+@dataclass
+class RoundDescription:
+    order: int
+    themes: List[ThemeDescription]
