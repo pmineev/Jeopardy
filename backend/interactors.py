@@ -1,6 +1,7 @@
 from backend.entities import UserProfile, Game, Round, Theme, Question, GameSession
 from backend.enums import State
 from backend.exceptions import InvalidCredentials, NotPlayer, NotCurrentPlayer
+from backend.notifiers import GameSessionNotifier
 
 
 class UserInteractor:
@@ -88,6 +89,7 @@ class GameInteractor:
 class GameSessionInteractor:
     def __init__(self, repo):
         self.repo = repo
+        self.notifier = GameSessionNotifier(repo)
 
     def create(self, game_session_data, username):
         game = Game(name=game_session_data['game_name'])
@@ -95,7 +97,9 @@ class GameSessionInteractor:
                                    game=game,
                                    max_players=game_session_data['max_players'])
 
-        self.repo.create(game_session)
+        game_session_id = self.repo.create(game_session)
+
+        self.notifier.created(game_session_id)
 
     def get_all_descriptions(self):
         return self.repo.get_all_descriptions()
@@ -104,6 +108,8 @@ class GameSessionInteractor:
         state = self.repo.get_state(game_session_id)
         if state == State.WAITING:
             self.repo.join(game_session_id, username)
+
+            self.notifier.joined(game_session_id)
         elif self.repo.is_player(game_session_id, username):
             self.repo.set_player_state(game_session_id, username, True)
 
@@ -117,12 +123,16 @@ class GameSessionInteractor:
         state = self.repo.get_state(game_session_id)
         if state == State.WAITING:
             self.repo.leave(game_session_id, username)
+
+            self.notifier.left(game_session_id)
             print(f'user {username} left')
         else:
             self.repo.set_player_state(game_session_id, username, False)
 
         if self.repo.is_all_players_left(game_session_id):
             self.repo.delete_game_session(game_session_id)
+
+            self.notifier.deleted(game_session_id)
             print(f'game deleted')
 
     def _start_game(self, game_session_id):

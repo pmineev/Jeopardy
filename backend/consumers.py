@@ -23,7 +23,7 @@ class LobbyConsumer(JsonWebsocketConsumer):
             })
 
     def lobby_event(self, event):
-        self.send_json(str({**self.scope, **event}))
+        self.send_json(event)
 
 
 class GameSessionConsumer(JsonWebsocketConsumer):

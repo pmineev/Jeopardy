@@ -161,6 +161,19 @@ class GameSessionRepo:
         orm_game_session.current_round = orm_game_session.game.rounds.get(order=0)
         orm_game_session.save()
 
+        return orm_game_session.creator_id
+
+    @staticmethod
+    def get_description(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        desc = GameSessionDescription(id=orm_game_session.pk,
+                                      creator=orm_game_session.creator.nickname,
+                                      game_name=orm_game_session.game.name,
+                                      max_players=orm_game_session.max_players,
+                                      current_players=orm_game_session.players.count())
+
+        return desc
+
     @staticmethod
     def get_all_descriptions():
         game_session_descriptions = list()
@@ -381,4 +394,3 @@ class GameSessionRepo:
                 orm_player.score -= value
             orm_player.save()
             print(f'player {orm_player.user.user.username} final score: {orm_player.score}')
-
