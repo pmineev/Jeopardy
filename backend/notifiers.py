@@ -19,23 +19,23 @@ class GameSessionNotifier:
         )
         async_to_sync(self.channel_layer.group_send)(group_name, notification_dict)
 
-    def created(self, game_session_id):
+    def game_session_created(self, game_session_id):
         game_session_description = self.repo.get_description(game_session_id)
         description_dict = GameSessionDescriptionSerializer(game_session_description).data
 
         self._notify('lobby', description_dict, 'lobby_event', 'created')
 
-    def deleted(self, game_session_id):
+    def game_session_deleted(self, game_session_id):
         deletion_dict = dict(game_session_id=str(game_session_id))
 
         self._notify('lobby', deletion_dict, 'lobby_event', 'deleted')
 
-    def joined(self, game_session_id):
+    def player_joined(self, game_session_id):
         join_dict = dict(game_session_id=str(game_session_id))
 
         self._notify('lobby', join_dict, 'lobby_event', 'joined')
 
-    def left(self, game_session_id):
+    def player_left(self, game_session_id):
         leave_dict = dict(game_session_id=str(game_session_id))
 
         self._notify('lobby', leave_dict, 'lobby_event', 'left')

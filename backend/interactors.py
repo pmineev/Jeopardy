@@ -99,7 +99,7 @@ class GameSessionInteractor:
 
         game_session_id = self.repo.create(game_session)
 
-        self.notifier.created(game_session_id)
+        self.notifier.game_session_created(game_session_id)
 
     def get_all_descriptions(self):
         return self.repo.get_all_descriptions()
@@ -109,7 +109,7 @@ class GameSessionInteractor:
         if state == State.WAITING:
             self.repo.join(game_session_id, username)
 
-            self.notifier.joined(game_session_id)
+            self.notifier.player_joined(game_session_id)
         elif self.repo.is_player(game_session_id, username):
             self.repo.set_player_state(game_session_id, username, True)
 
@@ -124,7 +124,7 @@ class GameSessionInteractor:
         if state == State.WAITING:
             self.repo.leave(game_session_id, username)
 
-            self.notifier.left(game_session_id)
+            self.notifier.player_left(game_session_id)
             print(f'user {username} left')
         else:
             self.repo.set_player_state(game_session_id, username, False)
@@ -132,7 +132,7 @@ class GameSessionInteractor:
         if self.repo.is_all_players_left(game_session_id):
             self.repo.delete_game_session(game_session_id)
 
-            self.notifier.deleted(game_session_id)
+            self.notifier.game_session_deleted(game_session_id)
             print(f'game deleted')
 
     def _start_game(self, game_session_id):
