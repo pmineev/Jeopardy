@@ -54,6 +54,12 @@ class GameSessionNotifier:
 
         self._notify(str(game_session_id), round_dict, 'game_session_event', 'round_started')
 
+    def final_round_started(self, game_session_id):
+        question_description = self.repo.get_final_round_description(game_session_id)
+        question_dict = QuestionDescriptionSerializer(question_description).data
+
+        self._notify(str(game_session_id), question_dict, 'game_session_event', 'final_round_started')
+
     def current_player_chosen(self, game_session_id):
         player = self.repo.get_current_player(game_session_id)
         player_dict = PlayerSerializer(player).data
@@ -89,3 +95,10 @@ class GameSessionNotifier:
         answer_dict = dict(answer=answer)
 
         self._notify(str(game_session_id), answer_dict, 'game_session_event', 'question_timeout')
+
+    def final_round_timeout(self, game_session_id):
+        players = self.repo.get_all_players(game_session_id)
+        players_list = [PlayerSerializer(player).data for player in players]
+        players_dict = dict(players=players_list)
+
+        self._notify(str(game_session_id), players_dict, 'game_session_event', 'final_round_timeout')

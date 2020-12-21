@@ -15,6 +15,7 @@ class PlayerSerializer(Serializer):
     nickname = CharField()
     score = IntegerField()
     is_playing = BooleanField(default=True)
+    answer = CharField(required=False)
 
 
 class GameDescriptionSerializer(Serializer):

@@ -16,6 +16,7 @@ class Player:
     nickname: str
     score: int = 0
     is_playing: bool = True
+    answer: str = None
 
 
 @dataclass

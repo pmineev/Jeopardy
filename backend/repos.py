@@ -266,6 +266,19 @@ class GameSessionRepo:
         return player
 
     @staticmethod
+    def get_all_players(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        players = list()
+        for orm_player in orm_game_session.players.all():
+            player = Player(nickname=orm_player.user.nickname,
+                            score=orm_player.score,
+                            is_playing=orm_player.is_playing,
+                            answer=orm_player.answer)
+            players.append(player)
+        return players
+
+    @staticmethod
     def set_random_current_player(game_session_id):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
@@ -425,7 +438,7 @@ class GameSessionRepo:
         print(f'all players answered')
         value = orm_game_session.game.final_round.value
         for orm_player in orm_game_session.players.all():
-            if orm_player.answer == orm_game_session.game.final_round.answer:
+            if orm_player.answer and orm_player.answer == orm_game_session.game.final_round.answer:
                 orm_player.score += value
             else:
                 orm_player.score -= value
@@ -452,3 +465,13 @@ class GameSessionRepo:
             round_description.themes.append(theme_description)
 
         return round_description
+
+    @staticmethod
+    def get_final_round_description(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        orm_final_question = orm_game_session.game.final_round
+
+        final_question = Question(text=orm_final_question.text,
+                                  value=orm_final_question.value)
+
+        return final_question

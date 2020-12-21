@@ -146,16 +146,18 @@ class GameSessionInteractor:
     def _set_next_round(self, game_session_id):
         self.repo.set_next_round(game_session_id)
 
-        self.notifier.round_started(game_session_id)
         if not self.repo.get_state(game_session_id) == State.FINAL_ROUND:
+            self.notifier.round_started(game_session_id)
+
             self._set_first_player(game_session_id)
 
             self.notifier.current_player_chosen(game_session_id)
 
             self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
         else:
-            pass
-            # self.notifier.final_round_started(game_session_id)
+            self.notifier.final_round_started(game_session_id)
+
+            self.timer.final_round_started(game_session_id)
 
     def _set_first_player(self, game_session_id):
         state = self.repo.get_state(game_session_id)
@@ -198,6 +200,11 @@ class GameSessionInteractor:
         else:
             self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
 
+    def final_round_timeout(self, game_session_id):
+        self.repo.check_players_final_answers(game_session_id)
+
+        self.notifier.final_round_timeout(game_session_id)
+
     def submit_answer(self, game_session_id, username, answer):
         if not self.repo.is_player(game_session_id, username):
             raise NotPlayer
@@ -231,7 +238,5 @@ class GameSessionInteractor:
 
         elif state == State.FINAL_ROUND:
             self.repo.set_player_answer(game_session_id, username, answer)
-            if self.repo.is_all_players_answered(game_session_id):
-                self.repo.check_players_final_answers(game_session_id)
         else:
             pass
