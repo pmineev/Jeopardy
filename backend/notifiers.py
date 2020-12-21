@@ -83,3 +83,9 @@ class GameSessionNotifier:
         )
 
         self._notify(str(game_session_id), player_dict, 'game_session_event', 'player_answered')
+
+    def question_timeout(self, game_session_id):
+        answer = self.repo.get_current_question_answer(game_session_id)
+        answer_dict = dict(answer=answer)
+
+        self._notify(str(game_session_id), answer_dict, 'game_session_event', 'question_timeout')

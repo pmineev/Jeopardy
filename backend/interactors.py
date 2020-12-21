@@ -2,6 +2,7 @@ from backend.entities import UserProfile, Game, Round, Theme, Question, GameSess
 from backend.enums import State
 from backend.exceptions import InvalidCredentials, NotPlayer, NotCurrentPlayer
 from backend.notifiers import GameSessionNotifier
+from backend.timers import GameSessionTimer
 
 
 class UserInteractor:
@@ -90,6 +91,7 @@ class GameSessionInteractor:
     def __init__(self, repo):
         self.repo = repo
         self.notifier = GameSessionNotifier(repo)
+        self.timer = GameSessionTimer(self)
 
     def create(self, game_session_data, username):
         game = Game(name=game_session_data['game_name'])
@@ -179,10 +181,22 @@ class GameSessionInteractor:
             self.repo.set_current_question(game_session_id, theme_order, question_order)
 
             self.notifier.current_question_chosen(game_session_id, theme_order, question_order)
+            self.timer.question_chosen(game_session_id)
 
             self.repo.set_state(game_session_id, State.ANSWERING)
         else:
             pass
+
+    def question_timeout(self, game_session_id):
+        self.repo.mark_current_question_as_answered(game_session_id)
+
+        self.notifier.question_timeout(game_session_id)
+
+        if self.repo.is_no_more_questions(game_session_id):
+            print('no more questions!')
+            self._set_next_round(game_session_id)
+        else:
+            self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
 
     def submit_answer(self, game_session_id, username, answer):
         if not self.repo.is_player(game_session_id, username):
@@ -200,6 +214,7 @@ class GameSessionInteractor:
                 self.repo.mark_current_question_as_answered(game_session_id)
 
                 self.notifier.player_answered(game_session_id, username, answer)
+                self.timer.player_answered(game_session_id)
 
                 if self.repo.is_no_more_questions(game_session_id):
                     print('no more questions!')
@@ -212,6 +227,7 @@ class GameSessionInteractor:
                 self.repo.change_player_score(game_session_id, username, -value)
 
                 self.notifier.player_answered(game_session_id, username, answer, is_correct=False)
+                self.timer.player_answered(game_session_id, is_correct=False)
 
         elif state == State.FINAL_ROUND:
             self.repo.set_player_answer(game_session_id, username, answer)

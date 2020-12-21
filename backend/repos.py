@@ -320,6 +320,12 @@ class GameSessionRepo:
         return orm_game_session.current_question.value
 
     @staticmethod
+    def get_current_question_answer(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        return orm_game_session.current_question.answer
+
+    @staticmethod
     def change_player_score(game_session_id, username, value):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
