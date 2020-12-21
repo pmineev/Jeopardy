@@ -10,6 +10,10 @@ class UserNotFound(Exception):
     pass
 
 
+class GameNotFound(Exception):
+    pass
+
+
 class InvalidCredentials(Exception):
     pass
 
@@ -31,4 +35,8 @@ class NotCurrentPlayer(Exception):
 
 
 class WrongQuestionRequest(Exception):
+    pass
+
+
+class AlreadyPlaying(Exception):
     pass

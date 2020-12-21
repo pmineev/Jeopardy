@@ -7,7 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from backend.entities import Game, GameDescription, Round, Theme, Question, UserProfile, Session, GameSession, \
     GameSessionDescription, RoundDescription, ThemeDescription, QuestionDescription, Player
 from backend.enums import State
-from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists, TooManyPlayers, WrongQuestionRequest
+from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists, GameNotFound, TooManyPlayers, \
+    WrongQuestionRequest, AlreadyPlaying
 from backend.models import ORMUserProfile, ORMQuestion, ORMTheme, ORMRound, ORMGame, ORMGameSession, ORMPlayer
 
 
@@ -150,9 +151,17 @@ class GameSessionRepo:
     @staticmethod
     def create(game_session: GameSession):
         orm_user_profile = ORMUserProfile.objects.get(user__username=game_session.creator)
+
+        orm_player_qs = ORMPlayer.objects.filter(user=orm_user_profile)
+        if orm_player_qs.exists():
+            raise AlreadyPlaying
         orm_player = ORMPlayer.objects.create(user=orm_user_profile)
 
-        orm_game = ORMGame.objects.get(name=game_session.game.name)
+        orm_game_qs = ORMGame.objects.filter(name=game_session.game.name)
+        if not orm_game_qs.exists():
+            raise GameNotFound
+
+        orm_game = orm_game_qs.first()
 
         orm_game_session = ORMGameSession.objects.create(creator=orm_user_profile,
                                                          game=orm_game,

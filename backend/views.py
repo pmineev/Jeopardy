@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
 from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists, TooManyPlayers, \
-    NotPlayer, NotCurrentPlayer, WrongQuestionRequest
+    NotPlayer, NotCurrentPlayer, WrongQuestionRequest, GameNotFound, AlreadyPlaying
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer, \
     GameSessionDescriptionSerializer
@@ -115,7 +115,12 @@ class GameSessionListView(APIView):
         if 'max_players' not in game_session_dict or 'game_name' not in game_session_dict:
             raise ParseError()
 
-        GameSessionListView.interactor.create(game_session_dict, request.user.username)
+        try:
+            GameSessionListView.interactor.create(game_session_dict, request.user.username)
+        except GameNotFound:
+            raise ParseError()
+        except AlreadyPlaying:
+            return Response(status=status.HTTP_409_CONFLICT)
 
         return Response(status=status.HTTP_201_CREATED)
 
