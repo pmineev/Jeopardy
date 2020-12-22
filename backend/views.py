@@ -23,12 +23,12 @@ class UserListView(APIView):
         user_dict = json.loads(request.body)
 
         if 'username' not in user_dict or 'password' not in user_dict:
-            raise ParseError()
+            raise ParseError(detail='provide username and password fields')
 
         try:
             UserListView.interactor.create(user_dict)
         except UserAlreadyExists:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='user already exists'))
         except InvalidCredentials:
             raise AuthenticationFailed()
 
@@ -44,11 +44,13 @@ class SessionView(APIView):
         user_dict = json.loads(request.body)
 
         if 'username' not in user_dict or 'password' not in user_dict:
-            raise ParseError()
+            raise ParseError(detail='provide username and password fields')
 
         try:
             session = SessionView.interactor.create_session(user_dict)
-        except (InvalidCredentials, UserNotFound):
+        except UserNotFound:
+            raise AuthenticationFailed(detail='user not found')
+        except InvalidCredentials:
             raise AuthenticationFailed()
 
         session_serializer = SessionSerializer(session)
@@ -76,7 +78,7 @@ class UserView(APIView):
         update_dict = json.loads(request.body)
 
         if 'password' not in update_dict and 'nickname' not in update_dict:
-            raise ParseError()
+            raise ParseError(detail='provide nickname or password fields')
 
         UserView.interactor.update(update_dict, username)
 
@@ -92,7 +94,7 @@ class GameListView(APIView):
         try:
             GameListView.interactor.create(game_dict, request.user.username)
         except GameAlreadyExists:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='game already exists'))
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -113,14 +115,14 @@ class GameSessionListView(APIView):
         game_session_dict = json.loads(request.body)
 
         if 'max_players' not in game_session_dict or 'game_name' not in game_session_dict:
-            raise ParseError()
+            raise ParseError(detail='provide max_players and game_name fields')
 
         try:
             GameSessionListView.interactor.create(game_session_dict, request.user.username)
         except GameNotFound:
-            raise ParseError()
+            raise ParseError(detail='game not found')
         except AlreadyPlaying:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='user is already playing'))
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -141,7 +143,7 @@ class GameSessionViewSet(ViewSet):
         try:
             GameSessionViewSet.interactor.join(game_session_id, request.user.username)
         except TooManyPlayers:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='too many players'))
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -149,7 +151,7 @@ class GameSessionViewSet(ViewSet):
         try:
             GameSessionViewSet.interactor.leave(game_session_id, request.user.username)
         except NotPlayer:
-            raise PermissionDenied()
+            raise PermissionDenied(detail='not player')
 
         return Response()
 
@@ -157,14 +159,16 @@ class GameSessionViewSet(ViewSet):
         question_dict = json.loads(request.body)
 
         if 'theme_order' not in question_dict or 'question_order' not in question_dict:
-            raise ParseError()
+            raise ParseError(detail='provide theme_order and question_order fields')
 
         try:
             GameSessionViewSet.interactor.choose_question(game_session_id, question_dict, request.user.username)
-        except (NotPlayer, NotCurrentPlayer):
-            raise PermissionDenied()
+        except NotPlayer:
+            raise PermissionDenied(detail='not player')
+        except NotCurrentPlayer:
+            raise PermissionDenied(detail='not current player')
         except WrongQuestionRequest:
-            raise ParseError()
+            raise ParseError(detail='wrong question request')
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -172,11 +176,13 @@ class GameSessionViewSet(ViewSet):
         answer_dict = json.loads(request.body)
 
         if 'answer' not in answer_dict:
-            raise ParseError()
+            raise ParseError(detail='provide answer field')
 
         try:
             GameSessionViewSet.interactor.submit_answer(game_session_id, request.user.username, answer_dict['answer'])
-        except (NotPlayer, NotCurrentPlayer):
-            raise PermissionDenied()
+        except NotPlayer:
+            raise PermissionDenied(detail='not player')
+        except NotCurrentPlayer:
+            raise PermissionDenied(detail='not current player')
 
         return Response(status=status.HTTP_201_CREATED)
