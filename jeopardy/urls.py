@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
+from django.views.generic import TemplateView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from backend.consumers import LobbyConsumer, GameSessionConsumer
@@ -32,6 +33,10 @@ urlpatterns = [
     path('game_sessions/exited/<int:game_session_id>/', GameSessionViewSet.as_view({'delete': 'leave'})),
     path('game_sessions/<int:game_session_id>/question/', GameSessionViewSet.as_view({'post': 'choose_question'})),
     path('game_sessions/<int:game_session_id>/answer/', GameSessionViewSet.as_view({'post': 'submit_answer'})),
+    path('swagger/', TemplateView.as_view(
+        template_name='swagger.html',
+        extra_context={'schema_url': 'openapi-schema'}
+    ), name='swagger'),
 ]
 
 websocket_urlpatterns = [

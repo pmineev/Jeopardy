@@ -1,0 +1,641 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Jeopardy",
+    "version": "1"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/users/": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "create user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "user created"
+          },
+          "401": {
+            "description": "incorrect credentials"
+          },
+          "409": {
+            "description": "user already exists"
+          }
+        }
+      }
+    },
+    "/users/{username}/": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "get user info",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "change user info",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "changed"
+          },
+          "400": {
+            "description": "bad request"
+          }
+        }
+      }
+    },
+    "/sessions": {
+      "post": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "incorrect credentials"
+          }
+        }
+      }
+    },
+    "/sessions/new_token/": {
+      "post": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "get new access token",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_3"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "new access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_201"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "get game list",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDescriptionList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "games"
+        ],
+        "summary": "post new game",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Game"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created"
+          },
+          "409": {
+            "description": "game already exists"
+          }
+        }
+      }
+    },
+    "/game_sessions/": {
+      "get": {
+        "tags": [
+          "game_sessions"
+        ],
+        "summary": "get active games list",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameSessionDescriptionList"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "game_sessions"
+        ],
+        "summary": "start game",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_4"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "game started"
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "409": {
+            "description": "user is already playing"
+          }
+        }
+      }
+    },
+    "/game_sessions/chosen/{game_session_id}/": {
+      "post": {
+        "tags": [
+          "game_sessions"
+        ],
+        "summary": "join game",
+        "parameters": [
+          {
+            "name": "game_session_id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "joined"
+          },
+          "409": {
+            "description": "too many players"
+          }
+        }
+      }
+    },
+    "/game_sessions/exited/{game_session_id}/": {
+      "delete": {
+        "tags": [
+          "game_sessions"
+        ],
+        "summary": "leave game",
+        "parameters": [
+          {
+            "name": "game_session_id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "left"
+          },
+          "403": {
+            "description": "not a player"
+          }
+        }
+      }
+    },
+    "/game_sessions/{game_session_id}/question/": {
+      "post": {
+        "tags": [
+          "game_sessions"
+        ],
+        "summary": "choose question",
+        "parameters": [
+          {
+            "name": "game_session_id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_5"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "chosen"
+          },
+          "403": {
+            "description": "not a player"
+          }
+        }
+      }
+    },
+    "/game_sessions/{game_session_id}/answer/": {
+      "post": {
+        "tags": [
+          "game_sessions"
+        ],
+        "summary": "submit answer",
+        "parameters": [
+          {
+            "name": "game_session_id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/body_6"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "not a player"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          }
+        },
+        "description": "user info"
+      },
+      "Session": {
+        "required": [
+          "access",
+          "refresh"
+        ],
+        "type": "object",
+        "properties": {
+          "refresh": {
+            "type": "string"
+          },
+          "access": {
+            "type": "string"
+          }
+        },
+        "description": "JWT tokens"
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "value": {
+            "type": "integer"
+          }
+        }
+      },
+      "Theme": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Question"
+            }
+          }
+        }
+      },
+      "Round": {
+        "type": "object",
+        "properties": {
+          "themes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Theme"
+            }
+          }
+        }
+      },
+      "Game": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "rounds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Round"
+            }
+          },
+          "final_round": {
+            "$ref": "#/components/schemas/Question"
+          }
+        }
+      },
+      "GameDescription": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "rounds_count": {
+            "type": "integer"
+          }
+        }
+      },
+      "GameDescriptionList": {
+        "type": "object",
+        "properties": {
+          "descriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameDescription"
+            }
+          }
+        }
+      },
+      "GameSessionDescription": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "creator": {
+            "type": "string"
+          },
+          "game_name": {
+            "type": "string"
+          },
+          "max_players": {
+            "type": "integer"
+          },
+          "current_players": {
+            "type": "integer"
+          }
+        }
+      },
+      "GameSessionDescriptionList": {
+        "type": "object",
+        "properties": {
+          "descriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameSessionDescription"
+            }
+          }
+        }
+      },
+      "body": {
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "body_1": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "body_2": {
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "body_3": {
+        "required": [
+          "refresh"
+        ],
+        "type": "object",
+        "properties": {
+          "refresh": {
+            "type": "string"
+          }
+        }
+      },
+      "inline_response_201": {
+        "required": [
+          "access"
+        ],
+        "type": "object",
+        "properties": {
+          "access": {
+            "type": "string"
+          }
+        }
+      },
+      "body_4": {
+        "required": [
+          "game_name",
+          "max_players"
+        ],
+        "type": "object",
+        "properties": {
+          "max_players": {
+            "type": "integer"
+          },
+          "game_name": {
+            "type": "string"
+          }
+        }
+      },
+      "body_5": {
+        "required": [
+          "question_order",
+          "theme_order"
+        ],
+        "type": "object",
+        "properties": {
+          "theme_order": {
+            "type": "integer"
+          },
+          "question_order": {
+            "type": "integer"
+          }
+        }
+      },
+      "body_6": {
+        "required": [
+          "answer"
+        ],
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
