@@ -38,6 +38,7 @@
     ]
   },
   "devDependencies": {
+    "react-router-dom": "^5.2.0",
     "yup": "^0.32.8"
   }
 }
