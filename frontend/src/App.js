@@ -1,21 +1,18 @@
-import React from 'react';
+import React from "react";
 import './App.css'
-import SignupForm from "./registration";
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route
-} from "react-router-dom";
+import RegisterForm from "./registration";
+import LoginForm from "./login";
+import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom";
 
 function App() {
     return (
         <Router>
             <Switch>
                 <Route path="/register">
-                    <SignupForm/>
+                    <RegisterForm/>
                 </Route>
                 <Route path="/login">
-                    {/*<LoginForm/>*/}
+                    <LoginForm/>
                 </Route>
                 <Route path="/games">
                     {/*<GamesList/>*/}
