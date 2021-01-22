@@ -1,15 +1,19 @@
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import TextInput from "./inputs";
+import {SubmitError, TextInput} from "./inputs";
+import {useAuth} from "./auth";
+import {useHistory} from "react-router-dom";
 
-const SignupForm = () => {
+const RegisterForm = () => {
+    const auth = useAuth();
+    const history = useHistory();
     return (
         <>
             <Formik
                 initialValues={{
-                    username: '',
-                    nickname: '',
-                    password: '',
+                    username: 'qqqqqqqqqq',
+                    nickname: 'qqqqqqqqqqqqqqqqqq',
+                    password: 'qqqqqqqqqq',
                 }}
                 validationSchema={Yup.object({
                     username: Yup.string()
@@ -24,11 +28,16 @@ const SignupForm = () => {
                         .max(128, 'Не более 128 символов')
                         .required('Обязательное поле')
                 })}
-                onSubmit={(values, {setSubmitting}) => {
-                    setTimeout(() => {
-                        alert(JSON.stringify(values, null, 2));
-                        setSubmitting(false);
-                    }, 400);
+                onSubmit={(values, {setSubmitting, setErrors}) => {
+                    auth.register(values)
+                        .then(() => {
+                            console.log('зареган');
+                            setSubmitting(false);
+                            history.push('/games');
+                        })
+                        .catch(error => {
+                            setErrors({'submitError': error.message});
+                        })
                 }}
             >
                 <Form>
@@ -50,6 +59,8 @@ const SignupForm = () => {
                         type="password"
                     />
 
+                    <SubmitError name='submitError'/>
+
                     <button type="submit">Зарегистрировать</button>
                 </Form>
             </Formik>
@@ -57,4 +68,4 @@ const SignupForm = () => {
     );
 };
 
-export default SignupForm;
+export {RegisterForm};

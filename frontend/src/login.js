@@ -1,14 +1,18 @@
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import TextInput from "./inputs";
+import {SubmitError, TextInput} from "./inputs";
+import {useAuth} from "./auth";
+import {useHistory} from "react-router-dom";
 
 const LoginForm = () => {
+    const auth = useAuth();
+    const history = useHistory();
     return (
         <>
             <Formik
                 initialValues={{
-                    username: '',
-                    password: '',
+                    username: 'frok',
+                    password: '1234',
                 }}
                 validationSchema={Yup.object({
                     username: Yup.string()
@@ -16,11 +20,17 @@ const LoginForm = () => {
                     password: Yup.string()
                         .required('Обязательное поле')
                 })}
-                onSubmit={(values, {setSubmitting}) => {
-                    setTimeout(() => {
-                        alert(JSON.stringify(values, null, 2));
-                        setSubmitting(false);
-                    }, 400);
+                onSubmit={(values, {setSubmitting, setErrors}) => {
+                    auth.login(values)
+                        .then(() => {
+                            console.log('залогинен');
+                            console.log(auth.isAuthenticated + 'login');
+                            setSubmitting(false);
+                            history.push('/games');
+                        })
+                        .catch(error => {
+                            setErrors({'submitError': error.message});
+                        })
                 }}
             >
                 <Form>
@@ -35,6 +45,8 @@ const LoginForm = () => {
                         name="password"
                         type="password"
                     />
+
+                    <SubmitError name='submitError'/>
 
                     <button type="submit">Войти</button>
                 </Form>
