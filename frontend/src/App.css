@@ -1,0 +1,61 @@
+html, body, #root, #root>div {
+  height: 100%;
+}
+
+body, input, button{
+  background-color: cornflowerblue;
+  font-size: 18px;
+  color: yellow;
+}
+
+header {
+  font-size: 24px;
+  color: yellow;
+}
+
+form {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-group {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  color: yellow;
+}
+
+input {
+  border: 2px solid darkblue;
+}
+
+input:hover {
+  border: 2px solid yellow;
+}
+input:focus {
+  border: 2px solid yellow;
+}
+.error {
+  color: orangered;
+  font-size: 12px;
+}
+
+button {
+  width: 300px;
+  padding: 0;
+  margin: 0;
+  border: 2px solid darkblue;
+}
+button:hover {
+  border: 2px solid yellow;
+}
+button:active {
+  background-color: yellow;
+  color: darkblue;
+}
