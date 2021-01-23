@@ -27,6 +27,7 @@ SECRET_KEY = 'jp#%3h8jdub%+50*e3x-s7(@t2adr7ug+y3iu02w2z*8+5gq&#'
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'backend']
+CORS_ORIGIN_ALLOW_ALL = True
 
 
 # Application definition
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'backend.apps.BackendConfig',
     'rest_framework',
     'channels',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'jeopardy.urls'
