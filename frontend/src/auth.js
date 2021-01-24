@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useState} from "react";
+import React, {createContext, useContext} from "react";
 import {Redirect, Route} from "react-router-dom";
 import {AuthService} from "./services";
 
@@ -10,13 +10,11 @@ function useAuth() {
 }
 
 function useProvideAuth() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     function register(credentials) {
         return authService.register(credentials)
             .then(status => {
                 if (status < 400) {
-                    setIsAuthenticated(true);
                     return;
                 }
 
@@ -42,8 +40,6 @@ function useProvideAuth() {
         return authService.login(credentials)
             .then(status => {
                 if (status < 400) {
-                    setIsAuthenticated(true);
-                    console.log(isAuthenticated + 'auth');
                     return;
                 }
 
@@ -59,6 +55,10 @@ function useProvideAuth() {
                 return Promise.reject(new Error(message))
 
             })
+    }
+
+    function isAuthenticated() {
+        return localStorage.getItem('access_token') !== null;
     }
 
     return {
@@ -80,12 +80,11 @@ function ProvideAuth({children}) {
 
 function PrivateRoute({children, ...rest}) {
     const auth = useAuth();
-    console.log(auth.isAuthenticated + 'route');
     return (
         <Route
             {...rest}
             render={({location}) =>
-                auth.isAuthenticated ? (
+                auth.isAuthenticated() ? (
                     children
                 ) : (
                     <Redirect
