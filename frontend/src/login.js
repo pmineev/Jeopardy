@@ -2,7 +2,7 @@ import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import {SubmitError, TextInput} from "./inputs";
 import {useAuth} from "./auth";
-import {useHistory} from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
 
 const LoginForm = () => {
     const auth = useAuth();
@@ -23,8 +23,6 @@ const LoginForm = () => {
                 onSubmit={(values, {setSubmitting, setErrors}) => {
                     auth.login(values)
                         .then(() => {
-                            console.log('залогинен');
-                            console.log(auth.isAuthenticated + 'login');
                             setSubmitting(false);
                             history.push('/games');
                         })
@@ -47,6 +45,8 @@ const LoginForm = () => {
                     />
 
                     <SubmitError name='submitError'/>
+
+                    <Link to='/register'>Еще не зарегистрированы?</Link>
 
                     <button type="submit">Войти</button>
                 </Form>
