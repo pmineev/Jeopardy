@@ -3,7 +3,7 @@ import './App.css'
 import {RegisterForm} from "./registration";
 import {PrivateRoute, ProvideAuth} from "./auth";
 import LoginForm from "./login";
-import GamesList from "./games";
+import GameList from "./games";
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 
 
@@ -19,7 +19,7 @@ function App() {
                         <LoginForm/>
                     </Route>
                     <PrivateRoute path="/games">
-                        <GamesList/>
+                        <GameList/>
                     </PrivateRoute>
                     <PrivateRoute path="/gameSessions">
                         {/*<GameSessionsList/>*/}

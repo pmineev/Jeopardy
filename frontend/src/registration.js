@@ -2,7 +2,7 @@ import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import {SubmitError, TextInput} from "./inputs";
 import {useAuth} from "./auth";
-import {useHistory} from "react-router-dom";
+import {Link, useHistory} from "react-router-dom";
 
 const RegisterForm = () => {
     const auth = useAuth();
@@ -60,6 +60,8 @@ const RegisterForm = () => {
                     />
 
                     <SubmitError name='submitError'/>
+
+                    <Link to='/login'>Уже зарегистрированы?</Link>
 
                     <button type="submit">Зарегистрировать</button>
                 </Form>
