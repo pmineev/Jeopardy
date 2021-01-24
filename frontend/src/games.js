@@ -1,11 +1,10 @@
-//import {useState} from 'react'
-//import {GameListService} from "./services";
+import {useEffect, useState} from 'react'
+import {GameListService} from "./services";
 
-//const gameListService = new GameListService();
+const gameListService = new GameListService();
 
 const GameDescription = (props) => {
     const descr = props.descr;
-    console.log(descr.name);
 
     return (
         <tr>
@@ -19,21 +18,15 @@ const GameDescription = (props) => {
     );
 };
 const GameList = () => {
-    // const [gameDescriptions, setGameDescriptions] = useState(0);
-    // gameListService.getDescriptions()
-    //     .then((result) => setGameDescriptions(result))
-    const gameDescriptions = [
-        {
-            "name": "Тестовая",
-            "author": "frokouyguyguygfaron",
-            "rounds_count": 3
-        },
-        {
-            "name": "Тестовейшая",
-            "author": "faron",
-            "rounds_count": 2
-        }
-    ]
+    const [gameDescriptions, setGameDescriptions] = useState([]);
+
+    useEffect(() => {
+        gameListService.getDescriptions()
+            .then(result => {
+                setGameDescriptions(result.data)
+            });
+    }, [])
+
     return (
         <>
             <header>Игры</header>

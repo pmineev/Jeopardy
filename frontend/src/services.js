@@ -78,4 +78,12 @@ class AuthService {
 
 }
 
-export {AuthService};
+class GameListService {
+    getDescriptions() {
+        const url = '/games/';
+        return axios.get(url);
+    }
+}
+
+
+export {AuthService, GameListService};
