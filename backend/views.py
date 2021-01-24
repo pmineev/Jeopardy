@@ -27,12 +27,15 @@ class UserListView(APIView):
 
         try:
             UserListView.interactor.create(user_dict)
+            session = UserListView.interactor.create_session(user_dict)
         except UserAlreadyExists:
             return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='user already exists'))
         except InvalidCredentials:
             raise AuthenticationFailed()
 
-        return Response(status=status.HTTP_201_CREATED)
+        session_serializer = SessionSerializer(session)
+
+        return Response(session_serializer.data, status=status.HTTP_201_CREATED)
 
 
 class SessionView(APIView):
