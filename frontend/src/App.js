@@ -1,9 +1,11 @@
-import React from "react";
+import React, {Fragment} from "react";
 import './App.css'
 import {RegisterForm} from "./registration";
 import {PrivateRoute, ProvideAuth} from "./auth";
 import LoginForm from "./login";
 import GameList from "./games";
+import Header from "./header";
+
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 
 
@@ -18,15 +20,18 @@ function App() {
                     <Route path="/login">
                         <LoginForm/>
                     </Route>
-                    <PrivateRoute path="/games">
-                        <GameList/>
-                    </PrivateRoute>
-                    <PrivateRoute path="/gameSessions">
-                        {/*<GameSessionsList/>*/}
-                    </PrivateRoute>
-                    <PrivateRoute path="/game">
-                        {/*<Game/>*/}
-                    </PrivateRoute>
+                    <Fragment>
+                        <Header/>
+                        <PrivateRoute path="/games">
+                            <GameList/>
+                        </PrivateRoute>
+                        <PrivateRoute path="/gameSessions">
+                            {/*<GameSessionsList/>*/}
+                        </PrivateRoute>
+                        <PrivateRoute path="/game">
+                            {/*<Game/>*/}
+                        </PrivateRoute>
+                    </Fragment>
                 </Switch>
             </Router>
         </ProvideAuth>
