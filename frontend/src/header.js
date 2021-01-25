@@ -9,7 +9,7 @@ function Header() {
         <header className="nav">
             <nav>
                 <NavLink to='/games' activeClassName='active'>Игры</NavLink>
-                <NavLink to='/gameSessions' activeClassName='active'>Активные игры</NavLink>
+                <NavLink to='/lobby' activeClassName='active'>Лобби</NavLink>
             </nav>
             <Link to={`/users/${username}`}>{username}</Link>
         </header>

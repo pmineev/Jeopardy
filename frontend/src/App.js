@@ -5,6 +5,7 @@ import {PrivateRoute, ProvideAuth} from "./auth";
 import LoginForm from "./login";
 import GameList from "./games";
 import Header from "./header";
+import Lobby from "./lobby";
 
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 
@@ -25,8 +26,8 @@ function App() {
                         <PrivateRoute path="/games">
                             <GameList/>
                         </PrivateRoute>
-                        <PrivateRoute path="/gameSessions">
-                            {/*<GameSessionsList/>*/}
+                        <PrivateRoute path="/lobby">
+                            {<Lobby/>}
                         </PrivateRoute>
                         <PrivateRoute path="/game">
                             {/*<Game/>*/}

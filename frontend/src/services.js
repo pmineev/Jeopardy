@@ -85,5 +85,12 @@ class GameListService {
     }
 }
 
+class LobbyService {
+    getDescriptions() {
+        const url = '/game_sessions/';
+        return axios.get(url);
+    }
+}
 
-export {AuthService, GameListService};
+
+export {AuthService, GameListService, LobbyService};
