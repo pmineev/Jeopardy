@@ -29,7 +29,8 @@ axios.interceptors.response.use(
             })
                 .then(response => {
                     localStorage.setItem('access_token', response.data.access)
-                })
+                });
+            return axios.request(error.config);
         } else {
 
         }
