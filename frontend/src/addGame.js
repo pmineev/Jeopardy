@@ -3,10 +3,8 @@ import * as Yup from "yup";
 import {SubmitError, TextInput} from "./inputs";
 import {useState} from "react";
 import Modal from "react-modal";
-import {useHistory, useLocation} from "react-router-dom";
 
-const AddGameForm = () => {
-    const history = useHistory();
+const AddGameForm = (props) => {
 
     return (
         <>
@@ -34,7 +32,7 @@ const AddGameForm = () => {
                 })}
                 onSubmit={(values, {setSubmitting}) => {
                     setSubmitting(false);
-                    history.push('/games/new/rounds', {...values, themes: []});
+                    props.setGameParams({...values, themes: []});
                 }}
             >
                 <Form>
@@ -253,20 +251,14 @@ function toOrdinal(n) {
     return ordinals[n];
 }
 
-const AddGame = () => {
-    const gameParams = useLocation().state;
+const SetRounds = (props) => {
     const [isAddThemeFormOpen, setIsAddThemeFormOpen] = useState(false);
     const [isAddQuestionFormOpen, setIsAddQuestionFormOpen] = useState(false);
     const [isAddFinalQuestionFormOpen, setIsAddFinalQuestionFormOpen] = useState(false);
-    const [themes, setThemes] = useState(gameParams.themes);
+    const [themes, setThemes] = useState(props.gameParams.themes);
     const [currentRound, setCurrentRound] = useState(1);
     const [questions, setQuestions] = useState([]);
     const [questionParams, setQuestionParams] = useState({index: -1});
-
-    console.log('q', questions);
-    console.log('th', themes);
-    console.log(toOrdinal(currentRound));
-    console.log(currentRound);
 
     return (
         <>
@@ -278,7 +270,7 @@ const AddGame = () => {
                     <Theme key={theme.name}
                            name={theme.name}
                            round={currentRound}
-                           questions_count={gameParams.questions_count}
+                           questions_count={props.gameParams.questions_count}
                            questions={questions.filter(q =>
                                q.round === currentRound
                                && q.theme === theme.name
@@ -305,15 +297,15 @@ const AddGame = () => {
             <div className='button-group'>
                 <button disabled={currentRound === 1}
                         onClick={() => setCurrentRound(currentRound === 'final'
-                            ? Number(gameParams.rounds_count) - 1
+                            ? Number(props.gameParams.rounds_count) - 1
                             : currentRound - 1)
                         }>Предыдущий раунд
                 </button>
 
                 <button onClick={() => {
                     let nextRound = currentRound + 1;
-                    console.log('nr', nextRound, gameParams.rounds_count);
-                    if (nextRound === Number(gameParams.rounds_count))
+                    console.log('nr', nextRound, props.gameParams.rounds_count);
+                    if (nextRound === Number(props.gameParams.rounds_count))
                         setIsAddFinalQuestionFormOpen(true)
                     else
                         setCurrentRound(nextRound)
@@ -389,8 +381,8 @@ const AddGame = () => {
                 ariaHideApp={false}
             >
                 <AddFinalQuestionForm
-                    rounds_count={gameParams.rounds_count}
-                    questions_count={gameParams.questions_count}
+                    rounds_count={props.gameParams.rounds_count}
+                    questions_count={props.gameParams.questions_count}
                     questions={questions}
                     themes={themes}
                     initialValues={questions.filter(q => q.theme === 'final')[0]}
@@ -410,6 +402,26 @@ const AddGame = () => {
             </Modal>
         </>
     );
+}
+
+const AddGame = () => {
+    const [gameParams, setGameParams] = useState(undefined);
+
+    return (
+        <>
+            {!gameParams &&
+            <AddGameForm
+                setGameParams={setGameParams}
+            />
+            }
+            {gameParams &&
+            <SetRounds
+                gameParams={gameParams}
+            />
+            }
+        </>
+    )
+
 };
 
-export {AddGameForm, AddGame};
+export default AddGame;
