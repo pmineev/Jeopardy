@@ -11,7 +11,7 @@ function Header() {
                 <NavLink to='/games' activeClassName='active'>Игры</NavLink>
                 <NavLink to='/lobby' activeClassName='active'>Лобби</NavLink>
             </nav>
-            <Link to={`/users/${username}`}>{username}</Link>
+            <Link to='/user'>{username}</Link>
         </header>
     );
 }

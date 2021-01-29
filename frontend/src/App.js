@@ -7,6 +7,7 @@ import GameList from "./games";
 import Header from "./header";
 import Lobby from "./lobby";
 import AddGame from "./addGame";
+import UserProfileForm from "./userProfile";
 
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 
@@ -24,6 +25,9 @@ function App() {
                     </Route>
                     <Fragment>
                         <Header/>
+                        <PrivateRoute exact path="/user">
+                            <UserProfileForm/>
+                        </PrivateRoute>
                         <PrivateRoute exact path="/games">
                             <GameList/>
                         </PrivateRoute>
