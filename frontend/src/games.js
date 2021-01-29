@@ -8,6 +8,7 @@ const gameListService = new GameListService();
 
 const GameDescription = (props) => {
     const descr = props.descr;
+    console.log(descr);
 
     return (
         <tr>
@@ -48,9 +49,10 @@ const GameList = () => {
                 {gameDescriptions.map(descr =>
                     <GameDescription key={descr.name} descr={descr}/>
                 )}
-                <button onClick={() => history.push('/games/new')}>Создать новую игру</button>
                 </tbody>
             </table>
+
+            <button onClick={() => history.push('/games/new')}>Создать новую игру</button>
 
         </>
     );
