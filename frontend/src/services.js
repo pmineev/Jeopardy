@@ -93,5 +93,59 @@ class LobbyService {
     }
 }
 
+class AddGameService {
+    post(game_name, themes, questions) {
+        const url = '/games/';
 
-export {AuthService, GameListService, LobbyService};
+        let game = {};
+
+        game.name = game_name;
+
+        const final_round_question = questions.filter(q => q.theme === 'final')[0];
+        game.final_round = {
+            text: final_round_question.text,
+            answer: final_round_question.answer,
+            value: final_round_question.value
+        }
+
+        game.rounds = []
+        for (let r = 1; r < themes.length; r++) {
+            let round = {};
+
+            round.themes = []
+            for (let t of themes[r]) {
+                let theme = {};
+
+                theme.name = t.name;
+
+                theme.questions = questions
+                    .filter(q =>
+                        q.round === r
+                        && q.theme === theme.name
+                    )
+                    .sort((q1, q2) =>
+                        q1.value - q2.value
+                    )
+
+                for (let q of theme.questions) {
+                    delete q.theme;
+                    delete q.round;
+                }
+
+                round.themes.push(theme);
+            }
+
+            game.rounds.push(round);
+        }
+        console.log(game)
+
+        return axios.post(url, game)
+            .catch(error => {
+                if (error.response.status === 409)
+                    return Promise.reject(new Error('Игра с таким названием уже существует'))
+            });
+    }
+}
+
+
+export {AuthService, GameListService, LobbyService, AddGameService};

@@ -3,6 +3,9 @@ import * as Yup from "yup";
 import {SubmitError, TextInput} from "./inputs";
 import {useState} from "react";
 import Modal from "react-modal";
+import {AddGameService} from "./services";
+
+const addGameService = new AddGameService();
 
 const AddGameForm = (props) => {
 
@@ -204,7 +207,10 @@ const AddFinalQuestionForm = (props) => {
                 props.setFinalQuestion(values);
                 if (isAllRoundsFilled())
                     if (isAllQuestionsFilled()) {
-                        alert('Невероятно');
+                        addGameService.post(props.game_name, props.themes, props.questions)
+                            .catch(error =>
+                                setErrors({'submitError': error.message})
+                            );
                         setSubmitting(false)
                     } else
                         setErrors({'submitError': 'Заполните все вопросы'})
@@ -381,6 +387,7 @@ const SetRounds = (props) => {
                 ariaHideApp={false}
             >
                 <AddFinalQuestionForm
+                    game_name={props.gameParams.name}
                     rounds_count={props.gameParams.rounds_count}
                     questions_count={props.gameParams.questions_count}
                     questions={questions}
@@ -390,6 +397,7 @@ const SetRounds = (props) => {
                         let i = questions.findIndex(q => q.theme === 'final');
                         let newQuestion = {
                             theme: 'final',
+                            value: 200 * props.gameParams.rounds_count * props.gameParams.questions_count,
                             ...question
                         }
                         if (i === -1)
