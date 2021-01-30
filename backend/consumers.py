@@ -1,8 +1,10 @@
+import json
+
 from asgiref.sync import async_to_sync
-from channels.generic.websocket import JsonWebsocketConsumer
+from channels.generic.websocket import WebsocketConsumer
 
 
-class LobbyConsumer(JsonWebsocketConsumer):
+class LobbyConsumer(WebsocketConsumer):
     group_name = 'lobby'
 
     def connect(self):
@@ -23,10 +25,10 @@ class LobbyConsumer(JsonWebsocketConsumer):
             })
 
     def lobby_event(self, event):
-        self.send_json(event)
+        self.send(json.dumps(event, ensure_ascii=False))
 
 
-class GameSessionConsumer(JsonWebsocketConsumer):
+class GameSessionConsumer(WebsocketConsumer):
     def connect(self):
         self.group_name = self.scope['url_route']['kwargs']['game_session_id']
 
@@ -47,4 +49,4 @@ class GameSessionConsumer(JsonWebsocketConsumer):
             })
 
     def game_session_event(self, event):
-        self.send_json(event)
+        self.send(json.dumps(event, ensure_ascii=False))
