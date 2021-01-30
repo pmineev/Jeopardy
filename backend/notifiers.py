@@ -10,13 +10,13 @@ class GameSessionNotifier:
         self.channel_layer = get_channel_layer()
         self.repo = repo
 
-    def _notify(self, group_name, notification_dict, type, event):
-        notification_dict.update(
-            {
-                'type': type,
-                'event': event
-            }
-        )
+    def _notify(self, group_name, data, type, event):
+        notification_dict = {
+            'type': type,
+            'event': event,
+            'data': data
+        }
+
         async_to_sync(self.channel_layer.group_send)(group_name, notification_dict)
 
     def game_session_created(self, game_session_id):
