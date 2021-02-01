@@ -26,12 +26,12 @@ class GameSessionNotifier:
         self._notify('lobby', description_dict, 'lobby_event', 'game_session_created')
 
     def game_session_deleted(self, game_session_id):
-        deletion_dict = dict(game_session_id=str(game_session_id))
+        deletion_dict = dict(game_session_id=game_session_id)
 
         self._notify('lobby', deletion_dict, 'lobby_event', 'game_session_deleted')
 
     def player_joined(self, game_session_id, username):
-        join_dict = dict(game_session_id=str(game_session_id))
+        join_dict = dict(game_session_id=game_session_id)
 
         player = self.repo.get_player(game_session_id, username)
         player_dict = PlayerSerializer(player).data
@@ -40,7 +40,7 @@ class GameSessionNotifier:
         self._notify(str(game_session_id), player_dict, 'game_session_event', 'player_joined')
 
     def player_left(self, game_session_id, username):
-        leave_dict = dict(game_session_id=str(game_session_id))
+        leave_dict = dict(game_session_id=game_session_id)
 
         player = self.repo.get_player(game_session_id, username)
         player_dict = PlayerSerializer(player).data
