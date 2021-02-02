@@ -27,6 +27,10 @@ class Notifier {
         }
     }
 
+    close() {
+        this.ws.close();
+    }
+
 }
 
 export default Notifier;

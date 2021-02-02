@@ -61,6 +61,8 @@ const Lobby = () => {
             .then(result => {
                 dispatch(['init', result.data]);
             });
+
+        return () => notifier.close()
     }, []);
 
     return (
