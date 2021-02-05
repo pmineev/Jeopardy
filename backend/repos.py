@@ -168,7 +168,13 @@ class GameSessionRepo:
                                                          max_players=game_session.max_players)
         orm_game_session.players.add(orm_player)
 
-        return orm_game_session.creator_id
+        desc = GameSessionDescription(id=orm_game_session.pk,
+                                      creator=orm_game_session.creator.nickname,
+                                      game_name=orm_game_session.game.name,
+                                      max_players=orm_game_session.max_players,
+                                      current_players=orm_game_session.players.count())
+
+        return desc
 
     @staticmethod
     def get_description(game_session_id):
@@ -204,6 +210,23 @@ class GameSessionRepo:
         orm_user_profile = ORMUserProfile.objects.get(user__username=username)
         orm_player = ORMPlayer.objects.create(user=orm_user_profile)
         orm_game_session.players.add(orm_player)
+
+        desc = GameSessionDescription(id=orm_game_session.pk,
+                                      creator=orm_game_session.creator.nickname,
+                                      game_name=orm_game_session.game.name,
+                                      max_players=orm_game_session.max_players,
+                                      current_players=orm_game_session.players.count())
+
+        players = list()
+        for orm_player in orm_game_session.players.all():
+            player = Player(nickname=orm_player.user.nickname,
+                            score=orm_player.score,
+                            is_playing=orm_player.is_playing,
+                            answer=orm_player.answer)
+            players.append(player)
+        desc.players = players
+
+        return desc
 
     @staticmethod
     def leave(game_session_id, username):
