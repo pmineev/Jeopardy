@@ -168,7 +168,13 @@ class GameSessionRepo:
                                                          max_players=game_session.max_players)
         orm_game_session.players.add(orm_player)
 
-        return orm_game_session.creator_id
+        desc = GameSessionDescription(id=orm_game_session.pk,
+                                      creator=orm_game_session.creator.nickname,
+                                      game_name=orm_game_session.game.name,
+                                      max_players=orm_game_session.max_players,
+                                      current_players=orm_game_session.players.count())
+
+        return desc
 
     @staticmethod
     def get_description(game_session_id):

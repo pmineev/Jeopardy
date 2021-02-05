@@ -99,9 +99,11 @@ class GameSessionInteractor:
                                    game=game,
                                    max_players=game_session_data['max_players'])
 
-        game_session_id = self.repo.create(game_session)
+        game_session_description = self.repo.create(game_session)
 
-        self.notifier.game_session_created(game_session_id)
+        self.notifier.game_session_created(game_session_description.id)
+
+        return game_session_description
 
     def get_all_descriptions(self):
         return self.repo.get_all_descriptions()
