@@ -18,7 +18,9 @@ axios.interceptors.response.use(
         return response;
     },
     error => {
-        if (error.response.status !== 401) {
+        if (error.response.status !== 401
+            || error.config.url === '/sessions/') {
+            console.log(error);
             return Promise.reject(error);
         }
 
