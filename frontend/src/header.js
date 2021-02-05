@@ -1,3 +1,4 @@
+import './header.css';
 import {Link, NavLink} from "react-router-dom";
 import {useAuth} from "./auth";
 

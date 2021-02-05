@@ -1,3 +1,4 @@
+import './list.css';
 import {useEffect, useState} from 'react'
 import {GameListService} from "./services";
 import {useHistory} from "react-router-dom";
@@ -34,10 +35,10 @@ const GameList = () => {
     }, [])
 
     return (
-        <>
+        <div className='games'>
             <header>Игры</header>
 
-            <table className="games-table">
+            <table className="list games-table">
                 <thead key="games-table-head">
                 <tr>
                     <th>Автор</th>

@@ -1,6 +1,8 @@
-import {useEffect, useReducer} from 'react'
-import {LobbyService} from "./services";
+import './list.css';
+import {useEffect, useReducer} from 'react';
+import {GameSessionService, LobbyService} from "./services";
 import Notifier from "./notifiers";
+import {useHistory} from "react-router-dom";
 
 
 const GameSessionDescription = (props) => {
@@ -66,10 +68,10 @@ const Lobby = () => {
     }, []);
 
     return (
-        <>
+        <div className='lobby'>
             <header>Лобби</header>
 
-            <table className="lobby-table">
+            <table className="list lobby-table">
                 <thead key="lobby-table-head">
                 <tr>
                     <th>Создатель</th>
@@ -83,7 +85,7 @@ const Lobby = () => {
                 )}
                 </tbody>
             </table>
-        </>
+        </div>
     );
 };
 

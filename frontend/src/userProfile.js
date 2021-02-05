@@ -23,47 +23,49 @@ const UserProfileForm = () => {
     }, [auth])
 
     return (
-        <Formik
-            enableReinitialize
-            initialValues={credentials}
-            validationSchema={Yup.object({
-                nickname: Yup.string()
-                    .optional()
-                    .min(2, 'Не менее 2 символов')
-                    .max(25, 'Не более 25 символов'),
-                password: Yup.string()
-                    .optional()
-                    .min(6, 'Не менее 6 символов')
-                    .max(128, 'Не более 128 символов')
-            })}
-            onSubmit={(values, {setSubmitting, setErrors}) => {
-                if (values.nickname.length === 0 && values.password.length === 0)
-                    setErrors({'submitError': 'Заполните хотя бы одно поле'})
-                else
-                    userProfileService.save(credentials.username, values.nickname, values.password)
-                        .then(() =>
-                            setSubmitting(false)
-                        );
-            }}
-        >
-            <Form>
-                <header>Профиль</header>
-                <TextInput
-                    label="Ник"
-                    name="nickname"
-                    type="text"
-                />
-                <TextInput
-                    label="Пароль"
-                    name="password"
-                    type="password"
-                />
+        <div className='form'>
+            <Formik
+                enableReinitialize
+                initialValues={credentials}
+                validationSchema={Yup.object({
+                    nickname: Yup.string()
+                        .optional()
+                        .min(2, 'Не менее 2 символов')
+                        .max(25, 'Не более 25 символов'),
+                    password: Yup.string()
+                        .optional()
+                        .min(6, 'Не менее 6 символов')
+                        .max(128, 'Не более 128 символов')
+                })}
+                onSubmit={(values, {setSubmitting, setErrors}) => {
+                    if (values.nickname.length === 0 && values.password.length === 0)
+                        setErrors({'submitError': 'Заполните хотя бы одно поле'})
+                    else
+                        userProfileService.save(credentials.username, values.nickname, values.password)
+                            .then(() =>
+                                setSubmitting(false)
+                            );
+                }}
+            >
+                <Form>
+                    <header>Профиль</header>
+                    <TextInput
+                        label="Ник"
+                        name="nickname"
+                        type="text"
+                    />
+                    <TextInput
+                        label="Пароль"
+                        name="password"
+                        type="password"
+                    />
 
-                <SubmitError name='submitError'/>
+                    <SubmitError name='submitError'/>
 
-                <button type="submit">Сохранить</button>
-            </Form>
-        </Formik>
+                    <button type="submit">Сохранить</button>
+                </Form>
+            </Formik>
+        </div>
     );
 };
 

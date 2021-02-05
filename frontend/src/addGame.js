@@ -1,3 +1,4 @@
+import './round.css';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import {SubmitError, TextInput} from "./inputs";
@@ -8,9 +9,8 @@ import {AddGameService} from "./services";
 const addGameService = new AddGameService();
 
 const AddGameForm = (props) => {
-
     return (
-        <>
+        <div className='form'>
             <Formik
                 initialValues={{
                     name: '',
@@ -59,7 +59,7 @@ const AddGameForm = (props) => {
                     <button type="submit">Создать игру</button>
                 </Form>
             </Formik>
-        </>
+        </div>
     );
 };
 
@@ -96,7 +96,7 @@ const AddThemeForm = (props) => {
 const Question = (props) => {
     return (
         <td
-            className={props.isSet ? '' : 'empty'}
+            className={`question-cell ${props.isSet ? '' : 'empty'}`}
             onClick={() => props.setQuestion(props.round, props.theme, props.value)}
         >{props.value}</td>
 
@@ -111,7 +111,12 @@ const Theme = (props) => {
     ).length !== 0);
     return (
         <tr>
-            <td key={props.name}>{props.name}</td>
+            <td
+                key={props.name}
+                className='theme-name'
+            >
+                {props.name}
+            </td>
             {question_values.slice(0, props.questions_count).map(value => (
                 <Question
                     key={props.name + value}
@@ -240,7 +245,6 @@ const AddFinalQuestionForm = (props) => {
     );
 }
 
-
 function toOrdinal(n) {
     const ordinals = ['Нулевой',
         'Первый',
@@ -270,7 +274,7 @@ const SetRounds = (props) => {
         <>
             <header>{toOrdinal(currentRound)} раунд</header>
 
-            <table className="add-game-table">
+            <table className="round add-game-table">
                 <tbody>
                 {themes[currentRound] && themes[currentRound].map(theme =>
                     <Theme key={theme.name}
@@ -322,8 +326,8 @@ const SetRounds = (props) => {
             </div>
 
             <Modal
-                className='modal add-theme'
-                ovrlayClassName='overlay modal add-theme'
+                className='modal form add-theme'
+                overlayClassName='overlay'
                 isOpen={isAddThemeFormOpen}
                 onRequestClose={() => setIsAddThemeFormOpen(false)}
                 ariaHideApp={false}
@@ -339,8 +343,8 @@ const SetRounds = (props) => {
             </Modal>
 
             <Modal
-                className='modal add-question'
-                ovrlayClassName='overlay modal add-question'
+                className='modal form add-question'
+                overlayClassName='overlay'
                 isOpen={isAddQuestionFormOpen}
                 onRequestClose={() => setIsAddQuestionFormOpen(false)}
                 ariaHideApp={false}
@@ -380,8 +384,8 @@ const SetRounds = (props) => {
 
 
             <Modal
-                className='modal add-final-question'
-                ovrlayClassName='overlay modal add-final-question'
+                className='modal form add-final-question'
+                overlayClassName='overlay'
                 isOpen={isAddFinalQuestionFormOpen}
                 onRequestClose={() => setIsAddFinalQuestionFormOpen(false)}
                 ariaHideApp={false}
@@ -416,7 +420,7 @@ const AddGame = () => {
     const [gameParams, setGameParams] = useState(undefined);
 
     return (
-        <>
+        <div className='add-game'>
             {!gameParams &&
             <AddGameForm
                 setGameParams={setGameParams}
@@ -427,7 +431,7 @@ const AddGame = () => {
                 gameParams={gameParams}
             />
             }
-        </>
+        </div>
     )
 
 };
