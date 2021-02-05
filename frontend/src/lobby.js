@@ -4,6 +4,7 @@ import {GameSessionService, LobbyService} from "./services";
 import Notifier from "./notifiers";
 import {useHistory} from "react-router-dom";
 
+const gameSessionService = new GameSessionService();
 
 const GameSessionDescription = (props) => {
     const descr = props.descr;
@@ -13,7 +14,14 @@ const GameSessionDescription = (props) => {
             <td>{descr.game_name}</td>
             <td>{descr.current_players}/{descr.max_players}</td>
             <td>
-                <button>Играть</button>
+                <button
+                    onClick={() => {
+                        gameSessionService.join(descr.id);
+                        props.history.push('/game', {game_session: descr})
+                    }}
+                >
+                    Играть
+                </button>
             </td>
         </tr>
     );
@@ -53,6 +61,7 @@ function reducer(gameDescriptions, [event, data]) {
 
 const Lobby = () => {
     const [gameDescriptions, dispatch] = useReducer(reducer, []);
+    const history = useHistory();
 
     useEffect(() => {
         const notifier = new Notifier('lobby');
@@ -81,7 +90,11 @@ const Lobby = () => {
                 </thead>
                 <tbody>
                 {gameDescriptions.length > 0 && gameDescriptions.map(descr =>
-                    <GameSessionDescription key={descr.creator} descr={descr}/>
+                    <GameSessionDescription
+                        key={descr.creator}
+                        descr={descr}
+                        history={history}
+                    />
                 )}
                 </tbody>
             </table>

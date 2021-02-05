@@ -168,4 +168,39 @@ class UserProfileService {
     }
 }
 
-export {AuthService, GameListService, LobbyService, AddGameService, UserProfileService};
+class GameSessionService {
+    create(gameName, max_players) {
+        const url = '/game_sessions/';
+        console.log('create');
+        return axios.post(url, {
+            game_name: gameName,
+            max_players: max_players
+        })
+    }
+
+    join(game_session_id) {
+        const url = `game_sessions/chosen/${game_session_id}/`;
+        axios.post(url);
+    }
+
+    leave(game_session_id) {
+        const url = `game_sessions/exited/${game_session_id}/`;
+        axios.delete(url);
+    }
+
+    choose_question(game_session_id, theme_order, question_order) {
+        const url = `game_sessions/${game_session_id}/question/`;
+        axios.post(url, {
+            theme_order: theme_order,
+            question_order: question_order
+        })
+            .catch(error => console.log(error));
+    }
+
+    submit_answer(game_session_id, answer) {
+        const url = `game_sessions/${game_session_id}/answer/`;
+        axios.post(url, {answer: answer});
+    }
+}
+
+export {AuthService, GameListService, LobbyService, AddGameService, UserProfileService, GameSessionService};
