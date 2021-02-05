@@ -80,6 +80,7 @@ class GameSessionDescription:
     game_name: str
     max_players: int
     current_players: int
+    players: List[Player] = None
 
 
 @dataclass

@@ -146,11 +146,13 @@ class GameSessionViewSet(ViewSet):
 
     def join(self, request, game_session_id):
         try:
-            GameSessionViewSet.interactor.join(game_session_id, request.user.username)
+            game_session_description = GameSessionViewSet.interactor.join(game_session_id, request.user.username)
         except TooManyPlayers:
             return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='too many players'))
 
-        return Response(status=status.HTTP_201_CREATED)
+        game_session_descriptions_serialized = GameSessionDescriptionSerializer(game_session_description).data
+
+        return Response(status=status.HTTP_201_CREATED, data=game_session_descriptions_serialized)
 
     def leave(self, request, game_session_id):
         try:
