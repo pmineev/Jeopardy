@@ -180,7 +180,7 @@ class GameSessionService {
 
     join(game_session_id) {
         const url = `game_sessions/chosen/${game_session_id}/`;
-        axios.post(url);
+        return axios.post(url);
     }
 
     leave(game_session_id) {

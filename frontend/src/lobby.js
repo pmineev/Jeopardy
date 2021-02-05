@@ -16,8 +16,10 @@ const GameSessionDescription = (props) => {
             <td>
                 <button
                     onClick={() => {
-                        gameSessionService.join(descr.id);
-                        props.history.push('/game', {game_session: descr})
+                        gameSessionService.join(descr.id)
+                            .then(response =>
+                                props.history.push('/game', response.data)
+                            )
                     }}
                 >
                     Играть
