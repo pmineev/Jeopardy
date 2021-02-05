@@ -8,6 +8,7 @@ import Header from "./header";
 import Lobby from "./lobby";
 import AddGame from "./addGame";
 import UserProfileForm from "./userProfile";
+import Game from "./game";
 
 import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 
@@ -35,10 +36,10 @@ function App() {
                             <AddGame/>
                         </PrivateRoute>
                         <PrivateRoute path="/lobby">
-                            {<Lobby/>}
+                            <Lobby/>
                         </PrivateRoute>
                         <PrivateRoute path="/game">
-                            {/*<Game/>*/}
+                            <Game/>
                         </PrivateRoute>
                     </Fragment>
                 </Switch>
