@@ -8,7 +8,7 @@ const RegisterForm = () => {
     const auth = useAuth();
     const history = useHistory();
     return (
-        <>
+        <div className='form'>
             <Formik
                 initialValues={{
                     username: 'qqqqqqqqqq',
@@ -66,7 +66,7 @@ const RegisterForm = () => {
                     <button type="submit">Зарегистрировать</button>
                 </Form>
             </Formik>
-        </>
+        </div>
     );
 };
 

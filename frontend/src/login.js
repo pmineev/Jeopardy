@@ -8,7 +8,7 @@ const LoginForm = () => {
     const auth = useAuth();
     const history = useHistory();
     return (
-        <>
+        <div className='form'>
             <Formik
                 initialValues={{
                     username: 'frok',
@@ -51,7 +51,7 @@ const LoginForm = () => {
                     <button type="submit">Войти</button>
                 </Form>
             </Formik>
-        </>
+        </div>
     );
 };
 

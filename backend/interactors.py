@@ -99,9 +99,11 @@ class GameSessionInteractor:
                                    game=game,
                                    max_players=game_session_data['max_players'])
 
-        game_session_id = self.repo.create(game_session)
+        game_session_description = self.repo.create(game_session)
 
-        self.notifier.game_session_created(game_session_id)
+        self.notifier.game_session_created(game_session_description.id)
+
+        return game_session_description
 
     def get_all_descriptions(self):
         return self.repo.get_all_descriptions()
@@ -109,29 +111,36 @@ class GameSessionInteractor:
     def join(self, game_session_id, username):
         state = self.repo.get_state(game_session_id)
         if state == State.WAITING:
-            self.repo.join(game_session_id, username)
+            game_session_description = self.repo.join(game_session_id, username)
 
             if self.repo.is_all_players_joined(game_session_id):
+                self.notifier.player_joined(game_session_id, username)
+
                 self._start_game(game_session_id)
         elif self.repo.is_player(game_session_id, username):
             self.repo.set_player_state(game_session_id, username, is_playing=True)
+
+            self.notifier.player_joined(game_session_id, username)
+
+            game_session_description = self.repo.get_session(game_session_id)
         else:
             raise NotPlayer
 
-        self.notifier.player_joined(game_session_id, username)
+        return game_session_description
 
     def leave(self, game_session_id, username):
         if not self.repo.is_player(game_session_id, username):
             raise NotPlayer
 
         state = self.repo.get_state(game_session_id)
+
+        self.notifier.player_left(game_session_id, username)
+
         if state == State.WAITING:
             self.repo.leave(game_session_id, username)
             print(f'user {username} left')
         else:
             self.repo.set_player_state(game_session_id, username, is_playing=False)
-
-        self.notifier.player_left(game_session_id, username)
 
         if self.repo.is_all_players_left(game_session_id):
             self.repo.delete_game_session(game_session_id)
@@ -147,11 +156,10 @@ class GameSessionInteractor:
         self.repo.set_next_round(game_session_id)
 
         if not self.repo.get_state(game_session_id) == State.FINAL_ROUND:
-            self.notifier.round_started(game_session_id)
-
             self._set_first_player(game_session_id)
 
             self.notifier.current_player_chosen(game_session_id)
+            self.notifier.round_started(game_session_id)
 
             self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
         else:

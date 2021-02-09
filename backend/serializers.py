@@ -30,11 +30,13 @@ class GameSessionDescriptionSerializer(Serializer):
     game_name = CharField()
     max_players = IntegerField()
     current_players = IntegerField()
+    players = PlayerSerializer(many=True, required=False)
 
 
 class QuestionDescriptionSerializer(Serializer):
     value = IntegerField()
     text = CharField(required=False)
+    is_answered = BooleanField(required=False, default=False)
 
 
 class ThemeDescriptionSerializer(Serializer):

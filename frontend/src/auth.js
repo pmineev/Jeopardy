@@ -11,10 +11,19 @@ function useAuth() {
 
 function useProvideAuth() {
 
+    function setUsername(username) {
+        localStorage.setItem('username', username);
+    }
+
+    function getUsername() {
+        return localStorage.getItem('username');
+    }
+
     function register(credentials) {
         return authService.register(credentials)
             .then(status => {
                 if (status < 400) {
+                    setUsername(credentials.username);
                     return;
                 }
 
@@ -40,6 +49,7 @@ function useProvideAuth() {
         return authService.login(credentials)
             .then(status => {
                 if (status < 400) {
+                    setUsername(credentials.username);
                     return;
                 }
 
@@ -64,7 +74,8 @@ function useProvideAuth() {
     return {
         register,
         login,
-        isAuthenticated
+        isAuthenticated,
+        getUsername
     };
 }
 

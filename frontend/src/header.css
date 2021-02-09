@@ -1,0 +1,13 @@
+header.nav {
+    height: 40px;
+    background-color: var(--primary-color);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+nav a {
+    margin-right: 20px
+}
