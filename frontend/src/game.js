@@ -161,7 +161,7 @@ const RoundTable = (props) => {
 const GameScreen = (props) => {
     return (
         <div className='game-screen'>
-            {props.state === State.CHOOSING_QUESTION &&
+            {([State.CHOOSING_QUESTION, State.TIMEOUT].includes(props.state)) &&
             <RoundTable
                 themes={props.round.themes}
                 questionChosen={(theme_order, question_order) => {
@@ -169,9 +169,11 @@ const GameScreen = (props) => {
                 }}
             />}
 
-            {props.state !== State.CHOOSING_QUESTION &&
+            {(![State.CHOOSING_QUESTION, State.TIMEOUT].includes(props.state)) &&
             <QuestionScreen
-                text={props.question_text}
+                text={([State.ROUND_STARTED, State.FINAL_ROUND_STARTED].includes(props.state))
+                    ? props.round_text
+                    : props.question_text}
             />
             }
         </div>
