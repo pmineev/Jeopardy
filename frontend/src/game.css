@@ -86,6 +86,7 @@
 
 .player-controls form {
     height: 70%;
+    width: 100%;
 }
 
 .player-controls textarea {
