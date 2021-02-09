@@ -156,11 +156,10 @@ class GameSessionInteractor:
         self.repo.set_next_round(game_session_id)
 
         if not self.repo.get_state(game_session_id) == State.FINAL_ROUND:
-            self.notifier.round_started(game_session_id)
-
             self._set_first_player(game_session_id)
 
             self.notifier.current_player_chosen(game_session_id)
+            self.notifier.round_started(game_session_id)
 
             self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
         else:
