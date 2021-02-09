@@ -114,13 +114,17 @@ class GameSessionInteractor:
             game_session_description = self.repo.join(game_session_id, username)
 
             if self.repo.is_all_players_joined(game_session_id):
+                self.notifier.player_joined(game_session_id, username)
+
                 self._start_game(game_session_id)
         elif self.repo.is_player(game_session_id, username):
             self.repo.set_player_state(game_session_id, username, is_playing=True)
+
+            self.notifier.player_joined(game_session_id, username)
+
+            game_session_description = self.repo.get_session(game_session_id)
         else:
             raise NotPlayer
-
-        self.notifier.player_joined(game_session_id, username)
 
         return game_session_description
 
