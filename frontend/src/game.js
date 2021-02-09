@@ -3,8 +3,9 @@ import './round.css';
 import {useEffect, useReducer} from "react";
 import Notifier from "./notifiers";
 import {GameSessionService} from "./services";
-import {useLocation} from "react-router-dom";
+import {useHistory, useLocation} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
+import ReactTooltip from 'react-tooltip';
 
 const gameSessionService = new GameSessionService();
 
@@ -30,7 +31,12 @@ const PlayerControls = (props) => {
             </Formik>
 
             <button
-                onClick={() => gameSessionService.leave(props.id)}
+                onClick={() => {
+                    gameSessionService.leave(props.id);
+                    localStorage.removeItem('gameSession');
+                    localStorage.removeItem('game_session_id');
+                    props.history.push('/games');
+                }}
             >
                 Выйти из игры
             </button>
