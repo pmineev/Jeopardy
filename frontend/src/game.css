@@ -50,6 +50,29 @@
     padding: 20px;
 }
 
+.tooltip {
+    font-family: 'Montserrat', serif !important;
+    font-size: 18px !important;
+    color: var(--text-color) !important;
+    background-color: var(--background-color) !important;
+    opacity: 0.7 !important;
+    border-radius: 0 !important;
+    border: 2px solid var(--primary-color) !important;
+}
+
+.tooltip:before {
+    border-top-color: var(--primary-color) !important;
+    border-top-style: solid !important;
+    border-top-width: 40px !important;
+    bottom: -40px !important;
+}
+
+.tooltip:after {
+    border-top-color: var(--background-color) !important;
+    border-top-style: solid !important;
+    border-top-width: 38px !important;
+    bottom: -38px !important;
+}
 
 .player-controls {
     grid-area: player-controls;
