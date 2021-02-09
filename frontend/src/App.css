@@ -142,6 +142,10 @@ button:active {
     padding: 20px 120px;
 }
 
+.games > header, .lobby > header, .add-game > header {
+    margin-bottom: 10px;
+}
+
 table {
     width: 100%;
     border-spacing: 0;
