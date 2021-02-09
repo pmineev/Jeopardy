@@ -95,6 +95,7 @@ const Theme = (props) => {
                 <QuestionCell
                     key={question.value}
                     value={question.value}
+                    is_answered={question.is_answered}
                     theme_order={props.theme_order}
                     question_order={index}
                     questionChosen={props.questionChosen}
@@ -183,6 +184,7 @@ const Players = (props) => {
                     nickname={player.nickname}
                     score={player.score}
                     is_playing={player.is_playing}
+                    current_answer={props.current_answer}
                 />
             )}
         </div>
@@ -357,13 +359,24 @@ function reducer(gameSession, [event, data]) {
 }
 
 const Game = () => {
+    const history = useHistory();
     const location = useLocation();
     const [gameSession, dispatch] = useReducer(reducer,
         {
-            current_question: {text: 'ожидаем'},
+            id: -1,
+            current_question: {
+                text: ''
+            },
+            current_answer: {
+                text: '',
+                player: {
+                    nickname: ''
+                }
+            },
             players: [],
-            themes: [],
-            id: -1
+            round: {
+                themes: []
+            }
         });
 
     useEffect(() => {
@@ -397,11 +410,12 @@ const Game = () => {
                 state={gameSession.state}
                 round={gameSession.round}
                 id={gameSession.id}
-                current_question={gameSession.current_question}
+                question_text={gameSession.current_question.text}
             />
 
             <Players
                 players={gameSession.players}
+                current_answer={gameSession.current_answer}
             />
 
             <HostCard
@@ -410,6 +424,7 @@ const Game = () => {
 
             <PlayerControls
                 id={gameSession.id}
+                history={history}
             />
         </div>
     )
