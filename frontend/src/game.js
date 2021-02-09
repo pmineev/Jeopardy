@@ -257,6 +257,18 @@ function reducer(gameSession, [event, data]) {
                 ...data
             };
         }
+        case 'set_state': {
+            return {
+                ...gameSession,
+                state: data
+            };
+        }
+        case 'clear_current_answer': {
+            return {
+                ...gameSession,
+                current_answer: {text: '', player: {nickname: ''}}
+            };
+        }
         case 'player_joined': {
             const index = gameSession.players.findIndex(p => p.nickname === data.nickname);
             if (index === -1)
@@ -296,15 +308,16 @@ function reducer(gameSession, [event, data]) {
             return {
                 ...gameSession,
                 round: data,
-                current_answer: {text: '', player: {nickname: ''}},
-                state: State.CHOOSING_QUESTION
+                round_text: toOrdinal(data.order + 1) + ' раунд',
+                state: data.order > 0 ? State.ROUND_ENDED : State.ROUND_STARTED
             }
         }
         case 'final_round_started': {
             return {
                 ...gameSession,
-                final_round: data,
-                state: State.FINAL_ROUND
+                current_question: data,
+                round_text: 'Финальный раунд',
+                state: State.FINAL_ROUND_STARTED
             }
         }
         case 'current_player_chosen': {
@@ -418,6 +431,7 @@ const Game = () => {
             },
             players: [],
             round: {
+                order: -1,
                 themes: []
             }
         });
@@ -444,6 +458,24 @@ const Game = () => {
         localStorage.setItem('gameSession', JSON.stringify(gameSession));
         console.log('gs', gameSession);
     }, [gameSession]);
+
+
+    useEffect(() => {
+        async function wait(state) {
+            console.log('st', state);
+            await new Promise(r =>
+                setTimeout(() =>
+                    dispatch(['set_state', state]), 3000));
+        }
+
+        if (gameSession.state === State.ROUND_ENDED)
+            wait(State.ROUND_STARTED)
+        else if (gameSession.state === State.ROUND_STARTED) {
+            dispatch(['clear_current_answer', null]);
+            wait(State.CHOOSING_QUESTION)
+        } else if (gameSession.state === State.FINAL_ROUND_STARTED)
+            wait(State.FINAL_ROUND)
+    }, [gameSession.state]);
 
     return (
         <div className='game'>
