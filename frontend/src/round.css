@@ -13,10 +13,6 @@
     width: 30%;
 }
 
-.round td.empty {
-    color: var(--empty-text-color);
-}
-
 .round td.question-cell:hover {
     outline: 5px solid var(--accent-color);
 }
@@ -24,6 +20,10 @@
 .round td.question-cell:active {
     color: var(--primary-color);
     background-color: var(--accent-color);
+}
+
+.round td.question-cell.empty {
+    color: rgba(0, 0, 0, 0);
 }
 
 .button-group {
