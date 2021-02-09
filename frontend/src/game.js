@@ -64,17 +64,8 @@ const HostCard = (props) => {
     )
 }
 
-const PlayerCard = (props) => {
 
-    return (
-        <div className='player-card'>
-            <div>{props.nickname}</div>
-            <div>{props.score}</div>
-        </div>
-    )
-}
-
-const Question = (props) => {
+const QuestionScreen = (props) => {
 
     return (
         <div className='question'>
@@ -144,11 +135,42 @@ const GameScreen = (props) => {
             />}
 
             {props.state !== State.CHOOSING_QUESTION &&
-            <Question
-                text={props.current_question.text}
+            <QuestionScreen
+                text={props.question_text}
             />
             }
         </div>
+    )
+}
+
+const PlayerCard = (props) => {
+    let tooltipRef;
+
+    useEffect(() => {
+        if (props.current_answer.text.length > 0
+            && props.current_answer.player.nickname === props.nickname)
+            ReactTooltip.show(tooltipRef)
+    }, [props.current_answer])
+    return (
+        <>
+            <div
+                className='player-card'
+                data-tip={props.nickname}
+                data-for={props.nickname}
+                ref={ref => tooltipRef = ref}
+            >
+                <div>{props.nickname}</div>
+                <div>{props.score}</div>
+            </div>
+            <ReactTooltip
+                className='tooltip'
+                id={props.nickname}
+                effect="solid"
+                delayHide={3000}
+            >
+                <div>{props.current_answer.text}</div>
+            </ReactTooltip>
+        </>
     )
 }
 
