@@ -467,6 +467,8 @@ const Game = () => {
         } else
             dispatch(['set', savedGameSession]);
 
+        return () => notifier.close();
+
     }, []);
 
     useEffect(() => {
