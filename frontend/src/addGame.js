@@ -301,8 +301,9 @@ const SetRounds = (props) => {
                 )}
                 </tbody>
             </table>
-
-            <button onClick={() => setIsAddThemeFormOpen(true)}>Добавить тему</button>
+            <div className='button-group'>
+                <button onClick={() => setIsAddThemeFormOpen(true)}>Добавить тему</button>
+            </div>
 
             <div className='button-group'>
                 <button disabled={currentRound === 1}
