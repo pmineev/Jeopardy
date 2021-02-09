@@ -3,7 +3,7 @@
     display: grid;
     grid-template-columns: 3fr 1fr;
     grid-template-rows: 2fr 1fr;
-    gap: 0 0;
+    gap: 10px 10px;
     grid-template-areas:
     "game-screen host-card"
     "players player-controls";
