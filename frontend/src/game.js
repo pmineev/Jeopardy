@@ -227,14 +227,6 @@ function reducer(gameSession, [event, data]) {
             return {
                 ...gameSession,
                 is_initialized: true,
-                id: data.id,
-                current_players: data.current_players,
-                max_players: data.max_players,
-                players: [{
-                    nickname: data.creator,
-                    score: 0,
-                    is_playing: true
-                }],
                 state: State.WAITING
             };
         }
@@ -245,7 +237,7 @@ function reducer(gameSession, [event, data]) {
         }
         case 'player_joined': {
             const index = gameSession.players.findIndex(p => p.nickname === data.nickname);
-            if (gameSession.state === State.WAITING)
+            if (index === -1)
                 return {
                     ...gameSession,
                     players: gameSession.players.concat(data),
@@ -257,7 +249,7 @@ function reducer(gameSession, [event, data]) {
             else
                 return {
                     ...gameSession,
-                    players: gameSession.players.slice(0, index - 1)
+                    players: gameSession.players.slice(0, index)
                         .concat(data
                             , gameSession.players.slice(index + 1))
                 }
@@ -267,13 +259,13 @@ function reducer(gameSession, [event, data]) {
             if (gameSession.state === State.WAITING)
                 return {
                     ...gameSession,
-                    players: gameSession.players.slice(0, index - 1)
+                    players: gameSession.players.slice(0, index)
                         .concat(gameSession.players.slice(index + 1))
                 }
             else
                 return {
                     ...gameSession,
-                    players: gameSession.players.slice(0, index - 1)
+                    players: gameSession.players.slice(0, index)
                         .concat(data
                             , gameSession.players.slice(index + 1))
                 }
@@ -282,6 +274,7 @@ function reducer(gameSession, [event, data]) {
             return {
                 ...gameSession,
                 round: data,
+                current_answer: {text: '', player: {nickname: ''}},
                 state: State.CHOOSING_QUESTION
             }
         }
@@ -303,24 +296,26 @@ function reducer(gameSession, [event, data]) {
             return {
                 ...gameSession,
                 current_question: data,
+                current_answer: {text: '', player: {nickname: ''}},
                 state: State.ANSWERING
             }
         }
         case 'player_answered': {
             const t = gameSession.current_question.theme_order;
             const q = gameSession.current_question.question_order;
-            if (data.answer.is_correct)
+            const playerIndex = gameSession.players.findIndex(p => p.nickname === data.player.nickname);
+            if (data.is_correct)
                 return {
                     ...gameSession,
-                    current_answer: data.answer.text,
-                    responding_player: data.player,
+                    current_answer: data,
+                    state: State.CHOOSING_QUESTION,
                     round: {
                         ...gameSession.round,
-                        themes: gameSession.round.themes.slice(0, t - 1)
+                        themes: gameSession.round.themes.slice(0, t)
                             .concat(
                                 {
                                     ...gameSession.round.themes[t],
-                                    questions: gameSession.round.themes[t].questions.slice(0, q - 1)
+                                    questions: gameSession.round.themes[t].questions.slice(0, q)
                                         .concat(
                                             {
                                                 ...gameSession.round.themes[t].questions[q],
@@ -331,13 +326,18 @@ function reducer(gameSession, [event, data]) {
                                 },
                                 gameSession.round.themes.slice(t + 1)
                             )
-                    }
+                    },
+                    players: gameSession.players.slice(0, playerIndex)
+                        .concat(data.player,
+                            gameSession.players.slice(playerIndex + 1))
                 }
             else
                 return {
                     ...gameSession,
-                    current_answer: data.answer,
-                    responding_player: data.player
+                    current_answer: data,
+                    players: gameSession.players.slice(0, playerIndex)
+                        .concat(data.player,
+                            gameSession.players.slice(playerIndex + 1))
                 }
         }
         case 'question_timeout': {
@@ -345,7 +345,7 @@ function reducer(gameSession, [event, data]) {
             const q = gameSession.current_question.question_order;
             return {
                 ...gameSession,
-                current_answer: data.answer,
+                current_answer: data,
                 state: State.TIMEOUT,
                 round: {
                     ...gameSession.round,
