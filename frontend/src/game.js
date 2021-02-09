@@ -77,7 +77,7 @@ const QuestionScreen = (props) => {
 const QuestionCell = (props) => {
 
     return (
-        <td className='question-cell'
+        <td className={`question-cell ${props.is_answered ? 'empty' : ''}`}
             onClick={() => props.questionChosen(props.theme_order, props.question_order)}
         >
             {props.value}
