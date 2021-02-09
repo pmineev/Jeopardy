@@ -5,6 +5,7 @@ import {SubmitError, TextInput} from "./inputs";
 import {useState} from "react";
 import Modal from "react-modal";
 import {AddGameService} from "./services";
+import {useHistory} from 'react-router-dom';
 
 const addGameService = new AddGameService();
 
@@ -213,10 +214,13 @@ const AddFinalQuestionForm = (props) => {
                 if (isAllRoundsFilled())
                     if (isAllQuestionsFilled()) {
                         addGameService.post(props.game_name, props.themes, props.questions)
+                            .then(response => {
+                                setSubmitting(false);
+                                props.history.push('/games');
+                            })
                             .catch(error =>
                                 setErrors({'submitError': error.message})
                             );
-                        setSubmitting(false)
                     } else
                         setErrors({'submitError': 'Заполните все вопросы'})
                 else
@@ -262,6 +266,7 @@ function toOrdinal(n) {
 }
 
 const SetRounds = (props) => {
+    const history = useHistory();
     const [isAddThemeFormOpen, setIsAddThemeFormOpen] = useState(false);
     const [isAddQuestionFormOpen, setIsAddQuestionFormOpen] = useState(false);
     const [isAddFinalQuestionFormOpen, setIsAddFinalQuestionFormOpen] = useState(false);
@@ -398,6 +403,7 @@ const SetRounds = (props) => {
                     questions={questions}
                     themes={themes}
                     initialValues={questions.filter(q => q.theme === 'final')[0]}
+                    history={history}
                     setFinalQuestion={question => {
                         let i = questions.findIndex(q => q.theme === 'final');
                         let newQuestion = {
