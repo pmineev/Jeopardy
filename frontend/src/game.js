@@ -45,16 +45,37 @@ const PlayerControls = (props) => {
 }
 
 const HostCard = (props) => {
-    let hostText;
+    let hostText = '';
     switch (props.state) {
         case State.WAITING: {
             hostText = 'ожидаем игроков';
             break;
         }
-        case State.CHOOSING_QUESTION: {
-            hostText = 'выбор вопроса'
+        case State.CHOOSING_QUESTION:
+        case State.TIMEOUT: {
+            if (props.state === State.TIMEOUT)
+                hostText = `Правильный ответ: ${props.current_answer.text}. `
+            else if (props.current_answer?.is_correct)
+                hostText = 'Правильно! ';
+            hostText += `${props.current_player.nickname}, выбирайте вопрос.`;
             break;
         }
+        case State.ANSWERING: {
+            const t = props.current_question.theme_order;
+            const themeName = props.themes[t].name;
+            const value = props.current_question.value;
+            hostText = `${themeName} за ${value}`;
+
+            if (props.current_answer.text.length > 0)
+                hostText = 'Неверно.'
+            break;
+        }
+        case State.FINAL_ROUND: {
+            hostText = 'Финальный раунд'
+            break;
+        }
+        default:
+            hostText = ''
     }
 
     return (
@@ -420,6 +441,10 @@ const Game = () => {
 
             <HostCard
                 state={gameSession.state}
+                current_player={gameSession.current_player}
+                current_question={gameSession.current_question}
+                current_answer={gameSession.current_answer}
+                themes={gameSession.round.themes}
             />
 
             <PlayerControls
