@@ -166,19 +166,38 @@ const GameScreen = (props) => {
 }
 
 const PlayerCard = (props) => {
+    const [answer, setAnswer] = useState('');
     let tooltipRef;
+
+    async function wait() {
+        await new Promise(r =>
+            setTimeout(() =>
+                ReactTooltip.hide(tooltipRef), 3000));
+    }
 
     useEffect(() => {
         if (props.current_answer.text.length > 0
-            && props.current_answer.player.nickname === props.nickname)
-            ReactTooltip.show(tooltipRef)
+            && props.current_answer?.player?.nickname === props.nickname) {
+            setAnswer(props.current_answer.text);
+            ReactTooltip.show(tooltipRef);
+
+            wait();
+        }
+
     }, [props.current_answer])
+
+    useEffect(() => {
+        setAnswer(props.answer);
+        ReactTooltip.show(tooltipRef);
+        wait()
+    }, [props.answer])
+
     return (
         <>
             <div
                 className='player-card'
-                data-tip={props.nickname}
-                data-for={props.nickname}
+                data-tip
+                data-for={props.nickname + '_tooltip'}
                 ref={ref => tooltipRef = ref}
             >
                 <div>{props.nickname}</div>
@@ -186,11 +205,12 @@ const PlayerCard = (props) => {
             </div>
             <ReactTooltip
                 className='tooltip'
-                id={props.nickname}
-                effect="solid"
+                id={props.nickname + '_tooltip'}
+                effect='solid'
                 delayHide={3000}
+                event='null'
+                getContent={() => answer}
             >
-                <div>{props.current_answer.text}</div>
             </ReactTooltip>
         </>
     )
@@ -206,6 +226,7 @@ const Players = (props) => {
                     score={player.score}
                     is_playing={player.is_playing}
                     current_answer={props.current_answer}
+                    answer={player.answer}
                 />
             )}
         </div>
