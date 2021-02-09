@@ -85,6 +85,7 @@ form:focus {
 }
 
 form header {
+    margin-bottom: 20px;
 }
 
 .form-group {
