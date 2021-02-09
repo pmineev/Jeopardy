@@ -226,6 +226,7 @@ function reducer(gameSession, [event, data]) {
         case 'init': {
             return {
                 ...gameSession,
+                ...data,
                 is_initialized: true,
                 state: State.WAITING
             };
