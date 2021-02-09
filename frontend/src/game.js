@@ -1,6 +1,6 @@
 import './game.css';
 import './round.css';
-import {useEffect, useReducer} from "react";
+import {useEffect, useReducer, useState} from "react";
 import Notifier from "./notifiers";
 import {GameSessionService} from "./services";
 import {useHistory, useLocation} from "react-router-dom";
@@ -100,7 +100,7 @@ const HostCard = (props) => {
 
 
 const QuestionScreen = (props) => {
-
+    console.log(props.text);
     return (
         <div className='question'>
             {props.text}
@@ -250,14 +250,34 @@ const Players = (props) => {
 
 const State = Object.freeze({
     WAITING: 0,
-    CHOOSING_QUESTION: 1,
-    ANSWERING: 2,
-    TIMEOUT: 3,
-    FINAL_ROUND: 4,
-    END_GAME: 5
+    ROUND_STARTED: 1,
+    CHOOSING_QUESTION: 2,
+    ANSWERING: 3,
+    TIMEOUT: 4,
+    ROUND_ENDED: 5,
+    FINAL_ROUND_STARTED: 6,
+    FINAL_ROUND: 7,
+    END_GAME: 8
 })
 
+function toOrdinal(n) {
+    const ordinals = ['Нулевой',
+        'Первый',
+        'Второй',
+        'Третий',
+        'Четвертый',
+        'Пятый',
+        'Шестой',
+        'Седьмой',
+        'Восьмой',
+        'Девятый'
+    ]
+
+    return ordinals[n];
+}
+
 function reducer(gameSession, [event, data]) {
+    console.log('r', event);
     switch (event) {
         case 'init': {
             return {
@@ -290,10 +310,7 @@ function reducer(gameSession, [event, data]) {
                 return {
                     ...gameSession,
                     players: gameSession.players.concat(data),
-                    current_players: gameSession.current_players + 1,
-                    state: gameSession.current_players + 1 === gameSession.max_players
-                        ? State.CHOOSING_QUESTION
-                        : State.WAITING
+                    current_players: gameSession.current_players + 1
                 }
             else
                 return {
@@ -420,7 +437,7 @@ function reducer(gameSession, [event, data]) {
         case 'final_round_timeout': {
             return {
                 ...gameSession,
-                players: data,
+                players: data.players,
                 state: State.END_GAME
             }
         }
@@ -458,12 +475,11 @@ const Game = () => {
 
         localStorage.setItem('game_session_id', game_session_id);
 
-        console.log('stor', localStorage.getItem('gameSession'));
         const savedGameSession = JSON.parse(localStorage.getItem('gameSession'));
+        console.log('stor', savedGameSession);
         if (!savedGameSession?.is_initialized) {
-            console.log('init');
+            console.log('init', location.state);
             dispatch(['init', location.state]);
-            location.state = '';
         } else
             dispatch(['set', savedGameSession]);
 
@@ -473,7 +489,6 @@ const Game = () => {
 
     useEffect(() => {
         localStorage.setItem('gameSession', JSON.stringify(gameSession));
-        console.log('gs', gameSession);
     }, [gameSession]);
 
 
@@ -503,6 +518,7 @@ const Game = () => {
                 round={gameSession.round}
                 id={gameSession.id}
                 question_text={gameSession.current_question.text}
+                round_text={gameSession.round_text}
             />
 
             <Players
@@ -516,6 +532,7 @@ const Game = () => {
                 current_question={gameSession.current_question}
                 current_answer={gameSession.current_answer}
                 themes={gameSession.round.themes}
+                players={gameSession.players}
             />
 
             <PlayerControls

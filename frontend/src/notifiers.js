@@ -22,12 +22,13 @@ class Notifier {
 
         this.ws.onmessage = (message) => {
             const data = JSON.parse(message.data);
-
+            console.log('ws', data);
             this.listener([data.event, data.data]);
         }
     }
 
     close() {
+        console.log('ws close');
         this.ws.close();
     }
 
