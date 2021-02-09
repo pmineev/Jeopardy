@@ -51,13 +51,21 @@ const HostCard = (props) => {
             hostText = 'ожидаем игроков';
             break;
         }
+        case State.ROUND_ENDED:
+        case State.FINAL_ROUND_STARTED:
         case State.CHOOSING_QUESTION:
         case State.TIMEOUT: {
             if (props.state === State.TIMEOUT)
                 hostText = `Правильный ответ: ${props.current_answer.text}. `
             else if (props.current_answer?.is_correct)
                 hostText = 'Правильно! ';
-            hostText += `${props.current_player.nickname}, выбирайте вопрос.`;
+
+            if (props.state === State.ROUND_ENDED)
+                hostText += 'Раунд закончен.'
+            else if (props.state === State.FINAL_ROUND_STARTED)
+                hostText += 'Впереди финальный раунд.'
+            else
+                hostText += `${props.current_player.nickname}, выбирайте вопрос.`;
             break;
         }
         case State.ANSWERING: {
@@ -72,6 +80,11 @@ const HostCard = (props) => {
         }
         case State.FINAL_ROUND: {
             hostText = 'Финальный раунд'
+            break;
+        }
+        case State.END_GAME: {
+            const winner = props.players.reduce((a, b) => a.score > b.score ? a : b);
+            hostText = `Победил ${winner.nickname}!`;
             break;
         }
         default:
