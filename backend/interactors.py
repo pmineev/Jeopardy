@@ -114,13 +114,17 @@ class GameSessionInteractor:
             game_session_description = self.repo.join(game_session_id, username)
 
             if self.repo.is_all_players_joined(game_session_id):
+                self.notifier.player_joined(game_session_id, username)
+
                 self._start_game(game_session_id)
         elif self.repo.is_player(game_session_id, username):
             self.repo.set_player_state(game_session_id, username, is_playing=True)
+
+            self.notifier.player_joined(game_session_id, username)
+
+            game_session_description = self.repo.get_session(game_session_id)
         else:
             raise NotPlayer
-
-        self.notifier.player_joined(game_session_id, username)
 
         return game_session_description
 
@@ -152,11 +156,10 @@ class GameSessionInteractor:
         self.repo.set_next_round(game_session_id)
 
         if not self.repo.get_state(game_session_id) == State.FINAL_ROUND:
-            self.notifier.round_started(game_session_id)
-
             self._set_first_player(game_session_id)
 
             self.notifier.current_player_chosen(game_session_id)
+            self.notifier.round_started(game_session_id)
 
             self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
         else:

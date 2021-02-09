@@ -36,6 +36,7 @@ class GameSessionDescriptionSerializer(Serializer):
 class QuestionDescriptionSerializer(Serializer):
     value = IntegerField()
     text = CharField(required=False)
+    is_answered = BooleanField(required=False, default=False)
 
 
 class ThemeDescriptionSerializer(Serializer):
