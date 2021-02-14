@@ -368,6 +368,7 @@ function reducer(gameSession, [event, data]) {
                 return {
                     ...gameSession,
                     current_answer: data,
+                    current_player: data.player,
                     state: State.CHOOSING_QUESTION,
                     round: {
                         ...gameSession.round,
@@ -409,11 +410,11 @@ function reducer(gameSession, [event, data]) {
                 state: State.TIMEOUT,
                 round: {
                     ...gameSession.round,
-                    themes: gameSession.round.themes.slice(0, t - 1)
+                    themes: gameSession.round.themes.slice(0, t)
                         .concat(
                             {
                                 ...gameSession.round.themes[t],
-                                questions: gameSession.round.themes[t].questions.slice(0, q - 1)
+                                questions: gameSession.round.themes[t].questions.slice(0, q)
                                     .concat(
                                         {
                                             ...gameSession.round.themes[t].questions[q],
