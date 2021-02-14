@@ -70,6 +70,8 @@ const GameList = () => {
 
 
     useEffect(() => {
+        document.title = 'Игры';
+
         gameListService.getDescriptions()
             .then(result => {
                 setGameDescriptions(result.data)

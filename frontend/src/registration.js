@@ -7,6 +7,9 @@ import {Link, useHistory} from "react-router-dom";
 const RegisterForm = () => {
     const auth = useAuth();
     const history = useHistory();
+
+    document.title = 'Регистрация'
+
     return (
         <div className='form'>
             <Formik

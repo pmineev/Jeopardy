@@ -463,6 +463,8 @@ const Game = () => {
         });
 
     useEffect(() => {
+        document.title = 'Игра'
+
         const game_session_id = location.state?.id ?? localStorage.getItem('game_session_id');
         const notifier = new Notifier('game', game_session_id);
         notifier.setListener(dispatch);

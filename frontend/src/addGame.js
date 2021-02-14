@@ -2,7 +2,7 @@ import './round.css';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import {SubmitError, TextInput} from "./inputs";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Modal from "react-modal";
 import {AddGameService} from "./services";
 import {useHistory} from 'react-router-dom';
@@ -410,6 +410,10 @@ const SetRounds = (props) => {
 
 const AddGame = () => {
     const [gameParams, setGameParams] = useState(undefined);
+
+    useEffect(() =>
+            document.title = 'Добавление игры'
+        , []);
 
     return (
         <div className='add-game'>
