@@ -6,6 +6,7 @@ import {useState} from "react";
 import Modal from "react-modal";
 import {AddGameService} from "./services";
 import {useHistory} from 'react-router-dom';
+import {toOrdinal} from "./utils";
 
 const addGameService = new AddGameService();
 
@@ -247,22 +248,6 @@ const AddFinalQuestionForm = (props) => {
             </Form>
         </Formik>
     );
-}
-
-function toOrdinal(n) {
-    const ordinals = ['Нулевой',
-        'Первый',
-        'Второй',
-        'Третий',
-        'Четвертый',
-        'Пятый',
-        'Шестой',
-        'Седьмой',
-        'Восьмой',
-        'Девятый'
-    ]
-
-    return ordinals[n];
 }
 
 const SetRounds = (props) => {
