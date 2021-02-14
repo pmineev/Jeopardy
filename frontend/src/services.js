@@ -201,6 +201,13 @@ class GameSessionService {
         const url = `game_sessions/${game_session_id}/answer/`;
         axios.post(url, {answer: answer});
     }
+
+    get_host_image_url(state) {
+        const baseURL = 'http://127.0.0.1:8000';
+        const imageURL = baseURL + '/static/img/kuleshov/' + state + '.jpg';
+        console.log(imageURL);
+        return imageURL;
+    }
 }
 
 export {AuthService, GameListService, LobbyService, AddGameService, UserProfileService, GameSessionService};

@@ -47,9 +47,12 @@ const PlayerControls = (props) => {
 
 const HostCard = (props) => {
     let hostText = '';
+    let hostImageURL;
+
     switch (props.state) {
         case State.WAITING: {
             hostText = 'ожидаем игроков';
+            hostImageURL = gameSessionService.get_host_image_url(State.WAITING);
             break;
         }
         case State.ROUND_ENDED:
@@ -61,12 +64,16 @@ const HostCard = (props) => {
             else if (props.current_answer?.is_correct)
                 hostText = 'Правильно! ';
 
-            if (props.state === State.ROUND_ENDED)
-                hostText += 'Раунд закончен.'
-            else if (props.state === State.FINAL_ROUND_STARTED)
-                hostText += 'Впереди финальный раунд.'
-            else
+            if (props.state === State.ROUND_ENDED) {
+                hostText += 'Раунд закончен.';
+                hostImageURL = gameSessionService.get_host_image_url(State.ROUND_STARTED);
+            } else if (props.state === State.FINAL_ROUND_STARTED) {
+                hostText += 'Впереди финальный раунд.';
+                hostImageURL = gameSessionService.get_host_image_url(State.ROUND_STARTED);
+            } else {
                 hostText += `${props.current_player.nickname}, выбирайте вопрос.`;
+                hostImageURL = gameSessionService.get_host_image_url(State.CHOOSING_QUESTION);
+            }
             break;
         }
         case State.ANSWERING: {
@@ -74,27 +81,40 @@ const HostCard = (props) => {
             const themeName = props.themes[t].name;
             const value = props.current_question.value;
             hostText = `${themeName} за ${value}`;
+            hostImageURL = gameSessionService.get_host_image_url(State.ANSWERING);
 
-            if (props.current_answer.text.length > 0)
-                hostText = 'Неверно.'
+            if (props.current_answer.text.length > 0) {
+                hostText = 'Неверно.';
+                hostImageURL = gameSessionService.get_host_image_url('wrong');
+            }
             break;
         }
         case State.FINAL_ROUND: {
-            hostText = 'Финальный раунд'
+            hostImageURL = gameSessionService.get_host_image_url(State.FINAL_ROUND);
+            hostText = 'Финальный раунд';
             break;
         }
         case State.END_GAME: {
             const winner = props.players.reduce((a, b) => a.score > b.score ? a : b);
             hostText = `Победил ${winner.nickname}!`;
+            hostImageURL = gameSessionService.get_host_image_url(State.END_GAME);
             break;
         }
-        default:
-            hostText = ''
+        default: {
+            hostText = '';
+            hostImageURL = gameSessionService.get_host_image_url(State.WAITING);
+        }
     }
 
     return (
         <div className='host-card'>
-            {hostText}
+            <img
+                src={hostImageURL}
+                alt='host'
+            />
+            <div>
+                {hostText}
+            </div>
         </div>
     )
 }

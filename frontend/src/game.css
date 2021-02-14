@@ -32,6 +32,10 @@
     grid-area: host-card;
 }
 
+.host-card > img {
+    width: 100%;
+}
+
 .players {
     grid-area: players;
     display: flex;
