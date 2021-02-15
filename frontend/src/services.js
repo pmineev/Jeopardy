@@ -208,6 +208,13 @@ class GameSessionService {
         console.log(imageURL);
         return imageURL;
     }
+
+    get_avatar_url() {
+        const baseURL = 'http://127.0.0.1:8000';
+        const imageURL = baseURL + '/static/img/avatar.png';
+        console.log(imageURL);
+        return imageURL;
+    }
 }
 
 export {AuthService, GameListService, LobbyService, AddGameService, UserProfileService, GameSessionService};

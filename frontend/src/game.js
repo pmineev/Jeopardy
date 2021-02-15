@@ -236,6 +236,10 @@ const PlayerCard = (props) => {
                 data-for={props.nickname + '_tooltip'}
                 ref={ref => tooltipRef = ref}
             >
+                <img
+                    src={props.avatarURL}
+                    alt={props.nickname}
+                />
                 <div>{props.nickname}</div>
                 <div>{props.score}</div>
             </div>
@@ -263,6 +267,7 @@ const Players = (props) => {
                     is_playing={player.is_playing}
                     current_answer={props.current_answer}
                     answer={player.answer}
+                    avatarURL={gameSessionService.get_avatar_url()}
                 />
             )}
         </div>
