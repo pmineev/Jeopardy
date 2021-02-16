@@ -22,6 +22,9 @@ from backend.consumers import LobbyConsumer, GameSessionConsumer
 from backend.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, GameSessionViewSet
 
 urlpatterns = [
+    path('', TemplateView.as_view(
+        template_name='index.html'
+    )),
     path('admin/', admin.site.urls),
     path('users/', UserListView.as_view()),
     path('users/<str:username>/', UserView.as_view()),
