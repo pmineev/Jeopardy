@@ -14,9 +14,9 @@ const RegisterForm = () => {
         <div className='form'>
             <Formik
                 initialValues={{
-                    username: 'qqqqqqqqqq',
-                    nickname: 'qqqqqqqqqqqqqqqqqq',
-                    password: 'qqqqqqqqqq',
+                    username: '',
+                    nickname: '',
+                    password: '',
                 }}
                 validationSchema={Yup.object({
                     username: Yup.string()

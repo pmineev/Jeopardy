@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://127.0.0.1:8000';
+const baseURL = 'http://127.0.0.1:8000/api';
+const baseStaticURL = 'http://127.0.0.1:8000/static';
+axios.defaults.baseURL = baseURL;
 
 axios.interceptors.request.use(
     config => {
@@ -203,15 +205,13 @@ class GameSessionService {
     }
 
     get_host_image_url(state) {
-        const baseURL = 'http://127.0.0.1:8000';
-        const imageURL = baseURL + '/static/img/kuleshov/' + state + '.jpg';
+        const imageURL = baseStaticURL + '/img/kuleshov/' + state + '.jpg';
         console.log(imageURL);
         return imageURL;
     }
 
     get_avatar_url() {
-        const baseURL = 'http://127.0.0.1:8000';
-        const imageURL = baseURL + '/static/img/avatar.png';
+        const imageURL = baseStaticURL + '/img/avatar.png';
         console.log(imageURL);
         return imageURL;
     }

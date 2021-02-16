@@ -14,8 +14,8 @@ const LoginForm = () => {
         <div className='form'>
             <Formik
                 initialValues={{
-                    username: 'frok',
-                    password: '1234',
+                    username: '',
+                    password: '',
                 }}
                 validationSchema={Yup.object({
                     username: Yup.string()
