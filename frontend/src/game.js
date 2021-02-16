@@ -281,6 +281,19 @@ const Players = (props) => {
     )
 }
 
+function not_answered_questions_count(round) {
+    let answered = 0;
+    for (let t of round.themes)
+        answered += t.questions.filter(q => q.is_answered).length;
+
+    const not_answered = round.themes.length * round.themes[0].questions.length - answered;
+    console.log(not_answered);
+    console.log(round.themes.length);
+    console.log(round.themes[0].questions.length);
+    console.log(answered);
+    return not_answered;
+}
+
 function reducer(gameSession, [event, data]) {
     console.log('r', event);
     switch (event) {
@@ -360,8 +373,8 @@ function reducer(gameSession, [event, data]) {
         case 'current_player_chosen': {
             return {
                 ...gameSession,
-                current_player: data,
-                state: State.CHOOSING_QUESTION
+                current_player: data
+                //state: State.CHOOSING_QUESTION
             }
         }
         case 'current_question_chosen': {
@@ -381,7 +394,9 @@ function reducer(gameSession, [event, data]) {
                     ...gameSession,
                     current_answer: data,
                     current_player: data.player,
-                    state: State.CHOOSING_QUESTION,
+                    state: not_answered_questions_count(gameSession.round) === 1
+                        ? gameSession.state
+                        : State.CHOOSING_QUESTION,
                     round: {
                         ...gameSession.round,
                         themes: gameSession.round.themes.slice(0, t)
