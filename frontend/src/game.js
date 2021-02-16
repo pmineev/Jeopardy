@@ -131,10 +131,13 @@ const QuestionScreen = (props) => {
 }
 
 const QuestionCell = (props) => {
-
+    const [clicked, setClicked] = useState(false);
     return (
-        <td className={`question-cell ${props.is_answered ? 'empty' : ''}`}
-            onClick={() => props.questionChosen(props.theme_order, props.question_order)}
+        <td className={`question-cell ${props.is_answered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
+            onClick={() => {
+                setClicked(true);
+                props.questionChosen(props.theme_order, props.question_order);
+            }}
         >
             {props.value}
         </td>

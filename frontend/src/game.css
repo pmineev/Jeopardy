@@ -31,6 +31,24 @@
     transition: opacity 1s ease-in;
 }
 
+.game-screen .round td.question-cell.clicked {
+    animation-name: blink;
+    animation-duration: 200ms;
+    animation-iteration-count: 2;
+    animation-timing-function: step-end;
+}
+
+@keyframes blink {
+    0% {
+        color: var(--primary-color);
+        background-color: var(--accent-color)
+    }
+    50% {
+        color: var(--accent-color);
+        background-color: var(--primary-color)
+    }
+}
+
 
 .question {
     height: 100%;
