@@ -6,6 +6,8 @@ import {GameSessionService} from "./services";
 import {useHistory, useLocation} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
 import ReactTooltip from 'react-tooltip';
+import ReactCSSTransitionReplace from 'react-css-transition-replace';
+import {State, toOrdinal} from "./utils";
 
 const gameSessionService = new GameSessionService();
 
@@ -46,9 +48,12 @@ const PlayerControls = (props) => {
 
 const HostCard = (props) => {
     let hostText = '';
+    let hostImageURL;
+
     switch (props.state) {
         case State.WAITING: {
             hostText = 'ожидаем игроков';
+            hostImageURL = gameSessionService.get_host_image_url(State.WAITING);
             break;
         }
         case State.ROUND_ENDED:
@@ -60,12 +65,16 @@ const HostCard = (props) => {
             else if (props.current_answer?.is_correct)
                 hostText = 'Правильно! ';
 
-            if (props.state === State.ROUND_ENDED)
-                hostText += 'Раунд закончен.'
-            else if (props.state === State.FINAL_ROUND_STARTED)
-                hostText += 'Впереди финальный раунд.'
-            else
+            if (props.state === State.ROUND_ENDED) {
+                hostText += 'Раунд закончен.';
+                hostImageURL = gameSessionService.get_host_image_url(State.ROUND_STARTED);
+            } else if (props.state === State.FINAL_ROUND_STARTED) {
+                hostText += 'Впереди финальный раунд.';
+                hostImageURL = gameSessionService.get_host_image_url(State.ROUND_STARTED);
+            } else {
                 hostText += `${props.current_player.nickname}, выбирайте вопрос.`;
+                hostImageURL = gameSessionService.get_host_image_url(State.CHOOSING_QUESTION);
+            }
             break;
         }
         case State.ANSWERING: {
@@ -73,27 +82,40 @@ const HostCard = (props) => {
             const themeName = props.themes[t].name;
             const value = props.current_question.value;
             hostText = `${themeName} за ${value}`;
+            hostImageURL = gameSessionService.get_host_image_url(State.ANSWERING);
 
-            if (props.current_answer.text.length > 0)
-                hostText = 'Неверно.'
+            if (props.current_answer.text.length > 0) {
+                hostText = 'Неверно.';
+                hostImageURL = gameSessionService.get_host_image_url('wrong');
+            }
             break;
         }
         case State.FINAL_ROUND: {
-            hostText = 'Финальный раунд'
+            hostImageURL = gameSessionService.get_host_image_url(State.FINAL_ROUND);
+            hostText = 'Финальный раунд';
             break;
         }
         case State.END_GAME: {
             const winner = props.players.reduce((a, b) => a.score > b.score ? a : b);
             hostText = `Победил ${winner.nickname}!`;
+            hostImageURL = gameSessionService.get_host_image_url(State.END_GAME);
             break;
         }
-        default:
-            hostText = ''
+        default: {
+            hostText = '';
+            hostImageURL = gameSessionService.get_host_image_url(State.WAITING);
+        }
     }
 
     return (
         <div className='host-card'>
-            {hostText}
+            <img
+                src={hostImageURL}
+                alt='host'
+            />
+            <div>
+                {hostText}
+            </div>
         </div>
     )
 }
@@ -109,10 +131,13 @@ const QuestionScreen = (props) => {
 }
 
 const QuestionCell = (props) => {
-
+    const [clicked, setClicked] = useState(false);
     return (
-        <td className={`question-cell ${props.is_answered ? 'empty' : ''}`}
-            onClick={() => props.questionChosen(props.theme_order, props.question_order)}
+        <td className={`question-cell ${props.is_answered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
+            onClick={() => {
+                setClicked(true);
+                props.questionChosen(props.theme_order, props.question_order);
+            }}
         >
             {props.value}
         </td>
@@ -160,23 +185,29 @@ const RoundTable = (props) => {
 
 const GameScreen = (props) => {
     return (
-        <div className='game-screen'>
-            {([State.CHOOSING_QUESTION, State.TIMEOUT].includes(props.state)) &&
-            <RoundTable
-                themes={props.round.themes}
-                questionChosen={(theme_order, question_order) => {
-                    gameSessionService.choose_question(props.id, theme_order, question_order);
-                }}
-            />}
+        <ReactCSSTransitionReplace
+            className='game-screen'
+            transitionName="game-screen"
+            transitionEnterTimeout={1000}
+            transitionLeaveTimeout={1000}
+        >
+            {([State.CHOOSING_QUESTION, State.TIMEOUT].includes(props.state))
+                ? <RoundTable
+                    key='table'
+                    themes={props.round.themes}
+                    questionChosen={(theme_order, question_order) => {
+                        gameSessionService.choose_question(props.id, theme_order, question_order);
+                    }}
+                />
+                : <QuestionScreen
+                    key='question'
+                    text={([State.ROUND_STARTED, State.FINAL_ROUND_STARTED].includes(props.state))
+                        ? props.round_text
+                        : props.question_text}
+                />
 
-            {(![State.CHOOSING_QUESTION, State.TIMEOUT].includes(props.state)) &&
-            <QuestionScreen
-                text={([State.ROUND_STARTED, State.FINAL_ROUND_STARTED].includes(props.state))
-                    ? props.round_text
-                    : props.question_text}
-            />
             }
-        </div>
+        </ReactCSSTransitionReplace>
     )
 }
 
@@ -215,6 +246,10 @@ const PlayerCard = (props) => {
                 data-for={props.nickname + '_tooltip'}
                 ref={ref => tooltipRef = ref}
             >
+                <img
+                    src={props.avatarURL}
+                    alt={props.nickname}
+                />
                 <div>{props.nickname}</div>
                 <div>{props.score}</div>
             </div>
@@ -242,38 +277,24 @@ const Players = (props) => {
                     is_playing={player.is_playing}
                     current_answer={props.current_answer}
                     answer={player.answer}
+                    avatarURL={gameSessionService.get_avatar_url()}
                 />
             )}
         </div>
     )
 }
 
-const State = Object.freeze({
-    WAITING: 0,
-    ROUND_STARTED: 1,
-    CHOOSING_QUESTION: 2,
-    ANSWERING: 3,
-    TIMEOUT: 4,
-    ROUND_ENDED: 5,
-    FINAL_ROUND_STARTED: 6,
-    FINAL_ROUND: 7,
-    END_GAME: 8
-})
+function not_answered_questions_count(round) {
+    let answered = 0;
+    for (let t of round.themes)
+        answered += t.questions.filter(q => q.is_answered).length;
 
-function toOrdinal(n) {
-    const ordinals = ['Нулевой',
-        'Первый',
-        'Второй',
-        'Третий',
-        'Четвертый',
-        'Пятый',
-        'Шестой',
-        'Седьмой',
-        'Восьмой',
-        'Девятый'
-    ]
-
-    return ordinals[n];
+    const not_answered = round.themes.length * round.themes[0].questions.length - answered;
+    console.log(not_answered);
+    console.log(round.themes.length);
+    console.log(round.themes[0].questions.length);
+    console.log(answered);
+    return not_answered;
 }
 
 function reducer(gameSession, [event, data]) {
@@ -355,8 +376,8 @@ function reducer(gameSession, [event, data]) {
         case 'current_player_chosen': {
             return {
                 ...gameSession,
-                current_player: data,
-                state: State.CHOOSING_QUESTION
+                current_player: data
+                //state: State.CHOOSING_QUESTION
             }
         }
         case 'current_question_chosen': {
@@ -375,7 +396,10 @@ function reducer(gameSession, [event, data]) {
                 return {
                     ...gameSession,
                     current_answer: data,
-                    state: State.CHOOSING_QUESTION,
+                    current_player: data.player,
+                    state: not_answered_questions_count(gameSession.round) === 1
+                        ? gameSession.state
+                        : State.CHOOSING_QUESTION,
                     round: {
                         ...gameSession.round,
                         themes: gameSession.round.themes.slice(0, t)
@@ -416,11 +440,11 @@ function reducer(gameSession, [event, data]) {
                 state: State.TIMEOUT,
                 round: {
                     ...gameSession.round,
-                    themes: gameSession.round.themes.slice(0, t - 1)
+                    themes: gameSession.round.themes.slice(0, t)
                         .concat(
                             {
                                 ...gameSession.round.themes[t],
-                                questions: gameSession.round.themes[t].questions.slice(0, q - 1)
+                                questions: gameSession.round.themes[t].questions.slice(0, q)
                                     .concat(
                                         {
                                             ...gameSession.round.themes[t].questions[q],
@@ -469,6 +493,8 @@ const Game = () => {
         });
 
     useEffect(() => {
+        document.title = 'Игра'
+
         const game_session_id = location.state?.id ?? localStorage.getItem('game_session_id');
         const notifier = new Notifier('game', game_session_id);
         notifier.setListener(dispatch);

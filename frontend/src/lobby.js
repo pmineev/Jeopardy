@@ -66,6 +66,8 @@ const Lobby = () => {
     const history = useHistory();
 
     useEffect(() => {
+        document.title = 'Лобби'
+
         const notifier = new Notifier('lobby');
         notifier.setListener(dispatch);
 

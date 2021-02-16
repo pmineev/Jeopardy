@@ -18,7 +18,7 @@
 
 .list tbody tr {
     height: 60px;
-    box-shadow: inset 0 -1px 0 #FFCC00, inset 0 0 25px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 -1px 0 var(--accent-color), inset 0 0 25px 10px rgba(0, 0, 0, 0.5);
 }
 
 .list td button {

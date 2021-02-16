@@ -13,6 +13,43 @@
     grid-area: game-screen;
 }
 
+.game-screen-leave {
+    opacity: 1;
+}
+
+.game-screen-leave.game-screen-leave-active {
+    opacity: 0;
+    transition: opacity 1s ease-in;
+}
+
+.game-screen-enter {
+    opacity: 0;
+}
+
+.game-screen-enter.game-screen-enter-active {
+    opacity: 1;
+    transition: opacity 1s ease-in;
+}
+
+.game-screen .round td.question-cell.clicked {
+    animation-name: blink;
+    animation-duration: 200ms;
+    animation-iteration-count: 2;
+    animation-timing-function: step-end;
+}
+
+@keyframes blink {
+    0% {
+        color: var(--primary-color);
+        background-color: var(--accent-color)
+    }
+    50% {
+        color: var(--accent-color);
+        background-color: var(--primary-color)
+    }
+}
+
+
 .question {
     height: 100%;
     display: flex;
@@ -30,6 +67,10 @@
 
 .host-card {
     grid-area: host-card;
+}
+
+.host-card > img {
+    width: 100%;
 }
 
 .players {

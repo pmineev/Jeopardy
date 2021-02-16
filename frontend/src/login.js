@@ -7,6 +7,9 @@ import {Link, useHistory} from "react-router-dom";
 const LoginForm = () => {
     const auth = useAuth();
     const history = useHistory();
+
+    document.title = 'Вход';
+
     return (
         <div className='form'>
             <Formik

@@ -11,6 +11,8 @@ const UserProfileForm = () => {
     const auth = useAuth();
     const [credentials, setCredentials] = useState({nickname: '', password: ''});
 
+    document.title = 'Профиль пользователя';
+
     useEffect(() => {
         userProfileService.get(auth.getUsername())
             .then(response =>

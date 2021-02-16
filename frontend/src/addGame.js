@@ -2,10 +2,11 @@ import './round.css';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import {SubmitError, TextInput} from "./inputs";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Modal from "react-modal";
 import {AddGameService} from "./services";
 import {useHistory} from 'react-router-dom';
+import {toOrdinal} from "./utils";
 
 const addGameService = new AddGameService();
 
@@ -216,6 +217,7 @@ const AddFinalQuestionForm = (props) => {
                         addGameService.post(props.game_name, props.themes, props.questions)
                             .then(response => {
                                 setSubmitting(false);
+                                localStorage.removeItem('game');
                                 props.history.push('/games');
                             })
                             .catch(error =>
@@ -249,31 +251,56 @@ const AddFinalQuestionForm = (props) => {
     );
 }
 
-function toOrdinal(n) {
-    const ordinals = ['Нулевой',
-        'Первый',
-        'Второй',
-        'Третий',
-        'Четвертый',
-        'Пятый',
-        'Шестой',
-        'Седьмой',
-        'Восьмой',
-        'Девятый'
-    ]
-
-    return ordinals[n];
-}
-
 const SetRounds = (props) => {
     const history = useHistory();
     const [isAddThemeFormOpen, setIsAddThemeFormOpen] = useState(false);
     const [isAddQuestionFormOpen, setIsAddQuestionFormOpen] = useState(false);
     const [isAddFinalQuestionFormOpen, setIsAddFinalQuestionFormOpen] = useState(false);
+    const [gameParams, setGameParams] = useState(props.gameParams);
     const [themes, setThemes] = useState(props.gameParams.themes);
     const [currentRound, setCurrentRound] = useState(1);
     const [questions, setQuestions] = useState([]);
     const [questionParams, setQuestionParams] = useState({index: -1});
+
+    useEffect(() => {
+        console.log(props.savedGame);
+        if (props.savedGame) {
+            setIsAddThemeFormOpen(props.savedGame.modals.isAddThemeFormOpen);
+            setIsAddQuestionFormOpen(props.savedGame.modals.isAddQuestionFormOpen);
+            setIsAddFinalQuestionFormOpen(props.savedGame.modals.isAddFinalQuestionFormOpen);
+            setGameParams(props.savedGame.gameParams);
+            setThemes(props.savedGame.themes);
+            setCurrentRound(props.savedGame.currentRound);
+            setQuestions(props.savedGame.questions);
+            setQuestionParams(props.savedGame.questionParams);
+        }
+    }, []);
+
+    useEffect(() => {
+        const game = {
+            modals: {
+                isAddThemeFormOpen: isAddThemeFormOpen,
+                isAddQuestionFormOpen: isAddQuestionFormOpen,
+                isAddFinalQuestionFormOpen: isAddFinalQuestionFormOpen
+            },
+            gameParams: gameParams,
+            themes: themes,
+            currentRound: currentRound,
+            questions: questions,
+            questionParams: questionParams
+        }
+
+        localStorage.setItem('game', JSON.stringify(game));
+    }, [
+        isAddThemeFormOpen,
+        isAddQuestionFormOpen,
+        isAddFinalQuestionFormOpen,
+        gameParams,
+        themes,
+        currentRound,
+        questions,
+        questionParams
+    ])
 
     return (
         <>
@@ -285,7 +312,7 @@ const SetRounds = (props) => {
                     <Theme key={theme.name}
                            name={theme.name}
                            round={currentRound}
-                           questions_count={props.gameParams.questions_count}
+                           questions_count={gameParams.questions_count}
                            questions={questions.filter(q =>
                                q.round === currentRound
                                && q.theme === theme.name
@@ -313,15 +340,15 @@ const SetRounds = (props) => {
             <div className='button-group'>
                 <button disabled={currentRound === 1}
                         onClick={() => setCurrentRound(currentRound === 'final'
-                            ? Number(props.gameParams.rounds_count) - 1
+                            ? Number(gameParams.rounds_count) - 1
                             : currentRound - 1)
                         }>Предыдущий раунд
                 </button>
 
                 <button onClick={() => {
                     let nextRound = currentRound + 1;
-                    console.log('nr', nextRound, props.gameParams.rounds_count);
-                    if (nextRound === Number(props.gameParams.rounds_count))
+                    console.log('nr', nextRound, gameParams.rounds_count);
+                    if (nextRound === Number(gameParams.rounds_count))
                         setIsAddFinalQuestionFormOpen(true)
                     else
                         setCurrentRound(nextRound)
@@ -397,9 +424,9 @@ const SetRounds = (props) => {
                 ariaHideApp={false}
             >
                 <AddFinalQuestionForm
-                    game_name={props.gameParams.name}
-                    rounds_count={props.gameParams.rounds_count}
-                    questions_count={props.gameParams.questions_count}
+                    game_name={gameParams.name}
+                    rounds_count={gameParams.rounds_count}
+                    questions_count={gameParams.questions_count}
                     questions={questions}
                     themes={themes}
                     initialValues={questions.filter(q => q.theme === 'final')[0]}
@@ -408,7 +435,7 @@ const SetRounds = (props) => {
                         let i = questions.findIndex(q => q.theme === 'final');
                         let newQuestion = {
                             theme: 'final',
-                            value: 200 * props.gameParams.rounds_count * props.gameParams.questions_count,
+                            value: 200 * gameParams.rounds_count * gameParams.questions_count,
                             ...question
                         }
                         if (i === -1)
@@ -425,18 +452,23 @@ const SetRounds = (props) => {
 
 const AddGame = () => {
     const [gameParams, setGameParams] = useState(undefined);
+    const [savedGame, setSavedGame] = useState(undefined);
+
+    useEffect(() => {
+        document.title = 'Добавление игры'
+        setSavedGame(JSON.parse(localStorage.getItem('game')));
+    }, []);
 
     return (
         <div className='add-game'>
-            {!gameParams &&
-            <AddGameForm
-                setGameParams={setGameParams}
-            />
-            }
-            {gameParams &&
-            <SetRounds
-                gameParams={gameParams}
-            />
+            {!(gameParams || savedGame)
+                ? <AddGameForm
+                    setGameParams={setGameParams}
+                />
+                : <SetRounds
+                    gameParams={savedGame ? savedGame.gameParams : gameParams}
+                    savedGame={savedGame}
+                />
             }
         </div>
     )
