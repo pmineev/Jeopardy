@@ -33,10 +33,6 @@ urlpatterns = [
     path('api/game_sessions/exited/<int:game_session_id>/', GameSessionViewSet.as_view({'delete': 'leave'})),
     path('api/game_sessions/<int:game_session_id>/question/', GameSessionViewSet.as_view({'post': 'choose_question'})),
     path('api/game_sessions/<int:game_session_id>/answer/', GameSessionViewSet.as_view({'post': 'submit_answer'})),
-    path('swagger/', TemplateView.as_view(
-        template_name='swagger.html',
-        extra_context={'schema_url': 'openapi-schema'}
-    ), name='swagger'),
     re_path(r'', TemplateView.as_view(
         template_name='index.html'
     )),
