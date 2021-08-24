@@ -26,17 +26,25 @@ axios.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        const refresh_token = localStorage.getItem('refresh_token');
-        if (refresh_token) {
-            axios.post('/sessions/new_token/', {
-                refresh: refresh_token
-            })
-                .then(response => {
-                    localStorage.setItem('access_token', response.data.access)
-                });
-            return axios.request(error.config);
+        if (error.response.data.messages?.[0].token_type !== 'access') {
+            localStorage.clear();
+            return Promise.reject(error);
         } else {
+            const refresh_token = localStorage.getItem('refresh_token');
+            if (refresh_token) {
+                axios.post('/sessions/new_token/', {
+                    refresh: refresh_token
+                })
+                    .then(response => {
+                        localStorage.setItem('access_token', response.data.access)
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    });
+                return axios.request(error.config);
+            } else {
 
+            }
         }
 
         console.log(error.response);
