@@ -5,7 +5,7 @@ from django.contrib.auth.models import User as ORMUser
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from backend.entities import Game, GameDescription, Round, Theme, Question, UserProfile, Session, GameSession, \
-    GameSessionDescription, RoundDescription, ThemeDescription, QuestionDescription, Player
+    GameSessionDescription, GameState, RoundDescription, ThemeDescription, QuestionDescription, Player
 from backend.enums import State
 from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists, GameNotFound, TooManyPlayers, \
     WrongQuestionRequest, AlreadyPlaying
@@ -220,11 +220,13 @@ class GameSessionRepo:
         orm_player = ORMPlayer.objects.create(user=orm_user_profile)
         orm_game_session.players.add(orm_player)
 
-        desc = GameSessionDescription(id=orm_game_session.pk,
-                                      creator=orm_game_session.creator.nickname,
-                                      game_name=orm_game_session.game.name,
-                                      max_players=orm_game_session.max_players,
-                                      current_players=orm_game_session.players.count())
+        return GameSessionRepo.get_game_state(game_session_id)
+
+    @staticmethod
+    def get_game_state(game_session_id):
+        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+
+        state = orm_game_session.state
 
         players = list()
         for orm_player in orm_game_session.players.all():
@@ -233,9 +235,17 @@ class GameSessionRepo:
                             is_playing=orm_player.is_playing,
                             answer=orm_player.answer)
             players.append(player)
-        desc.players = players
 
-        return desc
+        current_round = GameSessionRepo.get_final_round_description(game_session_id) if state == State.FINAL_ROUND \
+            else GameSessionRepo.get_current_round_description(game_session_id)
+
+        game_state = GameState(state=state,
+                               players=players,
+                               current_round=current_round,
+                               current_player=GameSessionRepo.get_current_player(game_session_id),
+                               current_question=GameSessionRepo.get_current_question(game_session_id))
+
+        return game_state
 
     @staticmethod
     def get_session(game_session_id):
@@ -311,6 +321,9 @@ class GameSessionRepo:
     def get_current_player(game_session_id):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
         orm_player = orm_game_session.current_player
+
+        if not orm_player:
+            return None
 
         player = Player(nickname=orm_player.user.nickname,
                         score=orm_player.score,
@@ -478,6 +491,9 @@ class GameSessionRepo:
     def get_current_question(game_session_id):
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
         orm_current_question = orm_game_session.current_question
+        if not orm_current_question:
+            return None
+
         question_description = QuestionDescription(value=orm_current_question.value,
                                                    text=orm_current_question.text)
 
@@ -512,6 +528,8 @@ class GameSessionRepo:
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
         orm_current_round = orm_game_session.current_round
 
+        if not orm_current_round:
+            return None
         round_description = RoundDescription(order=orm_current_round.order,
                                              themes=list())
 
@@ -521,6 +539,8 @@ class GameSessionRepo:
 
             for orm_question in orm_theme.questions.order_by('order'):
                 question_description = QuestionDescription(value=orm_question.value)
+                if orm_game_session.answered_questions.filter(pk=orm_question.pk).exists():
+                    question_description.is_answered = True
 
                 theme_description.questions.append(question_description)
 

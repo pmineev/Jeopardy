@@ -47,3 +47,11 @@ class ThemeDescriptionSerializer(Serializer):
 class RoundDescriptionSerializer(Serializer):
     order = IntegerField()
     themes = ThemeDescriptionSerializer(many=True)
+
+
+class GameStateSerializer(Serializer):
+    state = CharField()
+    players = PlayerSerializer(many=True)
+    current_round = RoundDescriptionSerializer(required=False)
+    current_player = PlayerSerializer(required=False)
+    current_question = QuestionDescriptionSerializer(required=False)
