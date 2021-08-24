@@ -11,7 +11,7 @@ from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentia
     NotPlayer, NotCurrentPlayer, WrongQuestionRequest, GameNotFound, AlreadyPlaying
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer, \
-    GameSessionDescriptionSerializer
+    GameSessionDescriptionSerializer, GameStateSerializer
 
 
 class UserListView(APIView):
@@ -146,13 +146,13 @@ class GameSessionViewSet(ViewSet):
 
     def join(self, request, game_session_id):
         try:
-            game_session_description = GameSessionViewSet.interactor.join(game_session_id, request.user.username)
+            game_state = GameSessionViewSet.interactor.join(game_session_id, request.user.username)
         except TooManyPlayers:
             return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='too many players'))
 
-        game_session_descriptions_serialized = GameSessionDescriptionSerializer(game_session_description).data
+        game_state_serialized = GameStateSerializer(game_state).data
 
-        return Response(status=status.HTTP_201_CREATED, data=game_session_descriptions_serialized)
+        return Response(status=status.HTTP_201_CREATED, data=game_state_serialized)
 
     def leave(self, request, game_session_id):
         try:
