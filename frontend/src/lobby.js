@@ -1,18 +1,23 @@
 import './list.css';
-import {useEffect, useReducer} from 'react';
+
+import {useEffect} from 'react';
+import {useHistory} from "react-router-dom";
+import {values} from 'mobx';
+import {observer} from "mobx-react-lite";
+
 import {GameSessionService, LobbyService} from "./services";
 import Notifier from "./notifiers";
-import {useHistory} from "react-router-dom";
+import {useStore} from "./stores/RootStore";
 
 const gameSessionService = new GameSessionService();
 
-const GameSessionDescription = (props) => {
+const GameSessionDescriptionView = observer((props) => {
     const descr = props.descr;
     return (
         <tr>
             <td>{descr.creator}</td>
-            <td>{descr.game_name}</td>
-            <td>{descr.current_players}/{descr.max_players}</td>
+            <td>{descr.gameName}</td>
+            <td>{descr.currentPlayers}/{descr.maxPlayers}</td>
             <td>
                 <button
                     onClick={() => {
@@ -27,58 +32,27 @@ const GameSessionDescription = (props) => {
             </td>
         </tr>
     );
-};
+});
 
-function reducer(gameDescriptions, [event, data]) {
-    switch (event) {
-        case 'init': {
-            return data;
-        }
-        case 'game_session_created': {
-            return gameDescriptions.concat(data);
-        }
-        case 'game_session_deleted': {
-            const index = gameDescriptions.findIndex(d => d.id === data.game_session_id);
-            return gameDescriptions.slice(0, index - 1)
-                .concat(gameDescriptions.slice(index + 1))
-        }
-        case 'player_joined': {
-            const index = gameDescriptions.findIndex(d => d.id === data.game_session_id);
-            return gameDescriptions.slice(0, index - 1)
-                .concat(
-                    {...gameDescriptions[index], current_players: gameDescriptions[index].current_players + 1}
-                    , gameDescriptions.slice(index + 1))
-        }
-        case 'player_left': {
-            const index = gameDescriptions.findIndex(d => d.id === data.game_session_id);
-            return gameDescriptions.slice(0, index - 1)
-                .concat(
-                    {...gameDescriptions[index], current_players: gameDescriptions[index].current_players - 1}
-                    , gameDescriptions.slice(index + 1))
-        }
-        default:
-            throw new Error('нет такого события')
-    }
-}
-
-const Lobby = () => {
-    const [gameDescriptions, dispatch] = useReducer(reducer, []);
+const Lobby = observer(() => {
+    // const [gameDescriptions, dispatch] = useReducer(reducer, []);
     const history = useHistory();
+    const {gameSessionDescriptionStore: store} = useStore();
 
     useEffect(() => {
         document.title = 'Лобби'
 
         const notifier = new Notifier('lobby');
-        notifier.setListener(dispatch);
+        notifier.setListener(store.listener);
 
         const lobbyService = new LobbyService();
         lobbyService.getDescriptions()
             .then(result => {
-                dispatch(['init', result.data]);
+                store.initialize(result.data);
             });
 
         return () => notifier.close()
-    }, []);
+    }, [store]);
 
     return (
         <div className='lobby'>
@@ -93,8 +67,9 @@ const Lobby = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {gameDescriptions.length > 0 && gameDescriptions.map(descr =>
-                    <GameSessionDescription
+                {console.log(store.descriptions)}
+                {store.descriptions.size > 0 && values(store.descriptions).map(descr =>
+                    <GameSessionDescriptionView
                         key={descr.creator}
                         descr={descr}
                         history={history}
@@ -104,6 +79,6 @@ const Lobby = () => {
             </table>
         </div>
     );
-};
+});
 
 export default Lobby;
