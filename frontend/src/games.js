@@ -1,31 +1,39 @@
 import './list.css';
-import {useEffect, useState} from 'react'
-import {GameListService, GameSessionService} from "./services";
+
+import {useEffect} from 'react'
 import {useHistory} from "react-router-dom";
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import {TextInput} from "./inputs";
 import Modal from "react-modal";
+import {values} from 'mobx';
+import {observer} from "mobx-react-lite";
+
+import {GameListService, GameSessionService} from "./services";
+import {TextInput} from "./inputs";
+import {useStore} from "./stores/RootStore";
 
 const gameListService = new GameListService();
 const gameSessionService = new GameSessionService();
 
-const CreateGameSessionForm = (props) => {
+const CreateGameSessionForm = observer((props) => {
+    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
+
     return (
         <Formik
             initialValues={{
-                max_players: '2'
+                maxPlayers: '2'
             }}
             validationSchema={Yup.object({
-                max_players: Yup.number()
+                maxPlayers: Yup.number()
                     .required('Обязательное поле')
                     .min(2, 'Не менее 2 игроков')
                     .max(10, 'Не более 10 игроков')
             })}
             onSubmit={(values, {setSubmitting}) => {
-                gameSessionService.create(props.gameName, values.max_players)
+                gameSessionService.create(store.chosenGame.name, values.maxPlayers)
                     .then((response) => {
                         setSubmitting(false);
+                        viewStore.toggleCreateGameSessionFormOpen();
                         props.history.push('/game', response.data)
                     })
             }}
@@ -34,7 +42,7 @@ const CreateGameSessionForm = (props) => {
                 <header>Новая игра</header>
                 <TextInput
                     label="Количество игроков"
-                    name="max_players"
+                    name="maxPlayers"
                     type="text"
                 />
 
@@ -42,41 +50,42 @@ const CreateGameSessionForm = (props) => {
             </Form>
         </Formik>
     );
-}
+});
 
-const GameDescription = (props) => {
-    const descr = props.descr;
+const GameDescription = observer((props) => {
+    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
 
     return (
         <tr>
-            <td>{descr.author}</td>
-            <td>{descr.name}</td>
-            <td>{descr.rounds_count}</td>
+            <td>{props.descr.author}</td>
+            <td>{props.descr.name}</td>
+            <td>{props.descr.roundsCount}</td>
             <td>
                 <button
-                    onClick={() => props.createGameSession(descr.name)}
+                    onClick={() => {
+                        viewStore.toggleCreateGameSessionFormOpen();
+                        store.setChosenGame(props.descr);
+                    }}
                 >
                     Играть
                 </button>
             </td>
         </tr>
     );
-};
-const GameList = () => {
-    const [gameDescriptions, setGameDescriptions] = useState([]);
-    const [isCreateGameSessionFormOpen, setIsCreateGameSessionFormOpen] = useState(false);
-    const [chosenGame, setChosenGame] = useState(0);
-    const history = useHistory();
+});
 
+const GameList = observer(() => {
+    const history = useHistory();
+    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
 
     useEffect(() => {
         document.title = 'Игры';
 
         gameListService.getDescriptions()
             .then(result => {
-                setGameDescriptions(result.data)
+                store.set(result.data);
             });
-    }, [])
+    }, [store])
 
     return (
         <div className='games'>
@@ -91,14 +100,10 @@ const GameList = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {gameDescriptions.map(descr =>
+                {values(store.descriptions).map(descr =>
                     <GameDescription
-                        key={descr.name}
+                        key={descr.id}
                         descr={descr}
-                        createGameSession={(gameName) => {
-                            setChosenGame(gameName);
-                            setIsCreateGameSessionFormOpen(true);
-                        }}
                     />
                 )}
                 </tbody>
@@ -110,17 +115,16 @@ const GameList = () => {
             <Modal
                 className='modal form create-game-session'
                 overlayClassName='overlay'
-                isOpen={isCreateGameSessionFormOpen}
-                onRequestClose={() => setIsCreateGameSessionFormOpen(false)}
+                isOpen={viewStore.isCreateGameSessionFormOpen}
+                onRequestClose={viewStore.toggleCreateGameSessionFormOpen}
                 ariaHideApp={false}
             >
                 <CreateGameSessionForm
-                    gameName={chosenGame}
                     history={history}
                 />
             </Modal>
         </div>
     );
-};
+});
 
 export default GameList;
