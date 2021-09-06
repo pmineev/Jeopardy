@@ -256,8 +256,7 @@ const AddFinalQuestionForm = observer(({history}) => {
     );
 });
 
-const SetRounds = observer(() => {
-    const history = useHistory();
+const Round = observer(({round}) => {
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
     return (
@@ -266,7 +265,7 @@ const SetRounds = observer(() => {
 
             <table className="round add-game-table">
                 <tbody>
-                {store.selectedRound.themes && store.selectedRound.themes.map(theme =>
+                {round.themes && round.themes.map(theme =>
                     <Theme key={theme.name}
                            theme={theme}
                     />
@@ -294,6 +293,17 @@ const SetRounds = observer(() => {
                     Следующий раунд
                 </button>
             </div>
+        </>
+    );
+});
+
+const RoundsView = observer(() => {
+    const history = useHistory();
+    const {addGameStore: store, addGameViewStore: viewStore} = useStore();
+
+    return (
+        <>
+            <Round round={store.selectedRound}/>
 
             <Modal
                 className='modal form add-theme'
@@ -347,7 +357,7 @@ const AddGame = observer(() => {
         <div className='add-game'>
             {viewStore.isAddGameFormOpen
                 ? <AddGameForm/>
-                : <SetRounds/>
+                : <RoundsView/>
             }
         </div>
     )
