@@ -26,4 +26,6 @@ function toOrdinal(n) {
     return ordinals[n];
 }
 
-export {State, toOrdinal}
+const questionValues = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+
+export {State, toOrdinal, questionValues}

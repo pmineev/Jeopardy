@@ -1,34 +1,41 @@
 import './round.css';
+
+import {useEffect} from "react";
+import {useHistory} from 'react-router-dom';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import {SubmitError, TextInput} from "./inputs";
-import {useEffect, useState} from "react";
 import Modal from "react-modal";
+import {observer} from "mobx-react-lite";
+import {getSnapshot} from "mobx-state-tree";
+
 import {AddGameService} from "./services";
-import {useHistory} from 'react-router-dom';
+import {SubmitError, TextInput} from "./inputs";
 import {toOrdinal} from "./utils";
+import {useStore} from "./stores/RootStore";
 
 const addGameService = new AddGameService();
 
-const AddGameForm = (props) => {
+const AddGameForm = observer(() => {
+    const {addGameStore: store, addGameViewStore: viewStore} = useStore();
+
     return (
         <div className='form'>
             <Formik
                 initialValues={{
                     name: '',
-                    rounds_count: '3',
-                    questions_count: '5',
+                    roundsCount: '3',
+                    questionsCount: '5',
                 }}
                 validationSchema={Yup.object({
                     name: Yup.string()
                         .required('Обязательное поле'),
-                    rounds_count: Yup.number()
+                    roundsCount: Yup.number()
                         .required('Обязательное поле')
                         .min(2, 'Не менее 2 раундов')
                         .max(10, 'Не более 10 раундов')
                         .typeError('Введите число')
                         .integer('Так тоже не прокатит'),
-                    questions_count: Yup.number()
+                    questionsCount: Yup.number()
                         .required('Обязательное поле')
                         .min(1, 'Не менее 1 вопроса')
                         .max(10, 'Не более 10 вепросов')
@@ -37,7 +44,12 @@ const AddGameForm = (props) => {
                 })}
                 onSubmit={(values, {setSubmitting}) => {
                     setSubmitting(false);
-                    props.setGameParams({...values, themes: []});
+                    store.setGameParams(
+                        values.name,
+                        Number(values.roundsCount),
+                        Number(values.questionsCount)
+                    );
+                    viewStore.toggleAddGameFormOpen();
                 }}
             >
                 <Form>
@@ -49,12 +61,12 @@ const AddGameForm = (props) => {
                     />
                     <TextInput
                         label="Количество раундов"
-                        name="rounds_count"
+                        name="roundsCount"
                         type="text"
                     />
                     <TextInput
                         label="Количество вопросов в теме"
-                        name="questions_count"
+                        name="questionsCount"
                         type="text"
                     />
 
@@ -63,9 +75,10 @@ const AddGameForm = (props) => {
             </Formik>
         </div>
     );
-};
+});
 
-const AddThemeForm = (props) => {
+const AddThemeForm = observer(() => {
+    const {addGameStore: store, addGameViewStore: viewStore} = useStore();
     return (
         <Formik
             initialValues={{
@@ -78,7 +91,8 @@ const AddThemeForm = (props) => {
             })}
             onSubmit={(values, {setSubmitting}) => {
                 setSubmitting(false);
-                props.setTheme(values);
+                viewStore.toggleAddThemeFormOpen();
+                store.selectedRound.addTheme(values.name);
             }}
         >
             <Form>
@@ -93,53 +107,51 @@ const AddThemeForm = (props) => {
             </Form>
         </Formik>
     );
-}
+});
 
-const Question = (props) => {
+const Question = observer(({question}) => {
+    const {addGameStore: store, addGameViewStore: viewStore} = useStore();
+
     return (
         <td
-            className={`question-cell ${props.isSet ? '' : 'empty'}`}
-            onClick={() => props.setQuestion(props.round, props.theme, props.value)}
-        >{props.value}</td>
+            className={`question-cell ${question.isSet ? '' : 'empty'}`}
+            onClick={() => {
+                store.setSelectedQuestion(question);
+                viewStore.toggleAddQuestionFormOpen();
+            }}
+        >{question.value}</td>
 
     )
-}
+});
 
-const Theme = (props) => {
-    const question_values = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
-    console.log('theme_q', props.questions);
-    console.log('theme_q_filter100', props.questions.filter(q =>
-        q.value === (100 * props.round)
-    ).length !== 0);
+const Theme = ({theme}) => {
     return (
         <tr>
             <td
-                key={props.name}
+                key={theme.name}
                 className='theme-name'
             >
-                {props.name}
+                {theme.name}
             </td>
-            {question_values.slice(0, props.questions_count).map(value => (
+            {theme.questions.map(question => (
                 <Question
-                    key={props.name + value}
-                    round={props.round}
-                    theme={props.name}
-                    value={value * props.round}
-                    setQuestion={props.setQuestion}
-                    isSet={props.questions.filter(q =>
-                        q.value === value * props.round
-                    ).length !== 0
-                    }
+                    key={theme.name + question.value.toString()}
+                    question={question}
                 />
             ))}
         </tr>
     )
 }
 
-const AddQuestionForm = (props) => {
+const AddQuestionForm = observer(() => {
+    const {addGameStore: store, addGameViewStore: viewStore} = useStore();
+
     return (
         <Formik
-            initialValues={props.initialValues}
+            initialValues={{
+                text: store.selectedQuestion.text ?? '',
+                answer: store.selectedQuestion.answer ?? '',
+            }}
             validationSchema={Yup.object({
                 text: Yup.string()
                     .required('Обязательное поле')
@@ -150,11 +162,12 @@ const AddQuestionForm = (props) => {
             })}
             onSubmit={(values, {setSubmitting}) => {
                 setSubmitting(false);
-                props.setQuestion(values);
+                viewStore.toggleAddQuestionFormOpen();
+                store.selectedQuestion.set(values.text, values.answer);
             }}
         >
             <Form>
-                <header>{props.theme} за {props.value}</header>
+                <header>Вопрос за {store.selectedQuestion.value}</header>
                 <TextInput
                     label="Текст вопроса"
                     name="text"
@@ -170,37 +183,16 @@ const AddQuestionForm = (props) => {
             </Form>
         </Formik>
     );
-}
+});
 
-const AddFinalQuestionForm = (props) => {
-    function isAllRoundsFilled() {
-        for (let round = 1; round < props.rounds_count; round++) {
-            if (!props.themes[round] || props.themes[round].length === 0)
-                return false;
-        }
-        return true;
-    }
+const AddFinalQuestionForm = observer(({history}) => {
+    const {addGameStore: store} = useStore();
 
-    function isAllQuestionsFilled() {
-        for (let round = 1; round < props.rounds_count; round++) {
-            for (let theme of props.themes[round]) {
-                if (props.questions.filter(q =>
-                    q.round === round
-                    && q.theme === theme.name
-                ).length !== Number(props.questions_count))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    console.log(props.initialValues);
     return (
         <Formik
-            initialValues={props.initialValues
-            ?? {
-                text: '',
-                answer: ''
+            initialValues={{
+                text: store.finalRound.text ?? '',
+                answer: store.finalRound.answer ?? ''
             }}
             validationSchema={Yup.object({
                 text: Yup.string()
@@ -211,14 +203,27 @@ const AddFinalQuestionForm = (props) => {
                     .max(50, 'Не более 50 символов')
             })}
             onSubmit={(values, {setSubmitting, setErrors}) => {
-                props.setFinalQuestion(values);
-                if (isAllRoundsFilled())
-                    if (isAllQuestionsFilled()) {
-                        addGameService.post(props.game_name, props.themes, props.questions)
-                            .then(response => {
+                store.setFinalRound(values.text, values.answer);
+                if (store.isAllRoundsFilled)
+                    if (store.isAllQuestionsFilled) {
+                        let storeSnapshot = getSnapshot(store);
+                        addGameService.post({
+                            name: storeSnapshot.name,
+                            rounds: storeSnapshot.rounds.map(round => ({
+                                themes: round.themes.map(theme => ({
+                                    name: theme.name,
+                                    questions: theme.questions.map(({id, ...rest}) => rest)
+                                }))
+                            })),
+                            finalRound: {
+                                value: storeSnapshot.finalRound.value,
+                                text: storeSnapshot.finalRound.text,
+                                answer: storeSnapshot.finalRound.answer
+                            }
+                        })
+                            .then(() => {
                                 setSubmitting(false);
-                                localStorage.removeItem('game');
-                                props.history.push('/games');
+                                history.push('/games');
                             })
                             .catch(error =>
                                 setErrors({'submitError': error.message})
@@ -249,230 +254,104 @@ const AddFinalQuestionForm = (props) => {
             </Form>
         </Formik>
     );
-}
+});
 
-const SetRounds = (props) => {
+const SetRounds = observer(() => {
     const history = useHistory();
-    const [isAddThemeFormOpen, setIsAddThemeFormOpen] = useState(false);
-    const [isAddQuestionFormOpen, setIsAddQuestionFormOpen] = useState(false);
-    const [isAddFinalQuestionFormOpen, setIsAddFinalQuestionFormOpen] = useState(false);
-    const [gameParams, setGameParams] = useState(props.gameParams);
-    const [themes, setThemes] = useState(props.gameParams.themes);
-    const [currentRound, setCurrentRound] = useState(1);
-    const [questions, setQuestions] = useState([]);
-    const [questionParams, setQuestionParams] = useState({index: -1});
-
-    useEffect(() => {
-        console.log(props.savedGame);
-        if (props.savedGame) {
-            setIsAddThemeFormOpen(props.savedGame.modals.isAddThemeFormOpen);
-            setIsAddQuestionFormOpen(props.savedGame.modals.isAddQuestionFormOpen);
-            setIsAddFinalQuestionFormOpen(props.savedGame.modals.isAddFinalQuestionFormOpen);
-            setGameParams(props.savedGame.gameParams);
-            setThemes(props.savedGame.themes);
-            setCurrentRound(props.savedGame.currentRound);
-            setQuestions(props.savedGame.questions);
-            setQuestionParams(props.savedGame.questionParams);
-        }
-    }, []);
-
-    useEffect(() => {
-        const game = {
-            modals: {
-                isAddThemeFormOpen: isAddThemeFormOpen,
-                isAddQuestionFormOpen: isAddQuestionFormOpen,
-                isAddFinalQuestionFormOpen: isAddFinalQuestionFormOpen
-            },
-            gameParams: gameParams,
-            themes: themes,
-            currentRound: currentRound,
-            questions: questions,
-            questionParams: questionParams
-        }
-
-        localStorage.setItem('game', JSON.stringify(game));
-    }, [
-        isAddThemeFormOpen,
-        isAddQuestionFormOpen,
-        isAddFinalQuestionFormOpen,
-        gameParams,
-        themes,
-        currentRound,
-        questions,
-        questionParams
-    ])
+    const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
     return (
         <>
-            <header>{toOrdinal(currentRound)} раунд</header>
+            <header>{toOrdinal(store.selectedRoundIndex + 1)} раунд</header>
 
             <table className="round add-game-table">
                 <tbody>
-                {themes[currentRound] && themes[currentRound].map(theme =>
+                {store.selectedRound.themes && store.selectedRound.themes.map(theme =>
                     <Theme key={theme.name}
-                           name={theme.name}
-                           round={currentRound}
-                           questions_count={gameParams.questions_count}
-                           questions={questions.filter(q =>
-                               q.round === currentRound
-                               && q.theme === theme.name
-                           )}
-                           setQuestion={(r, t, v) => {
-                               setQuestionParams({
-                                   round: r,
-                                   theme: t,
-                                   value: v,
-                                   index: questions.findIndex(q =>
-                                       q.round === r
-                                       && q.theme === t
-                                       && q.value === v)
-                               })
-                               setIsAddQuestionFormOpen(true);
-                           }}
+                           theme={theme}
                     />
                 )}
                 </tbody>
             </table>
             <div className='button-group'>
-                <button onClick={() => setIsAddThemeFormOpen(true)}>Добавить тему</button>
+                <button onClick={viewStore.toggleAddThemeFormOpen}>Добавить тему</button>
             </div>
 
             <div className='button-group'>
-                <button disabled={currentRound === 1}
-                        onClick={() => setCurrentRound(currentRound === 'final'
-                            ? Number(gameParams.rounds_count) - 1
-                            : currentRound - 1)
-                        }>Предыдущий раунд
+                <button disabled={store.selectedRoundIndex === 0}
+                        onClick={store.previousRound}
+                >
+                    Предыдущий раунд
                 </button>
 
                 <button onClick={() => {
-                    let nextRound = currentRound + 1;
-                    console.log('nr', nextRound, gameParams.rounds_count);
-                    if (nextRound === Number(gameParams.rounds_count))
-                        setIsAddFinalQuestionFormOpen(true)
+                    if (store.selectedRoundIndex < store.roundsCount - 2)
+                        store.nextRound()
                     else
-                        setCurrentRound(nextRound)
-                }
-
-                }>Следующий раунд
+                        viewStore.toggleAddFinalQuestionFormOpen()
+                }}
+                >
+                    Следующий раунд
                 </button>
             </div>
 
             <Modal
                 className='modal form add-theme'
                 overlayClassName='overlay'
-                isOpen={isAddThemeFormOpen}
-                onRequestClose={() => setIsAddThemeFormOpen(false)}
+                isOpen={viewStore.isAddThemeFormOpen}
+                onRequestClose={viewStore.toggleAddThemeFormOpen}
                 ariaHideApp={false}
             >
-                <AddThemeForm
-                    setTheme={(theme) => {
-                        if (!themes[currentRound])
-                            themes[currentRound] = [];
-                        themes[currentRound].push(theme);
-                        setIsAddThemeFormOpen(false);
-                        setThemes(themes);
-                    }}/>
+                <AddThemeForm/>
             </Modal>
 
             <Modal
                 className='modal form add-question'
                 overlayClassName='overlay'
-                isOpen={isAddQuestionFormOpen}
-                onRequestClose={() => setIsAddQuestionFormOpen(false)}
+                isOpen={viewStore.isAddQuestionFormOpen}
+                onRequestClose={viewStore.toggleAddQuestionFormOpen}
                 ariaHideApp={false}
             >
-                <AddQuestionForm
-                    theme={questionParams.theme}
-                    value={questionParams.value}
-                    setQuestion={question => {
-                        if (questionParams.index === -1)
-                            questions.push({
-                                round: questionParams.round,
-                                theme: questionParams.theme,
-                                value: questionParams.value,
-                                text: question.text,
-                                answer: question.answer,
-                            })
-                        else {
-                            questions[questionParams.index].text = question.text;
-                            questions[questionParams.index].answer = question.answer;
-                        }
-                        setQuestions(questions);
-                        setIsAddQuestionFormOpen(false);
-                    }}
-                    initialValues={
-                        questionParams.index === -1
-                            ? {
-                                text: '',
-                                answer: ''
-                            }
-                            : {
-                                text: questions[questionParams.index].text,
-                                answer: questions[questionParams.index].answer
-                            }
-                    }
-                />
+                <AddQuestionForm/>
             </Modal>
 
 
             <Modal
                 className='modal form add-final-question'
                 overlayClassName='overlay'
-                isOpen={isAddFinalQuestionFormOpen}
-                onRequestClose={() => setIsAddFinalQuestionFormOpen(false)}
+                isOpen={viewStore.isAddFinalQuestionFormOpen}
+                onRequestClose={viewStore.toggleAddFinalQuestionFormOpen}
                 ariaHideApp={false}
             >
                 <AddFinalQuestionForm
-                    game_name={gameParams.name}
-                    rounds_count={gameParams.rounds_count}
-                    questions_count={gameParams.questions_count}
-                    questions={questions}
-                    themes={themes}
-                    initialValues={questions.filter(q => q.theme === 'final')[0]}
                     history={history}
-                    setFinalQuestion={question => {
-                        let i = questions.findIndex(q => q.theme === 'final');
-                        let newQuestion = {
-                            theme: 'final',
-                            value: 200 * gameParams.rounds_count * gameParams.questions_count,
-                            ...question
-                        }
-                        if (i === -1)
-                            questions.push(newQuestion)
-                        else
-                            questions[i] = newQuestion;
-                        setQuestions(questions);
-                    }}
                 />
             </Modal>
         </>
     );
-}
+});
 
-const AddGame = () => {
-    const [gameParams, setGameParams] = useState(undefined);
-    const [savedGame, setSavedGame] = useState(undefined);
+const AddGame = observer(() => {
+    const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
     useEffect(() => {
         document.title = 'Добавление игры'
-        setSavedGame(JSON.parse(localStorage.getItem('game')));
-    }, []);
+
+        return () => {
+            store.clear();
+            viewStore.clear();
+        }
+    }, [store, viewStore]);
 
     return (
         <div className='add-game'>
-            {!(gameParams || savedGame)
-                ? <AddGameForm
-                    setGameParams={setGameParams}
-                />
-                : <SetRounds
-                    gameParams={savedGame ? savedGame.gameParams : gameParams}
-                    savedGame={savedGame}
-                />
+            {viewStore.isAddGameFormOpen
+                ? <AddGameForm/>
+                : <SetRounds/>
             }
         </div>
     )
 
-};
+});
 
 export default AddGame;
