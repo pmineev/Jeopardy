@@ -45,6 +45,11 @@ const Round = types
                 ))
             }))
         }
+    }))
+    .views(self => ({
+        get index() {
+            return Number(self.id.slice(self.id.lastIndexOf('_') + 1));
+        }
     }));
 
 const AddGameStore = types
@@ -65,7 +70,7 @@ const AddGameStore = types
 
             for (let i = 0; i < self.roundsCount - 1; i++) {
                 self.rounds[i] = Round.create({
-                    id: self.name + i.toString(),
+                    id: self.name + '_' + i.toString(),
                     questionValues: questionValues
                         .slice(0, self.questionsCount)
                         .map(value => value * (i + 1))
@@ -83,10 +88,10 @@ const AddGameStore = types
             self.selectedQuestion = question;
         },
         previousRound() {
-            self.selectedRound = self.rounds[self.selectedRoundIndex - 1];
+            self.selectedRound = self.rounds[self.selectedRound.index - 1];
         },
         nextRound() {
-            self.selectedRound = self.rounds[self.selectedRoundIndex + 1];
+            self.selectedRound = self.rounds[self.selectedRound.index + 1];
         },
         setFinalRound(text, answer) {
             self.finalRound.set(text, answer)
@@ -101,9 +106,6 @@ const AddGameStore = types
         }
     }))
     .views(self => ({
-        get selectedRoundIndex() {
-            return self.rounds.indexOf(self.selectedRound);
-        },
         get isAllRoundsFilled() {
             for (const round of self.rounds) {
                 if (round.themes.length === 0) {

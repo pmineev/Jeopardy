@@ -261,7 +261,7 @@ const Round = observer(({round}) => {
 
     return (
         <>
-            <header>{toOrdinal(store.selectedRoundIndex + 1)} раунд</header>
+            <header>{toOrdinal(round.index + 1)} раунд</header>
 
             <table className="round add-game-table">
                 <tbody>
@@ -277,14 +277,14 @@ const Round = observer(({round}) => {
             </div>
 
             <div className='button-group'>
-                <button disabled={store.selectedRoundIndex === 0}
+                <button disabled={round.index === 0}
                         onClick={store.previousRound}
                 >
                     Предыдущий раунд
                 </button>
 
                 <button onClick={() => {
-                    if (store.selectedRoundIndex < store.roundsCount - 2)
+                    if (round.index < store.roundsCount - 2)
                         store.nextRound()
                     else
                         viewStore.toggleAddFinalQuestionFormOpen()
