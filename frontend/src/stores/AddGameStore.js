@@ -102,7 +102,8 @@ const AddGameStore = types
             self.roundsCount = undefined;
             self.rounds = [];
             self.finalRound = undefined;
-
+            self.selectedRound = undefined;
+            self.selectedQuestion = undefined;
         }
     }))
     .views(self => ({
