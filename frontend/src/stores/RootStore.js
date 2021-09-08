@@ -17,9 +17,9 @@ const RootStore = types
     });
 
 let rootStore = RootStore.create({
-    gameSessionDescriptionStore: GameSessionDescriptionStore.create({}),
-    gameListStore: GameListStore.create({}),
-    gameListViewStore: GameListViewStore.create({}),
+    gameSessionDescriptionStore: GameSessionDescriptionStore.create(),
+    gameListStore: GameListStore.create(),
+    gameListViewStore: GameListViewStore.create(),
     addGameStore: AddGameStore.create(),
     addGameViewStore: AddGameViewStore.create()
 });

@@ -2,7 +2,7 @@ import {types} from "mobx-state-tree";
 
 const GameListViewStore = types
     .model({
-        isCreateGameSessionFormOpen: types.boolean
+        isCreateGameSessionFormOpen: false
     })
     .actions(self => ({
         toggleCreateGameSessionFormOpen() {
