@@ -1,4 +1,7 @@
+from django_enum_choices.serializers import EnumChoiceField
 from rest_framework.serializers import Serializer, CharField, IntegerField, BooleanField
+
+from backend.enums import State
 
 
 class SessionSerializer(Serializer):
@@ -50,7 +53,7 @@ class RoundDescriptionSerializer(Serializer):
 
 
 class GameStateSerializer(Serializer):
-    state = CharField()
+    state = EnumChoiceField(State)
     players = PlayerSerializer(many=True)
     current_round = RoundDescriptionSerializer(required=False)
     current_player = PlayerSerializer(required=False)
