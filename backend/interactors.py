@@ -111,7 +111,7 @@ class GameSessionInteractor:
     def join(self, game_session_id, username):
         state = self.repo.get_state(game_session_id)
         if state == State.WAITING:
-            game_session_description = self.repo.join(game_session_id, username)
+            game_state = self.repo.join(game_session_id, username)
 
             if self.repo.is_all_players_joined(game_session_id):
                 self.notifier.player_joined(game_session_id, username)
@@ -122,11 +122,11 @@ class GameSessionInteractor:
 
             self.notifier.player_joined(game_session_id, username)
 
-            game_session_description = self.repo.get_session(game_session_id)
+            game_state = self.repo.get_game_state(game_session_id)
         else:
             raise NotPlayer
 
-        return game_session_description
+        return game_state
 
     def leave(self, game_session_id, username):
         if not self.repo.is_player(game_session_id, username):
@@ -141,6 +141,7 @@ class GameSessionInteractor:
             print(f'user {username} left')
         else:
             self.repo.set_player_state(game_session_id, username, is_playing=False)
+            print(f'player {username} left')
 
         if self.repo.is_all_players_left(game_session_id):
             self.repo.delete_game_session(game_session_id)

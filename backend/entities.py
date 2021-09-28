@@ -66,11 +66,6 @@ class GameSession:
     creator: UserProfile
     game: Game
     max_players: int
-    state: State = State.WAITING
-    players: List[Player] = None
-    current_player: Player = None
-    current_round: Round = None
-    current_question: Question = None
 
 
 @dataclass
@@ -80,12 +75,12 @@ class GameSessionDescription:
     game_name: str
     max_players: int
     current_players: int
-    players: List[Player] = None
 
 
 @dataclass
 class QuestionDescription:
     value: int
+    is_answered: bool = False
     text: str = None
 
 
@@ -99,3 +94,12 @@ class ThemeDescription:
 class RoundDescription:
     order: int
     themes: List[ThemeDescription]
+
+
+@dataclass
+class GameState:
+    state: State
+    players: List[Player]
+    current_round: RoundDescription = None
+    current_player: Player = None
+    current_question: QuestionDescription = None
