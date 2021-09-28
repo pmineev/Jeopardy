@@ -15,8 +15,8 @@ import {useStore} from "./stores/RootStore";
 const gameListService = new GameListService();
 const gameSessionService = new GameSessionService();
 
-const CreateGameSessionForm = observer((props) => {
-    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
+const CreateGameSessionForm = observer(({history}) => {
+    const {gameListStore: store, gameListViewStore: viewStore, gameSessionStore} = useStore();
 
     return (
         <Formik
@@ -31,10 +31,13 @@ const CreateGameSessionForm = observer((props) => {
             })}
             onSubmit={(values, {setSubmitting}) => {
                 gameSessionService.create(store.chosenGame.name, values.maxPlayers)
-                    .then((response) => {
+                    .then(response => {
+                        gameSessionStore.initializeCreated(response.data);
+                        localStorage.setItem('gameSessionId', response.data.id)
+
                         setSubmitting(false);
                         viewStore.toggleCreateGameSessionFormOpen();
-                        props.history.push('/game', response.data)
+                        history.push('/game')
                     })
             }}
         >

@@ -6,6 +6,7 @@ import GameListStore from "./GameListStore";
 import GameListViewStore from "./GameListViewStore";
 import AddGameStore from "./AddGameStore";
 import AddGameViewStore from "./AddGameViewStore";
+import GameSessionStore from "./GameSessionStore";
 
 const RootStore = types
     .model({
@@ -13,7 +14,8 @@ const RootStore = types
         gameListStore: GameListStore,
         gameListViewStore: GameListViewStore,
         addGameStore: AddGameStore,
-        addGameViewStore: AddGameViewStore
+        addGameViewStore: AddGameViewStore,
+        gameSessionStore: GameSessionStore
     });
 
 let rootStore = RootStore.create({
@@ -21,7 +23,8 @@ let rootStore = RootStore.create({
     gameListStore: GameListStore.create(),
     gameListViewStore: GameListViewStore.create(),
     addGameStore: AddGameStore.create(),
-    addGameViewStore: AddGameViewStore.create()
+    addGameViewStore: AddGameViewStore.create(),
+    gameSessionStore: GameSessionStore.create()
 });
 
 let rootStoreContext = createContext(rootStore);

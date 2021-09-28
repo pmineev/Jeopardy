@@ -11,8 +11,9 @@ import {useStore} from "./stores/RootStore";
 
 const gameSessionService = new GameSessionService();
 
-const GameSessionDescriptionView = observer((props) => {
-    const descr = props.descr;
+const GameSessionDescriptionView = observer(({descr, history}) => {
+    const {gameSessionStore} = useStore();
+
     return (
         <tr>
             <td>{descr.creator}</td>
@@ -23,8 +24,10 @@ const GameSessionDescriptionView = observer((props) => {
                     onClick={() => {
                         gameSessionService.join(descr.id)
                             .then(response =>
-                                props.history.push('/game', response.data)
-                            )
+                                gameSessionStore.initializeJoined(response.data));
+
+                        localStorage.setItem('gameSessionId', descr.id)
+                        history.push('/game');
                     }}
                 >
                     Играть
@@ -67,7 +70,6 @@ const Lobby = observer(() => {
                 </tr>
                 </thead>
                 <tbody>
-                {console.log(store.descriptions)}
                 {store.descriptions.size > 0 && values(store.descriptions).map(descr =>
                     <GameSessionDescriptionView
                         key={descr.creator}
