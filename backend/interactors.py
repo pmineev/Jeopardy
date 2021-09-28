@@ -51,7 +51,7 @@ class GameInteractor:
         self.repo = repo
 
     def create(self, game_data, username):
-        final_round_data = game_data['final_round']
+        final_round_data = game_data['finalRound']
         final_round = Question(text=final_round_data['text'],
                                answer=final_round_data['answer'],
                                value=final_round_data['value'])
@@ -111,7 +111,7 @@ class GameSessionInteractor:
     def join(self, game_session_id, username):
         state = self.repo.get_state(game_session_id)
         if state == State.WAITING:
-            game_state = self.repo.join(game_session_id, username)
+            self.repo.join(game_session_id, username)
 
             if self.repo.is_all_players_joined(game_session_id):
                 self.notifier.player_joined(game_session_id, username)
@@ -122,9 +122,10 @@ class GameSessionInteractor:
 
             self.notifier.player_joined(game_session_id, username)
 
-            game_state = self.repo.get_game_state(game_session_id)
         else:
             raise NotPlayer
+
+        game_state = self.repo.get_game_state(game_session_id)
 
         return game_state
 

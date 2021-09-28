@@ -220,7 +220,6 @@ class GameSessionRepo:
         orm_player = ORMPlayer.objects.create(user=orm_user_profile)
         orm_game_session.players.add(orm_player)
 
-        return GameSessionRepo.get_game_state(game_session_id)
 
     @staticmethod
     def get_game_state(game_session_id):

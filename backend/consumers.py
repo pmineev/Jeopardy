@@ -25,7 +25,7 @@ class LobbyConsumer(WebsocketConsumer):
             })
 
     def lobby_event(self, event):
-        event.pop('type')
+        # event.pop('type')
         self.send(json.dumps(event, ensure_ascii=False))
 
 
