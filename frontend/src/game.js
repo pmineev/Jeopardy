@@ -27,7 +27,7 @@ const PlayerControls = observer(() => {
                 }}
                 onSubmit={(values, {setSubmitting, resetForm}) => {
                     if (values.answer?.length > 0) {
-                        gameSessionService.submit_answer(store.id, values.answer);
+                        gameSessionService.submitAnswer(store.id, values.answer);
                         resetForm();
                         setSubmitting(false);
                     }
@@ -59,7 +59,7 @@ const HostCard = observer(() => {
     switch (store.state) {
         case State.WAITING: {
             hostText = 'ожидаем игроков';
-            hostImageURL = gameSessionService.get_host_image_url(State.WAITING);
+            hostImageURL = gameSessionService.getHostImageUrl(State.WAITING);
             break;
         }
         case State.ROUND_ENDED:
@@ -73,13 +73,13 @@ const HostCard = observer(() => {
 
             if (store.state === State.ROUND_ENDED) {
                 hostText += 'Раунд закончен.';
-                hostImageURL = gameSessionService.get_host_image_url(State.ROUND_STARTED);
+                hostImageURL = gameSessionService.getHostImageUrl(State.ROUND_STARTED);
             } else if (store.state === State.FINAL_ROUND_STARTED) {
                 hostText += 'Впереди финальный раунд.';
-                hostImageURL = gameSessionService.get_host_image_url(State.ROUND_STARTED);
+                hostImageURL = gameSessionService.getHostImageUrl(State.ROUND_STARTED);
             } else {
                 hostText += `${store.currentPlayer.nickname}, выбирайте вопрос.`;
-                hostImageURL = gameSessionService.get_host_image_url(State.CHOOSING_QUESTION);
+                hostImageURL = gameSessionService.getHostImageUrl(State.CHOOSING_QUESTION);
             }
             break;
         }
@@ -87,28 +87,28 @@ const HostCard = observer(() => {
             const themeName = store.currentRound.themes[store.currentQuestionIndexes.theme].name;
             const value = store.currentQuestion.value;
             hostText = `${themeName} за ${value}`;
-            hostImageURL = gameSessionService.get_host_image_url(State.ANSWERING);
+            hostImageURL = gameSessionService.getHostImageUrl(State.ANSWERING);
 
             if (store.currentAnswer?.text.length > 0) {
                 hostText = 'Неверно.';
-                hostImageURL = gameSessionService.get_host_image_url('wrong');
+                hostImageURL = gameSessionService.getHostImageUrl('wrong');
             }
             break;
         }
         case State.FINAL_ROUND: {
-            hostImageURL = gameSessionService.get_host_image_url(State.FINAL_ROUND);
+            hostImageURL = gameSessionService.getHostImageUrl(State.FINAL_ROUND);
             hostText = 'Финальный раунд';
             break;
         }
         case State.END_GAME: {
             const winner = store.players.reduce((a, b) => a.score > b.score ? a : b);
             hostText = `Победил ${winner.nickname}!`;
-            hostImageURL = gameSessionService.get_host_image_url(State.END_GAME);
+            hostImageURL = gameSessionService.getHostImageUrl(State.END_GAME);
             break;
         }
         default: {
             hostText = '';
-            hostImageURL = gameSessionService.get_host_image_url(State.WAITING);
+            hostImageURL = gameSessionService.getHostImageUrl(State.WAITING);
         }
     }
 
@@ -147,7 +147,7 @@ const QuestionCell = observer(({question, theme_order, question_order}) => {
         <td className={`question-cell ${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
             onClick={() => {
                 setClicked(true);
-                gameSessionService.choose_question(store.id, theme_order, question_order);
+                gameSessionService.chooseQuestion(store.id, theme_order, question_order);
             }}
         >
             {question.value}
@@ -242,7 +242,7 @@ const PlayerCard = observer(({player}) => {
                 ref={ref => tooltipRef = ref}
             >
                 <img
-                    src={gameSessionService.get_avatar_url()}
+                    src={gameSessionService.getAvatarUrl()}
                     alt={player.nickname}
                 />
                 <div>{player.nickname}</div>

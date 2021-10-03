@@ -156,7 +156,7 @@ class GameSessionService {
         axios.delete(url);
     }
 
-    choose_question(game_session_id, theme_order, question_order) {
+    chooseQuestion(game_session_id, theme_order, question_order) {
         const url = `game_sessions/${game_session_id}/question/`;
         axios.post(url, {
             theme_order: theme_order,
@@ -165,18 +165,18 @@ class GameSessionService {
             .catch(error => console.log(error));
     }
 
-    submit_answer(game_session_id, answer) {
+    submitAnswer(game_session_id, answer) {
         const url = `game_sessions/${game_session_id}/answer/`;
         axios.post(url, {answer: answer});
     }
 
-    get_host_image_url(state) {
+    getHostImageUrl(state) {
         const imageURL = baseStaticURL + '/img/kuleshov/' + state + '.jpg';
         console.log(imageURL);
         return imageURL;
     }
 
-    get_avatar_url() {
+    getAvatarUrl() {
         const imageURL = baseStaticURL + '/img/avatar.png';
         console.log(imageURL);
         return imageURL;
