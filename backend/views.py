@@ -144,6 +144,14 @@ class GameSessionListView(APIView):
 class GameSessionViewSet(ViewSet):
     interactor = GameSessionFactory.get()
 
+    def id(self, request):
+        try:
+            game_session_id = GameSessionViewSet.interactor.get_game_session_id(request.user.username)
+        except NotPlayer:
+            raise PermissionDenied(detail='not player')
+
+        return Response(data=dict(id=game_session_id))
+
     def join(self, request, game_session_id):
         try:
             game_state = GameSessionViewSet.interactor.join(game_session_id, request.user.username)
