@@ -8,7 +8,7 @@ from backend.entities import Game, GameDescription, Round, Theme, Question, User
     GameSessionDescription, GameState, RoundDescription, ThemeDescription, QuestionDescription, Player
 from backend.enums import State
 from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists, GameNotFound, TooManyPlayers, \
-    WrongQuestionRequest, AlreadyPlaying
+    WrongQuestionRequest, AlreadyPlaying, NotPlayer
 from backend.models import ORMUserProfile, ORMQuestion, ORMTheme, ORMRound, ORMGame, ORMGameSession, ORMPlayer
 
 
@@ -148,6 +148,17 @@ class GameRepo:
 
 
 class GameSessionRepo:
+    @staticmethod
+    def get_id(username):
+        try:
+            orm_game_session = ORMGameSession.objects.get(players__user__user__username=username)
+
+            game_session_id = orm_game_session.pk
+        except ORMGameSession.DoesNotExist:
+            raise NotPlayer
+
+        return game_session_id
+
     @staticmethod
     def create(game_session: GameSession):
         orm_user_profile = ORMUserProfile.objects.get(user__username=game_session.creator)
