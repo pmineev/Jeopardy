@@ -1,4 +1,4 @@
-import {types} from "mobx-state-tree";
+import {applySnapshot, types} from "mobx-state-tree";
 import {State, toOrdinal} from "../utils";
 
 const Player = types
@@ -186,6 +186,8 @@ const GameSessionStore = types
             })
         },
         initializeJoined(data) {
+            self.clear();
+
             self.state = data.state;
             data.players.forEach(player =>
                 self.players.push({
@@ -194,9 +196,13 @@ const GameSessionStore = types
                     isPlaying: player.is_playing
                 })
             );
-            self.setCurrentRound(data.current_round);
-            self.setCurrentPlayer(data.current_player);
-            self.setCurrentQuestion(data.current_question);
+
+            if (data.current_round)
+                self.setCurrentRound(data.current_round);
+            if (data.current_player)
+                self.setCurrentPlayer(data.current_player);
+            if (data.current_question)
+                self.setCurrentQuestion(data.current_question);
         },
         setState(state) {
             self.state = state;
@@ -237,6 +243,9 @@ const GameSessionStore = types
         },
         clearCurrentAnswer() {
             self.currentAnswer = undefined;
+        },
+        clear() {
+            applySnapshot(self, {});
         }
     }))
     .views(self => ({

@@ -137,6 +137,16 @@ class UserProfileService {
 }
 
 class GameSessionService {
+    getId() {
+        const url = `game_sessions/id/`;
+        return axios.get(url);
+    }
+
+    getGameState(gameSessionId) {
+        const url = `game_sessions/${gameSessionId}/`;
+        return axios.get(url);
+    }
+
     create(gameName, maxPlayers) {
         const url = '/game_sessions/';
         console.log('create');
@@ -172,7 +182,6 @@ class GameSessionService {
 
     getHostImageUrl(state) {
         const imageURL = baseStaticURL + '/img/kuleshov/' + state + '.jpg';
-        console.log(imageURL);
         return imageURL;
     }
 

@@ -278,19 +278,38 @@ const Players = observer(() => {
 
 const Game = observer(() => {
     const {gameSessionStore: store} = useStore();
+    const history = useHistory();
 
     useEffect(() => {
         document.title = 'Игра';
 
-        const gameSessionId = store.id > 0 ? store.id : Number(localStorage.getItem('gameSessionId'));
+        let gameSessionId;
+        let notifier;
 
-        if (!store.id)
-            store.setId(gameSessionId);
+        if (!store.id) {
+            gameSessionService.getId()
+                .then(response => {
+                    gameSessionId = response.data.id;
 
-        const notifier = new Notifier('game', gameSessionId);
-        notifier.setListener(store.listener);
+                    store.setId(gameSessionId);
+                    gameSessionService.getGameState(gameSessionId)
+                        .then(r =>
+                            store.initializeJoined(r.data));
 
-        return () => notifier.close();
+                    notifier = new Notifier('game', gameSessionId);
+                    notifier.setListener(store.listener);
+
+                })
+                .catch(error => {
+                    if (error.response.data.detail === 'not player')
+                        history.push('/games');
+                })
+
+        }
+
+        return () => {
+            notifier?.close();
+        }
     }, [store]);
 
     useEffect(() => {

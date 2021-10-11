@@ -26,7 +26,6 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
                             .then(response =>
                                 gameSessionStore.initializeJoined(response.data));
 
-                        localStorage.setItem('gameSessionId', descr.id)
                         history.push('/game');
                     }}
                 >
