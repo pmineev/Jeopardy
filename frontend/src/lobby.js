@@ -23,9 +23,10 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
                 <button
                     onClick={() => {
                         gameSessionService.join(descr.id)
-                            .then(response =>
-                                gameSessionStore.initializeJoined(response.data));
-
+                            .then(response => {
+                                gameSessionStore.initializeJoined(response.data);
+                                gameSessionStore.setId(descr.id);
+                            });
                         history.push('/game');
                     }}
                 >

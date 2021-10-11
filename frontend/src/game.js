@@ -291,10 +291,11 @@ const Game = observer(() => {
                 .then(response => {
                     gameSessionId = response.data.id;
 
-                    store.setId(gameSessionId);
                     gameSessionService.getGameState(gameSessionId)
-                        .then(r =>
-                            store.initializeJoined(r.data));
+                        .then(r => {
+                            store.initializeJoined(r.data);
+                            store.setId(gameSessionId);
+                        });
 
                     notifier = new Notifier('game', gameSessionId);
                     notifier.setListener(store.listener);
