@@ -93,6 +93,16 @@ class GameSessionInteractor:
         self.notifier = GameSessionNotifier(repo)
         self.timer = GameSessionTimer(self)
 
+    def get_game_session_id(self, username):
+        game_session_id = self.repo.get_id(username)
+
+        return game_session_id
+
+    def get_game_state(self, game_session_id):
+        game_state = self.repo.get_game_state(game_session_id)
+
+        return game_state
+
     def create(self, game_session_data, username):
         game = Game(name=game_session_data['game_name'])
         game_session = GameSession(creator=username,

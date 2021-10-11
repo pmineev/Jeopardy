@@ -137,46 +137,55 @@ class UserProfileService {
 }
 
 class GameSessionService {
-    create(gameName, max_players) {
+    getId() {
+        const url = `game_sessions/id/`;
+        return axios.get(url);
+    }
+
+    getGameState(gameSessionId) {
+        const url = `game_sessions/${gameSessionId}/`;
+        return axios.get(url);
+    }
+
+    create(gameName, maxPlayers) {
         const url = '/game_sessions/';
         console.log('create');
         return axios.post(url, {
             game_name: gameName,
-            max_players: max_players
+            max_players: maxPlayers
         })
     }
 
-    join(game_session_id) {
-        const url = `game_sessions/chosen/${game_session_id}/`;
+    join(gameSessionId) {
+        const url = `game_sessions/${gameSessionId}/join/`;
         return axios.post(url);
     }
 
-    leave(game_session_id) {
-        const url = `game_sessions/exited/${game_session_id}/`;
+    leave(gameSessionId) {
+        const url = `game_sessions/${gameSessionId}/leave/`;
         axios.delete(url);
     }
 
-    choose_question(game_session_id, theme_order, question_order) {
-        const url = `game_sessions/${game_session_id}/question/`;
+    chooseQuestion(gameSessionId, themeOrder, questionOrder) {
+        const url = `game_sessions/${gameSessionId}/question/`;
         axios.post(url, {
-            theme_order: theme_order,
-            question_order: question_order
+            theme_order: themeOrder,
+            question_order: questionOrder
         })
             .catch(error => console.log(error));
     }
 
-    submit_answer(game_session_id, answer) {
-        const url = `game_sessions/${game_session_id}/answer/`;
+    submitAnswer(gameSessionId, answer) {
+        const url = `game_sessions/${gameSessionId}/answer/`;
         axios.post(url, {answer: answer});
     }
 
-    get_host_image_url(state) {
+    getHostImageUrl(state) {
         const imageURL = baseStaticURL + '/img/kuleshov/' + state + '.jpg';
-        console.log(imageURL);
         return imageURL;
     }
 
-    get_avatar_url() {
+    getAvatarUrl() {
         const imageURL = baseStaticURL + '/img/avatar.png';
         console.log(imageURL);
         return imageURL;

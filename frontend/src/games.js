@@ -33,7 +33,6 @@ const CreateGameSessionForm = observer(({history}) => {
                 gameSessionService.create(store.chosenGame.name, values.maxPlayers)
                     .then(response => {
                         gameSessionStore.initializeCreated(response.data);
-                        localStorage.setItem('gameSessionId', response.data.id)
 
                         setSubmitting(false);
                         viewStore.toggleCreateGameSessionFormOpen();

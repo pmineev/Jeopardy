@@ -1,0 +1,440 @@
+asyncapi: '2.2.0'
+info:
+  title: Jeopardy Websocket API
+  version: 1.0.0
+  description: |
+    API для асинхронных событий.
+
+    Пользователи получают уведомления во время игры и при нахождении в лобби.
+
+    События лобби:
+    - добавлена игровая сессия;
+    - удалена игровая сессия;
+    - пользователь присоединился к игре;
+    - пользователь вышел из игры.
+
+    Игровые события:
+    - пользователь присоединился к игре;
+    - пользователь вышел из игры;
+    - начался новый раунд;
+    - выбран текущий игрок;
+    - выбран текущий вопрос;
+    - игрок ответил на вопрос;
+    - истекло время ответа на вопрос;
+    - начался финальный раунд;
+    - закончился финальный раунд.
+
+defaultContentType: application/json
+
+servers:
+  dev:
+    description: Websocket-сервер.
+    protocol: ws
+    url: ws://127.0.0.1:8000/ws
+
+channels:
+  /lobby/:
+    description: Канал для событий лобби.
+    subscribe:
+      message:
+        $ref: '#/components/messages/lobbyMessage'
+
+  /game_sessions/{id}/:
+    description: Канал для игровых событий.
+    parameters:
+      id:
+        description: Идентификатор игровой сессии
+        schema:
+          type: integer
+          minimum: 1
+    subscribe:
+      message:
+        $ref: '#/components/messages/gameSessionMessage'
+
+components:
+  messages:
+    lobbyMessage:
+      summary: Сообщение о событии лобби
+      title: Сообщение лобби
+      name: lobbyMessage
+      payload:
+        oneOf:
+        - $ref: '#/components/schemas/gameSessionCreatedEvent'
+        - $ref: '#/components/schemas/gameSessionDeletedEvent'
+        - $ref: '#/components/schemas/playerJoinedLobbyEvent'
+        - $ref: '#/components/schemas/playerLeftLobbyEvent'
+
+    gameSessionMessage:
+      summary: Сообщение об игровом событии
+      title: Игровое сообщение
+      name: gameSessionMessage
+      payload:
+        oneOf:
+        - $ref: '#/components/schemas/playerJoinedGameSessionEvent'
+        - $ref: '#/components/schemas/playerLeftGameSessionEvent'
+        - $ref: '#/components/schemas/roundStartedEvent'
+        - $ref: '#/components/schemas/currentPlayerChosenEvent'
+        - $ref: '#/components/schemas/currentQuestionChosenEvent'
+        - $ref: '#/components/schemas/playerAnsweredEvent'
+        - $ref: '#/components/schemas/questionTimeoutEvent'
+        - $ref: '#/components/schemas/finalRoundStartedEvent'
+        - $ref: '#/components/schemas/finalRoundTimeoutEvent'
+
+  schemas:
+    gameSessionCreatedEvent:
+      description: Игровая сессия создана
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: gameSessionCreated
+        data:
+          $ref: '#/components/schemas/gameSessionDescription'
+
+    gameSessionDeletedEvent:
+      description: Игровая сессия удалена
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: gameSessionDeleted
+        data:
+          type: object
+          required:
+          - id
+          properties:
+            id:
+              $ref: '#/components/schemas/gameSessionId'
+
+    playerJoinedLobbyEvent:
+      description: Игрок присоединился
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: playerJoined
+        data:
+          type: object
+          required:
+          - id
+          properties:
+            id:
+              $ref: '#/components/schemas/gameSessionId'
+
+    playerJoinedGameSessionEvent:
+      description: Игрок присоединился
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: playerJoined
+        data:
+          type: object
+          required:
+          - nickname
+          properties:
+            nickname:
+              $ref: '#/components/schemas/playerNickname'
+
+    playerLeftLobbyEvent:
+      description: Игрок вышел
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: playerLeft
+        data:
+          type: object
+          required:
+          - id
+          properties:
+            id:
+              $ref: '#/components/schemas/gameSessionId'
+
+    playerLeftGameSessionEvent:
+      description: Игрок вышел
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: playerLeft
+        data:
+          type: object
+          required:
+          - nickname
+          properties:
+            nickname:
+              $ref: '#/components/schemas/playerNickname'
+
+    roundStartedEvent:
+      description: Раунд начался
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          description: q
+          type: string
+          const: roundStarted
+        data:
+          $ref: '#/components/schemas/roundDescription'
+
+    currentPlayerChosenEvent:
+      description: Выбран текущий игрок
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: currentPlayerChosen
+        data:
+          type: object
+          required:
+          - nickname
+          properties:
+            nickname:
+              $ref: '#/components/schemas/playerNickname'
+
+    currentQuestionChosenEvent:
+      description: Выбран текущий вопрос
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: currentQuestionChosen
+        data:
+          type: object
+          required:
+          - text
+          - themeOrder
+          - questionOrder
+          properties:
+            text:
+              description: Текст вопроса
+              type: string
+            themeOrder:
+              description: Индекс темы вопроса
+              type: integer
+              minimum: 0
+            questionOrder:
+              description: Индекс вопроса в теме
+              type: integer
+              minimum: 0
+
+    playerAnsweredEvent:
+      description: Игрок ответил на вопрос
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: playerAnswered
+        data:
+          $ref: '#/components/schemas/player'
+
+    questionTimeoutEvent:
+      description: Истекло время ответа на вопрос
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: questionTimeout
+        data:
+          $ref: '#/components/schemas/answer'
+
+    finalRoundStartedEvent:
+      description: Финальный раунд начался
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: finalRoundStarted
+        data:
+          type: object
+          required:
+          - text
+          - value
+          properties:
+            text:
+              description: Текст финального вопроса
+              type: string
+            value:
+              description: Стоимость финального вопроса
+              type: integer
+              minimum: 0
+
+    finalRoundTimeoutEvent:
+      description: Финальный раунд закончился
+      type: object
+      required:
+      - event
+      - data
+      properties:
+        event:
+          type: string
+          const: finalRoundTimeout
+        data:
+          type: object
+          required:
+          - players
+          - answer
+          properties:
+            players:
+              description: Игроки
+              type: array
+              items:
+                $ref: '#/components/schemas/player'
+            answer:
+              description: Правильный ответ
+              type: object
+              required:
+              - text
+              properties:
+                text:
+                  description: Текст ответа
+                  type: string
+
+    gameSessionDescription:
+      description: Описание игровой сессии
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - creator
+      - gameName
+      - maxPlayers
+      - currentPlayers
+      properties:
+        id:
+          $ref: '#/components/schemas/gameSessionId'
+        creator:
+          description: Ник создателя игровой сессии
+          type: string
+        gameName:
+          description: Название игры
+          type: string
+        maxPlayers:
+          description: Максимальное количество игроков
+          type: integer
+          minimum: 2
+        currentPlayers:
+          description: Текущее количество игроков
+          type: integer
+          minimum: 1
+
+    gameSessionId:
+      description: Идентификатор игровой сессии
+      type: integer
+      minimum: 1
+
+    roundDescription:
+      description: Описание раунда
+      type: object
+      additionalProperties: false
+      required:
+      - order
+      - themes
+      properties:
+        order:
+          description: Номер раунда
+          type: integer
+          minimum: 0
+        themes:
+          description: Темы раунда
+          type: array
+          items:
+            $ref: '#/components/schemas/themeDescription'
+
+    themeDescription:
+      description: Тема
+      type: object
+      required:
+      - name
+      - questions
+      properties:
+        name:
+          description: Название темы
+          type: string
+        questions:
+          description: Вопросы темы
+          type: array
+          items:
+            $ref: '#/components/schemas/questionDescription'
+
+    questionDescription:
+      description: Вопрос
+      type: object
+      required:
+      - value
+      properties:
+        value:
+          description: Стоимость вопроса
+          type: integer
+          minimum: 0
+
+    player:
+      description: Игрок
+      type: object
+      required:
+      - nickname
+      - score
+      - answer
+      properties:
+        nickname:
+          $ref: '#/components/schemas/playerNickname'
+        score:
+          description: Счет игрока
+          type: integer
+          minimum: 0
+        answer:
+          $ref: '#/components/schemas/answer'
+
+    playerNickname:
+      description: Ник игрока
+      type: string
+
+    answer:
+      description: Ответ
+      type: object
+      required:
+      - text
+      - isCorrect
+      properties:
+        text:
+          description: Текст ответа
+          type: string
+        isCorrect:
+          description: Корректность ответа
+          type: boolean
