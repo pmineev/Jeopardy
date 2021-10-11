@@ -147,12 +147,12 @@ class GameSessionService {
     }
 
     join(gameSessionId) {
-        const url = `game_sessions/chosen/${gameSessionId}/`;
+        const url = `game_sessions/${gameSessionId}/join/`;
         return axios.post(url);
     }
 
     leave(gameSessionId) {
-        const url = `game_sessions/exited/${gameSessionId}/`;
+        const url = `game_sessions/${gameSessionId}/leave/`;
         axios.delete(url);
     }
 
