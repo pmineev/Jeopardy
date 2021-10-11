@@ -152,6 +152,13 @@ class GameSessionViewSet(ViewSet):
 
         return Response(data=dict(id=game_session_id))
 
+    def get_state(self, request, game_session_id):
+        game_state = GameSessionViewSet.interactor.get_game_state(game_session_id)
+
+        game_state_serialized = GameStateSerializer(game_state).data
+
+        return Response(data=game_state_serialized)
+
     def join(self, request, game_session_id):
         try:
             game_state = GameSessionViewSet.interactor.join(game_session_id, request.user.username)
