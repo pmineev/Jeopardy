@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/games/', GameListView.as_view()),
     path('api/game_sessions/', GameSessionListView.as_view()),
     path('api/game_sessions/id/', GameSessionViewSet.as_view({'get': 'id'})),
+    path('api/game_sessions/<int:game_session_id>/', GameSessionViewSet.as_view({'get': 'get_state'})),
     path('api/game_sessions/<int:game_session_id>/join/', GameSessionViewSet.as_view({'post': 'join'})),
     path('api/game_sessions/<int:game_session_id>/leave/', GameSessionViewSet.as_view({'delete': 'leave'})),
     path('api/game_sessions/<int:game_session_id>/question/', GameSessionViewSet.as_view({'post': 'choose_question'})),
