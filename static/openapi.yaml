@@ -23,20 +23,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-              - password
-              - username
-              properties:
-                username:
-                  description: Имя пользователя
-                  type: string
-                nickname:
-                  description: Ник пользователя
-                  type: string
-                password:
-                  description: Пароль пользователя
-                  type: string
+              $ref: '#/components/schemas/registerUserCredentials'
       responses:
         '201':
           description: Пользователь успешно зарегистрирован
@@ -95,14 +82,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                nickname:
-                  description: Ник пользователя
-                  type: string
-                password:
-                  description: Пароль пользователя
-                  type: string
+              $ref: '#/components/schemas/changeUserCredentials'
       responses:
         '204':
           description: Информация изменена
@@ -120,17 +100,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-              - password
-              - username
-              properties:
-                username:
-                  description: Имя пользователя
-                  type: string
-                password:
-                  description: Пароль пользователя
-                  type: string
+              $ref: '#/components/schemas/loginUserCredentials'
       responses:
         '200':
           description: Аутентификация прошла успешно
@@ -273,19 +243,7 @@ paths:
         content:
           application/json:
             schema:
-              description: Описание игровой сессии
-              type: object
-              required:
-              - gameName
-              - maxPlayers
-              properties:
-                gameName:
-                  description: Название игры
-                  type: string
-                maxPlayers:
-                  description: Максимальное количество игроков
-                  type: integer
-                  minimum: 2
+              $ref: '#/components/schemas/createGameSession'
       responses:
         '201':
           description: Игровая сессия создана
@@ -356,19 +314,7 @@ paths:
         content:
           application/json:
             schema:
-              required:
-              - themeOrder
-              - questionOrder
-              type: object
-              properties:
-                themeOrder:
-                  description: Индекс темы вопроса
-                  type: integer
-                  minimum: 0
-                questionOrder:
-                  description: Индекс вопроса в теме
-                  type: integer
-                  minimum: 0
+              $ref: '#/components/schemas/questionChoice'
       responses:
         '201':
           description: Текущий вопрос выбран
@@ -404,13 +350,7 @@ paths:
         content:
           application/json:
             schema:
-              required:
-              - answer
-              type: object
-              properties:
-                answer:
-                  description: Текст ответа
-                  type: string
+              $ref: '#/components/schemas/playerAnswer'
       responses:
         '201':
           description: OK
@@ -436,6 +376,45 @@ components:
       bearerFormat: JWT
 
   schemas:
+    registerUserCredentials:
+      type: object
+      required:
+      - password
+      - username
+      properties:
+        username:
+          description: Имя пользователя
+          type: string
+        nickname:
+          description: Ник пользователя
+          type: string
+        password:
+          description: Пароль пользователя
+          type: string
+
+    changeUserCredentials:
+      type: object
+      properties:
+        nickname:
+          description: Ник пользователя
+          type: string
+        password:
+          description: Пароль пользователя
+          type: string
+
+    loginUserCredentials:
+      type: object
+      required:
+      - password
+      - username
+      properties:
+        username:
+          description: Имя пользователя
+          type: string
+        password:
+          description: Пароль пользователя
+          type: string
+
     user:
       description: Информация о пользователе
       type: object
@@ -546,6 +525,45 @@ components:
           description: Текущее количество игроков
           type: integer
           minimum: 1
+
+    createGameSession:
+      description: Описание игровой сессии
+      type: object
+      required:
+      - gameName
+      - maxPlayers
+      properties:
+        gameName:
+          description: Название игры
+          type: string
+        maxPlayers:
+          description: Максимальное количество игроков
+          type: integer
+          minimum: 2
+
+    questionChoice:
+      required:
+      - themeOrder
+      - questionOrder
+      type: object
+      properties:
+        themeOrder:
+          description: Индекс темы вопроса
+          type: integer
+          minimum: 0
+        questionOrder:
+          description: Индекс вопроса в теме
+          type: integer
+          minimum: 0
+
+    playerAnswer:
+      required:
+      - answer
+      type: object
+      properties:
+        answer:
+          description: Текст ответа
+          type: string
 
     requestRejectReason:
       description: Причина отклонения запроса
