@@ -467,7 +467,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/round'
-        final_round:
+        finalRound:
           $ref: '#/components/schemas/question'
 
     round:
