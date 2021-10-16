@@ -1,17 +1,17 @@
-import json
-
 from rest_framework import status
-from rest_framework.exceptions import ParseError, AuthenticationFailed, PermissionDenied
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
 from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists, TooManyPlayers, \
-    NotPlayer, NotCurrentPlayer, WrongQuestionRequest, GameNotFound, AlreadyPlaying
+    NotPlayer, NotCurrentPlayer, WrongQuestionRequest, GameNotFound, AlreadyPlaying, WrongStage
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer, \
-    GameSessionDescriptionSerializer, GameStateSerializer
+    GameSessionDescriptionSerializer, GameStateSerializer, RegisterUserCredentialsSerializer, \
+    LoginUserCredentialsSerializer, ChangeUserCredentialsSerializer, GameSerializer, CreateGameSessionSerializer, \
+    QuestionChoiceSerializer, PlayerAnswerSerializer
 
 
 class UserListView(APIView):
@@ -20,22 +20,20 @@ class UserListView(APIView):
     interactor = UserFactory.get()
 
     def post(self, request):
-        user_dict = json.loads(request.body)
-
-        if 'username' not in user_dict or 'password' not in user_dict:
-            raise ParseError(detail='provide username and password fields')
+        serializer = RegisterUserCredentialsSerializer(data=request.data)
 
         try:
-            UserListView.interactor.create(user_dict)
-            session = UserListView.interactor.create_session(user_dict)
+            serializer.is_valid(raise_exception=True)
+            UserListView.interactor.create(serializer.validated_data)
+            session = UserListView.interactor.create_session(serializer.validated_data)
+        except ValidationError:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except UserAlreadyExists:
-            return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='user already exists'))
-        except InvalidCredentials:
-            raise AuthenticationFailed()
+            return Response(status=status.HTTP_409_CONFLICT)
 
         session_serializer = SessionSerializer(session)
 
-        return Response(session_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED, data=session_serializer.data)
 
 
 class SessionView(APIView):
@@ -44,17 +42,15 @@ class SessionView(APIView):
     interactor = UserFactory.get()
 
     def post(self, request):
-        user_dict = json.loads(request.body)
-
-        if 'username' not in user_dict or 'password' not in user_dict:
-            raise ParseError(detail='provide username and password fields')
+        serializer = LoginUserCredentialsSerializer(data=request.data)
 
         try:
-            session = SessionView.interactor.create_session(user_dict)
-        except UserNotFound:
-            raise AuthenticationFailed(detail='user not found')
-        except InvalidCredentials:
-            raise AuthenticationFailed()
+            serializer.is_valid(raise_exception=True)
+            session = SessionView.interactor.create_session(serializer.validated_data)
+        except ValidationError:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except (UserNotFound, InvalidCredentials):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         session_serializer = SessionSerializer(session)
 
@@ -66,7 +62,7 @@ class UserView(APIView):
 
     def get(self, request, username):
         if username != request.user.username:
-            raise PermissionDenied()
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         user = UserView.interactor.get(username)
 
@@ -76,26 +72,30 @@ class UserView(APIView):
 
     def patch(self, request, username):
         if username != request.user.username:
-            raise PermissionDenied()
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        update_dict = json.loads(request.body)
+        serializer = ChangeUserCredentialsSerializer(data=request.data)
 
-        if 'password' not in update_dict and 'nickname' not in update_dict:
-            raise ParseError(detail='provide nickname or password fields')
+        try:
+            serializer.is_valid(raise_exception=True)
+            UserView.interactor.update(serializer.validated_data, username)
+        except ValidationError:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        UserView.interactor.update(update_dict, username)
-
-        return Response()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class GameListView(APIView):
     interactor = GameFactory.get()
 
     def post(self, request):
-        game_dict = json.loads(request.body)
+        serializer = GameSerializer(data=request.data)
 
         try:
-            GameListView.interactor.create(game_dict, request.user.username)
+            serializer.is_valid(raise_exception=True)
+            GameListView.interactor.create(serializer.validated_data, request.user.username)
+        except ValidationError:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except GameAlreadyExists:
             return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='game already exists'))
 
@@ -115,17 +115,16 @@ class GameSessionListView(APIView):
     interactor = GameSessionFactory.get()
 
     def post(self, request):
-        game_session_dict = json.loads(request.body)
-
-        if 'max_players' not in game_session_dict or 'game_name' not in game_session_dict:
-            raise ParseError(detail='provide max_players and game_name fields')
+        serializer = CreateGameSessionSerializer(data=request.data)
 
         try:
-            game_session_description = GameSessionListView.interactor.create(game_session_dict, request.user.username)
-        except GameNotFound:
-            raise ParseError(detail='game not found')
+            serializer.is_valid(raise_exception=True)
+            game_session_description = GameSessionListView.interactor.create(serializer.validated_data,
+                                                                             request.user.username)
+        except ValidationError:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except AlreadyPlaying:
-            return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='user is already playing'))
+            return Response(status=status.HTTP_409_CONFLICT)
 
         game_session_descriptions_serialized = GameSessionDescriptionSerializer(game_session_description).data
 
@@ -148,12 +147,17 @@ class GameSessionViewSet(ViewSet):
         try:
             game_session_id = GameSessionViewSet.interactor.get_game_session_id(request.user.username)
         except NotPlayer:
-            raise PermissionDenied(detail='not player')
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         return Response(data=dict(id=game_session_id))
 
     def get_state(self, request, game_session_id):
-        game_state = GameSessionViewSet.interactor.get_game_state(game_session_id)
+        try:
+            game_state = GameSessionViewSet.interactor.get_game_state(game_session_id)
+        except GameNotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except NotPlayer:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         game_state_serialized = GameStateSerializer(game_state).data
 
@@ -162,8 +166,10 @@ class GameSessionViewSet(ViewSet):
     def join(self, request, game_session_id):
         try:
             game_state = GameSessionViewSet.interactor.join(game_session_id, request.user.username)
-        except TooManyPlayers:
-            return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='too many players'))
+        except GameNotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except (TooManyPlayers, AlreadyPlaying):
+            return Response(status=status.HTTP_409_CONFLICT)
 
         game_state_serialized = GameStateSerializer(game_state).data
 
@@ -172,39 +178,41 @@ class GameSessionViewSet(ViewSet):
     def leave(self, request, game_session_id):
         try:
             GameSessionViewSet.interactor.leave(game_session_id, request.user.username)
+        except GameNotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         except NotPlayer:
-            raise PermissionDenied(detail='not player')
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        return Response()
+        return Response(status=status.HTTP_201_CREATED)
 
     def choose_question(self, request, game_session_id):
-        question_dict = json.loads(request.body)
-
-        if 'theme_order' not in question_dict or 'question_order' not in question_dict:
-            raise ParseError(detail='provide theme_order and question_order fields')
+        serializer = QuestionChoiceSerializer(data=request.data)
 
         try:
-            GameSessionViewSet.interactor.choose_question(game_session_id, question_dict, request.user.username)
-        except NotPlayer:
-            raise PermissionDenied(detail='not player')
-        except NotCurrentPlayer:
-            raise PermissionDenied(detail='not current player')
-        except WrongQuestionRequest:
-            raise ParseError(detail='wrong question request')
+            serializer.is_valid(raise_exception=True)
+            GameSessionViewSet.interactor.choose_question(game_session_id, serializer.validated_data,
+                                                          request.user.username)
+        except (ValidationError, WrongQuestionRequest):
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except GameNotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except (NotPlayer, NotCurrentPlayer, WrongStage):
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         return Response(status=status.HTTP_201_CREATED)
 
     def submit_answer(self, request, game_session_id):
-        answer_dict = json.loads(request.body)
-
-        if 'answer' not in answer_dict:
-            raise ParseError(detail='provide answer field')
+        serializer = PlayerAnswerSerializer(data=request.data)
 
         try:
-            GameSessionViewSet.interactor.submit_answer(game_session_id, request.user.username, answer_dict['answer'])
-        except NotPlayer:
-            raise PermissionDenied(detail='not player')
-        except NotCurrentPlayer:
-            raise PermissionDenied(detail='not current player')
+            serializer.is_valid(raise_exception=True)
+            GameSessionViewSet.interactor.submit_answer(game_session_id, request.user.username,
+                                                        serializer.validated_data)
+        except ValidationError:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except GameNotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except (NotPlayer, WrongStage):
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         return Response(status=status.HTTP_201_CREATED)
