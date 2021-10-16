@@ -86,6 +86,8 @@ paths:
       responses:
         '204':
           description: Информация изменена
+        '403':
+          description: Доступ запрещен
         '422':
           description: Некорректные данные
 
@@ -299,6 +301,8 @@ paths:
                 $ref: '#/components/schemas/gameState'
         '403':
           description: Пользователя нет в указанной игровой сессии
+        '404':
+          description: Игровая сессия не найдена
 
   /game_sessions/{game_session_id}/actions/join/:
     post:
@@ -319,6 +323,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/gameState'
+        '404':
+          description: Игровая сессия не найдена
         '409':
           description: |
             Пользователь не присоединен к игре.
@@ -348,6 +354,8 @@ paths:
           description: Пользователь успешно вышел из игры
         '403':
           description: Пользователя нет в указанной игровой сессии
+        '404':
+          description: Игровая сессия не найдена
 
   /game_sessions/{game_session_id}/current_question/:
     post:
@@ -382,6 +390,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/requestRejectReason'
+        '404':
+          description: Игровая сессия не найдена
         '422':
           description: Некорректные данные
 
@@ -419,6 +429,8 @@ paths:
                 $ref: '#/components/schemas/requestRejectReason'
         '422':
           description: Некорректные данные
+        '404':
+          description: Игровая сессия не найдена
 
 components:
   securitySchemes:
