@@ -209,6 +209,10 @@ paths:
       responses:
         '201':
           description: Игра успешно сохранена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameState'
         '409':
           description: Игра с таким именем уже существует
         '422':
@@ -252,6 +256,50 @@ paths:
         '422':
           description: Некорректные данные
 
+  /game_sessions/id/:
+    get:
+      tags:
+      - game_sessions
+      summary: Получение игроком идентификатора игровой сессии
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: Идентификатор игровой сессии
+                type: object
+                required:
+                - id
+                properties:
+                  id:
+                    type: integer
+                    minimum: 1
+        '404':
+          description: Пользователь не играет
+
+  /game_sessions/{game_session_id}/:
+    get:
+      tags:
+      - game_sessions
+      summary: Получение игроком текущего состояния игровой сессии
+      parameters:
+      - name: game_session_id
+        in: path
+        description: Идентификатор игровой сессии
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameState'
+        '403':
+          description: Пользователя нет в указанной игровой сессии
+
   /game_sessions/{game_session_id}/actions/join/:
     post:
       tags:
@@ -267,6 +315,10 @@ paths:
       responses:
         '201':
           description: Пользователь успешно присоединился к игре
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameState'
         '409':
           description: |
             Пользователь не присоединен к игре.
@@ -540,6 +592,92 @@ components:
           description: Максимальное количество игроков
           type: integer
           minimum: 2
+
+    gameState:
+      description: Состояние игровой сессии
+      type: object
+      additionalProperties: false
+      required:
+      - stage
+      - players
+      properties:
+        stage:
+          description: Стадия игры
+          type: string
+        players:
+          description: Игроки
+          type: array
+          items:
+            $ref: '#/components/schemas/player'
+        currentRound:
+          allOf:
+          - $ref: '#/components/schemas/round'
+          - type: object
+            required:
+            - order
+            properties:
+              order:
+                description: Индекс раунда
+                type: integer
+                minimum: 0
+        currentPlayer:
+          $ref: '#/components/schemas/playerNickname'
+        currentQuestion:
+          description: Текущий вопрос
+          type: object
+          required:
+          - text
+          - value
+          properties:
+            text:
+              description: Текст вопроса
+              type: string
+            value:
+              description: Стоимость вопроса
+              type: integer
+              minimum: 0
+            themeOrder:
+              description: Индекс темы вопроса
+              type: integer
+              minimum: 0
+            questionOrder:
+              description: Индекс вопроса в теме
+              type: integer
+              minimum: 0
+
+    player:
+      description: Игрок
+      type: object
+      required:
+      - nickname
+      - score
+      properties:
+        nickname:
+          $ref: '#/components/schemas/playerNickname'
+        score:
+          description: Счет игрока
+          type: integer
+          minimum: 0
+        answer:
+          $ref: '#/components/schemas/answer'
+
+    answer:
+      description: Ответ
+      type: object
+      required:
+      - text
+      - isCorrect
+      properties:
+        text:
+          description: Текст ответа
+          type: string
+        isCorrect:
+          description: Корректность ответа
+          type: boolean
+
+    playerNickname:
+      description: Ник игрока
+      type: string
 
     questionChoice:
       required:
