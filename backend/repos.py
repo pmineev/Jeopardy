@@ -21,10 +21,11 @@ class UserRepo:
 
     @staticmethod
     def get(username):
-        orm_user = ORMUser.objects.get(username=username)
-        if not orm_user:
+        orm_user_qs = ORMUser.objects.filter(username=username)
+        if not orm_user_qs.exists():
             raise UserNotFound
 
+        orm_user = orm_user_qs.first()
         orm_user_profile = ORMUserProfile.objects.get(user=orm_user)
         return UserRepo._to_entity(orm_user_profile)
 
@@ -239,7 +240,6 @@ class GameSessionRepo:
 
         orm_player = ORMPlayer.objects.create(user=orm_user_profile)
         orm_game_session.players.add(orm_player)
-
 
     @staticmethod
     def get_game_state(game_session_id):
