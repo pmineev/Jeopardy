@@ -23,20 +23,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-              - password
-              - username
-              properties:
-                username:
-                  description: Имя пользователя
-                  type: string
-                nickname:
-                  description: Ник пользователя
-                  type: string
-                password:
-                  description: Пароль пользователя
-                  type: string
+              $ref: '#/components/schemas/registerUserCredentials'
       responses:
         '201':
           description: Пользователь успешно зарегистрирован
@@ -95,17 +82,12 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                nickname:
-                  description: Ник пользователя
-                  type: string
-                password:
-                  description: Пароль пользователя
-                  type: string
+              $ref: '#/components/schemas/changeUserCredentials'
       responses:
         '204':
           description: Информация изменена
+        '403':
+          description: Доступ запрещен
         '422':
           description: Некорректные данные
 
@@ -120,17 +102,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-              - password
-              - username
-              properties:
-                username:
-                  description: Имя пользователя
-                  type: string
-                password:
-                  description: Пароль пользователя
-                  type: string
+              $ref: '#/components/schemas/loginUserCredentials'
       responses:
         '200':
           description: Аутентификация прошла успешно
@@ -273,26 +245,64 @@ paths:
         content:
           application/json:
             schema:
-              description: Описание игровой сессии
-              type: object
-              required:
-              - gameName
-              - maxPlayers
-              properties:
-                gameName:
-                  description: Название игры
-                  type: string
-                maxPlayers:
-                  description: Максимальное количество игроков
-                  type: integer
-                  minimum: 2
+              $ref: '#/components/schemas/createGameSession'
       responses:
         '201':
           description: Игровая сессия создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameSessionDescription' # TODO заменить на gameState
         '409':
           description: Пользователь уже играет
         '422':
           description: Некорректные данные
+
+  /game_sessions/id/:
+    get:
+      tags:
+      - game_sessions
+      summary: Получение игроком идентификатора игровой сессии
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: Идентификатор игровой сессии
+                type: object
+                required:
+                - id
+                properties:
+                  id:
+                    type: integer
+                    minimum: 1
+        '404':
+          description: Пользователь не играет
+
+  /game_sessions/{game_session_id}/:
+    get:
+      tags:
+      - game_sessions
+      summary: Получение игроком текущего состояния игровой сессии
+      parameters:
+      - name: game_session_id
+        in: path
+        description: Идентификатор игровой сессии
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameState'
+        '403':
+          description: Пользователя нет в указанной игровой сессии
+        '404':
+          description: Игровая сессия не найдена
 
   /game_sessions/{game_session_id}/actions/join/:
     post:
@@ -309,6 +319,12 @@ paths:
       responses:
         '201':
           description: Пользователь успешно присоединился к игре
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameState'
+        '404':
+          description: Игровая сессия не найдена
         '409':
           description: |
             Пользователь не присоединен к игре.
@@ -338,6 +354,8 @@ paths:
           description: Пользователь успешно вышел из игры
         '403':
           description: Пользователя нет в указанной игровой сессии
+        '404':
+          description: Игровая сессия не найдена
 
   /game_sessions/{game_session_id}/current_question/:
     post:
@@ -356,19 +374,7 @@ paths:
         content:
           application/json:
             schema:
-              required:
-              - themeOrder
-              - questionOrder
-              type: object
-              properties:
-                themeOrder:
-                  description: Индекс темы вопроса
-                  type: integer
-                  minimum: 0
-                questionOrder:
-                  description: Индекс вопроса в теме
-                  type: integer
-                  minimum: 0
+              $ref: '#/components/schemas/questionChoice'
       responses:
         '201':
           description: Текущий вопрос выбран
@@ -384,6 +390,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/requestRejectReason'
+        '404':
+          description: Игровая сессия не найдена
         '422':
           description: Некорректные данные
 
@@ -404,13 +412,7 @@ paths:
         content:
           application/json:
             schema:
-              required:
-              - answer
-              type: object
-              properties:
-                answer:
-                  description: Текст ответа
-                  type: string
+              $ref: '#/components/schemas/playerAnswer'
       responses:
         '201':
           description: OK
@@ -427,6 +429,8 @@ paths:
                 $ref: '#/components/schemas/requestRejectReason'
         '422':
           description: Некорректные данные
+        '404':
+          description: Игровая сессия не найдена
 
 components:
   securitySchemes:
@@ -436,6 +440,45 @@ components:
       bearerFormat: JWT
 
   schemas:
+    registerUserCredentials:
+      type: object
+      required:
+      - password
+      - username
+      properties:
+        username:
+          description: Имя пользователя
+          type: string
+        nickname:
+          description: Ник пользователя
+          type: string
+        password:
+          description: Пароль пользователя
+          type: string
+
+    changeUserCredentials:
+      type: object
+      properties:
+        nickname:
+          description: Ник пользователя
+          type: string
+        password:
+          description: Пароль пользователя
+          type: string
+
+    loginUserCredentials:
+      type: object
+      required:
+      - password
+      - username
+      properties:
+        username:
+          description: Имя пользователя
+          type: string
+        password:
+          description: Пароль пользователя
+          type: string
+
     user:
       description: Информация о пользователе
       type: object
@@ -467,7 +510,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/round'
-        final_round:
+        finalRound:
           $ref: '#/components/schemas/question'
 
     round:
@@ -546,6 +589,131 @@ components:
           description: Текущее количество игроков
           type: integer
           minimum: 1
+
+    createGameSession:
+      description: Описание игровой сессии
+      type: object
+      required:
+      - gameName
+      - maxPlayers
+      properties:
+        gameName:
+          description: Название игры
+          type: string
+        maxPlayers:
+          description: Максимальное количество игроков
+          type: integer
+          minimum: 2
+
+    gameState:
+      description: Состояние игровой сессии
+      type: object
+      additionalProperties: false
+      required:
+      - stage
+      - players
+      properties:
+        stage:
+          description: Стадия игры
+          type: string
+        players:
+          description: Игроки
+          type: array
+          items:
+            $ref: '#/components/schemas/player'
+        currentRound:
+          allOf:
+          - $ref: '#/components/schemas/round'
+          - type: object
+            required:
+            - order
+            properties:
+              order:
+                description: Индекс раунда
+                type: integer
+                minimum: 0
+        currentPlayer:
+          $ref: '#/components/schemas/playerNickname'
+        currentQuestion:
+          description: Текущий вопрос
+          type: object
+          required:
+          - text
+          - value
+          properties:
+            text:
+              description: Текст вопроса
+              type: string
+            value:
+              description: Стоимость вопроса
+              type: integer
+              minimum: 0
+            themeOrder:
+              description: Индекс темы вопроса
+              type: integer
+              minimum: 0
+            questionOrder:
+              description: Индекс вопроса в теме
+              type: integer
+              minimum: 0
+
+    player:
+      description: Игрок
+      type: object
+      required:
+      - nickname
+      - score
+      properties:
+        nickname:
+          $ref: '#/components/schemas/playerNickname'
+        score:
+          description: Счет игрока
+          type: integer
+          minimum: 0
+        answer:
+          $ref: '#/components/schemas/answer'
+
+    answer:
+      description: Ответ
+      type: object
+      required:
+      - text
+      - isCorrect
+      properties:
+        text:
+          description: Текст ответа
+          type: string
+        isCorrect:
+          description: Корректность ответа
+          type: boolean
+
+    playerNickname:
+      description: Ник игрока
+      type: string
+
+    questionChoice:
+      required:
+      - themeOrder
+      - questionOrder
+      type: object
+      properties:
+        themeOrder:
+          description: Индекс темы вопроса
+          type: integer
+          minimum: 0
+        questionOrder:
+          description: Индекс вопроса в теме
+          type: integer
+          minimum: 0
+
+    playerAnswer:
+      required:
+      - answer
+      type: object
+      properties:
+        answer:
+          description: Текст ответа
+          type: string
 
     requestRejectReason:
       description: Причина отклонения запроса
