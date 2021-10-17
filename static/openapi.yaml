@@ -211,10 +211,6 @@ paths:
       responses:
         '201':
           description: Игра успешно сохранена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/gameState'
         '409':
           description: Игра с таким именем уже существует
         '422':
@@ -253,6 +249,10 @@ paths:
       responses:
         '201':
           description: Игровая сессия создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameSessionDescription' # TODO заменить на gameState
         '409':
           description: Пользователь уже играет
         '422':
