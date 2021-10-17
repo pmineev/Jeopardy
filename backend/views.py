@@ -5,7 +5,7 @@ from rest_framework.serializers import ValidationError
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
-from backend.exceptions import UserNotFound, UserAlreadyExists, InvalidCredentials, GameAlreadyExists, TooManyPlayers, \
+from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists, TooManyPlayers, \
     NotPlayer, NotCurrentPlayer, WrongQuestionRequest, GameNotFound, AlreadyPlaying, WrongStage
 from backend.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.serializers import SessionSerializer, UserSerializer, GameDescriptionSerializer, \
@@ -49,7 +49,7 @@ class SessionView(APIView):
             session = SessionView.interactor.create_session(serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except (UserNotFound, InvalidCredentials):
+        except UserNotFound:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         session_serializer = SessionSerializer(session)
@@ -64,7 +64,10 @@ class UserView(APIView):
         if username != request.user.username:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        user = UserView.interactor.get(username)
+        try:
+            user = UserView.interactor.get(username)
+        except UserNotFound:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         user_serializer = UserSerializer(user)
 
@@ -97,7 +100,7 @@ class GameListView(APIView):
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except GameAlreadyExists:
-            return Response(status=status.HTTP_409_CONFLICT, data=dict(detail='game already exists'))
+            return Response(status=status.HTTP_409_CONFLICT)
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -108,7 +111,7 @@ class GameListView(APIView):
         for desc in game_descriptions:
             game_descriptions_serialized.append(GameDescriptionSerializer(desc).data)
 
-        return Response(game_descriptions_serialized)
+        return Response(dict(descriptions=game_descriptions_serialized))
 
 
 class GameSessionListView(APIView):
@@ -153,7 +156,7 @@ class GameSessionViewSet(ViewSet):
 
     def get_state(self, request, game_session_id):
         try:
-            game_state = GameSessionViewSet.interactor.get_game_state(game_session_id)
+            game_state = GameSessionViewSet.interactor.get_game_state(game_session_id, request.user.username)
         except GameNotFound:
             return Response(status=status.HTTP_404_NOT_FOUND)
         except NotPlayer:

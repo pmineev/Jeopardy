@@ -100,7 +100,7 @@ class GameRepo:
             orm_game.rounds.add(orm_round)
 
     @staticmethod
-    def get(game_name):
+    def get(game_name):  # TODO ненужный метод?
         orm_game = ORMGame.objects.get(name=game_name)
 
         orm_final_round = orm_game.final_round
@@ -149,12 +149,16 @@ class GameRepo:
 
 class GameSessionRepo:
     @staticmethod
+    def is_game_session_exists(game_session_id):
+        return ORMGameSession.objects.filter(creator_id=game_session_id).exists()
+
+    @staticmethod
     def get_id(username):
         try:
             orm_game_session = ORMGameSession.objects.get(players__user__user__username=username)
 
             game_session_id = orm_game_session.pk
-        except ORMGameSession.DoesNotExist:
+        except ORMGameSession.DoesNotExist:  # TODO заменить все .exists()
             raise NotPlayer
 
         return game_session_id
@@ -222,19 +226,27 @@ class GameSessionRepo:
 
     @staticmethod
     def join(game_session_id, username):
+        orm_user_profile = ORMUserProfile.objects.get(user__username=username)
+
+        orm_player_qs = ORMPlayer.objects.filter(user=orm_user_profile)
+        if orm_player_qs.exists():
+            raise AlreadyPlaying
+
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
         if orm_game_session.players.count() + 1 > orm_game_session.max_players:
             raise TooManyPlayers
 
-        orm_user_profile = ORMUserProfile.objects.get(user__username=username)
         orm_player = ORMPlayer.objects.create(user=orm_user_profile)
         orm_game_session.players.add(orm_player)
 
 
     @staticmethod
     def get_game_state(game_session_id):
-        orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        try:
+            orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
+        except ORMGameSession.DoesNotExist:
+            raise GameNotFound
 
         state = orm_game_session.state
 
@@ -258,7 +270,7 @@ class GameSessionRepo:
         return game_state
 
     @staticmethod
-    def get_session(game_session_id):
+    def get_session(game_session_id):  # TODO ненужный метод?
         orm_game_session = ORMGameSession.objects.get(creator_id=game_session_id)
 
         desc = GameSessionDescription(id=orm_game_session.pk,
