@@ -24,15 +24,15 @@ class PlayerSerializer(Serializer):
 class GameDescriptionSerializer(Serializer):
     name = CharField()
     author = CharField()
-    rounds_count = IntegerField()
+    roundsCount = IntegerField(source='rounds_count')
 
 
-class GameSessionDescriptionSerializer(Serializer):
+class GameSessionDescriptionSerializer(Serializer):  # TODO убрать поля, не нужные для описания сессии
     id = IntegerField()
     creator = CharField()
-    game_name = CharField()
-    max_players = IntegerField()
-    current_players = IntegerField()
+    gameName = CharField(source='game_name')
+    maxPlayers = IntegerField(source='max_players')
+    current_players = IntegerField(source='final_round')
     players = PlayerSerializer(many=True, required=False)
 
 
