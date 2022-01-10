@@ -192,11 +192,10 @@ components:
       - data
       properties:
         event:
-          description: q
           type: string
           const: roundStarted
         data:
-          $ref: '#/components/schemas/roundDescription'
+          $ref: '#/components/schemas/gameStateCurrentRound'
 
     currentPlayerChosenEvent:
       description: Выбран текущий игрок
@@ -217,7 +216,7 @@ components:
               $ref: '#/components/schemas/playerNickname'
 
     currentQuestionChosenEvent:
-      description: Выбран текущий вопрос
+      description: Текущий вопрос выбран
       type: object
       required:
       - event
@@ -230,17 +229,17 @@ components:
           type: object
           required:
           - text
-          - themeOrder
-          - questionOrder
+          - themeIndex
+          - questionIndex
           properties:
             text:
               description: Текст вопроса
               type: string
-            themeOrder:
+            themeIndex:
               description: Индекс темы вопроса
               type: integer
               minimum: 0
-            questionOrder:
+            questionIndex:
               description: Индекс вопроса в теме
               type: integer
               minimum: 0
@@ -269,7 +268,17 @@ components:
           type: string
           const: questionTimeout
         data:
-          $ref: '#/components/schemas/answer'
+          description: Правильный ответ на вопрос
+          type: object
+          required:
+          - answer
+          properties:
+            answer:
+              $ref: '#/components/schemas/correctAnswer'
+
+    correctAnswer:
+      description: Текст ответа
+      type: string
 
     finalRoundStartedEvent:
       description: Финальный раунд начался
@@ -282,18 +291,7 @@ components:
           type: string
           const: finalRoundStarted
         data:
-          type: object
-          required:
-          - text
-          - value
-          properties:
-            text:
-              description: Текст финального вопроса
-              type: string
-            value:
-              description: Стоимость финального вопроса
-              type: integer
-              minimum: 0
+          $ref: '#/components/schemas/gameStateFinalRound'
 
     finalRoundTimeoutEvent:
       description: Финальный раунд закончился
@@ -317,14 +315,7 @@ components:
               items:
                 $ref: '#/components/schemas/player'
             answer:
-              description: Правильный ответ
-              type: object
-              required:
-              - text
-              properties:
-                text:
-                  description: Текст ответа
-                  type: string
+              $ref: '#/components/schemas/correctAnswer'
 
     gameSessionDescription:
       description: Описание игровой сессии
@@ -359,8 +350,8 @@ components:
       type: integer
       minimum: 1
 
-    roundDescription:
-      description: Описание раунда
+    gameStateCurrentRound:
+      description: Описание текущего раунда игровой сессии
       type: object
       additionalProperties: false
       required:
@@ -370,15 +361,15 @@ components:
         order:
           description: Номер раунда
           type: integer
-          minimum: 0
+          minimum: 1
         themes:
           description: Темы раунда
           type: array
           items:
-            $ref: '#/components/schemas/themeDescription'
+            $ref: '#/components/schemas/gameStateTheme'
 
-    themeDescription:
-      description: Тема
+    gameStateTheme:
+      description: Описание темы текущего раунда игровой сессии
       type: object
       required:
       - name
@@ -391,10 +382,10 @@ components:
           description: Вопросы темы
           type: array
           items:
-            $ref: '#/components/schemas/questionDescription'
+            $ref: '#/components/schemas/gameStateQuestion'
 
-    questionDescription:
-      description: Вопрос
+    gameStateQuestion:
+      description: Описание вопроса текущего раунда игровой сессии
       type: object
       required:
       - value
@@ -403,6 +394,9 @@ components:
           description: Стоимость вопроса
           type: integer
           minimum: 0
+        isAnswered:
+          description: Отвеченный ли вопрос
+          type: boolean
 
     player:
       description: Игрок
@@ -418,6 +412,9 @@ components:
           description: Счет игрока
           type: integer
           minimum: 0
+        isPlaying:
+          description: Играет ли игрок
+          type: boolean
         answer:
           $ref: '#/components/schemas/answer'
 
@@ -438,3 +435,18 @@ components:
         isCorrect:
           description: Корректность ответа
           type: boolean
+
+    gameStateFinalRound:
+      description: Вопрос финального раунда
+      type: object
+      required:
+      - text
+      - value
+      properties:
+        text:
+          description: Текст финального вопроса
+          type: string
+        value:
+          description: Стоимость финального вопроса
+          type: integer
+          minimum: 0

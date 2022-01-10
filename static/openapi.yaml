@@ -109,18 +109,7 @@ paths:
           content:
             application/json:
               schema:
-                description: JWT-токены
-                type: object
-                required:
-                - access
-                - refresh
-                properties:
-                  refresh:
-                    description: refresh-токен
-                    type: string
-                  access:
-                    description: access-токен
-                    type: string
+                $ref: '#/components/schemas/session'
         '401':
           description: Неверные учетные данные
         '422':
@@ -173,29 +162,9 @@ paths:
             application/json:
               schema:
                 description: Список описаний игр
-                type: object
-                properties:
-                  descriptions:
-                    type: array
-                    items:
-                      description: Описание игры
-                      type: object
-                      additionalProperties: false
-                      required:
-                      - name
-                      - author
-                      - roundsCount
-                      properties:
-                        name:
-                          description: Название игры
-                          type: string
-                        author:
-                          description: Автор игры
-                          type: string
-                        roundsCount:
-                          description: Количество раундов
-                          type: integer
-                          minimum: 2
+                type: array
+                items:
+                  $ref: '#/components/schemas/gameDescription'
 
     post:
       tags:
@@ -228,12 +197,9 @@ paths:
             application/json:
               schema:
                 description: Список игровых сессий
-                type: object
-                properties:
-                  descriptions:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/gameSessionDescription'
+                type: array
+                items:
+                  $ref: '#/components/schemas/gameSessionDescription'
 
     post:
       tags:
@@ -252,7 +218,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/gameSessionDescription' # TODO заменить на gameState
+                $ref: '#/components/schemas/gameState'
         '409':
           description: Пользователь уже играет
         '422':
@@ -412,7 +378,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/playerAnswer'
+              $ref: '#/components/schemas/answerRequest'
       responses:
         '201':
           description: OK
@@ -440,6 +406,40 @@ components:
       bearerFormat: JWT
 
   schemas:
+
+    session:
+      description: JWT-токены
+      type: object
+      required:
+      - access
+      - refresh
+      properties:
+        refreshToken:
+          description: refresh-токен
+          type: string
+        accessToken:
+          description: access-токен
+          type: string
+
+    gameDescription:
+      description: Описание игры
+      type: object
+      additionalProperties: false
+      required:
+      - name
+      - author
+      - roundsCount
+      properties:
+        name:
+          description: Название игры
+          type: string
+        author:
+          description: Автор игры
+          type: string
+        roundsCount:
+          description: Количество раундов
+          type: integer
+
     registerUserCredentials:
       type: object
       required:
@@ -469,8 +469,8 @@ components:
     loginUserCredentials:
       type: object
       required:
-      - password
       - username
+      - password
       properties:
         username:
           description: Имя пользователя
@@ -622,40 +622,13 @@ components:
           items:
             $ref: '#/components/schemas/player'
         currentRound:
-          allOf:
-          - $ref: '#/components/schemas/round'
-          - type: object
-            required:
-            - order
-            properties:
-              order:
-                description: Индекс раунда
-                type: integer
-                minimum: 0
+          $ref: '#/components/schemas/gameStateCurrentRound'
         currentPlayer:
           $ref: '#/components/schemas/playerNickname'
         currentQuestion:
-          description: Текущий вопрос
-          type: object
-          required:
-          - text
-          - value
-          properties:
-            text:
-              description: Текст вопроса
-              type: string
-            value:
-              description: Стоимость вопроса
-              type: integer
-              minimum: 0
-            themeOrder:
-              description: Индекс темы вопроса
-              type: integer
-              minimum: 0
-            questionOrder:
-              description: Индекс вопроса в теме
-              type: integer
-              minimum: 0
+          $ref: '#/components/schemas/gameStateCurrentQuestion'
+        finalRound:
+          $ref: '#/components/schemas/gameStateFinalRound'
 
     player:
       description: Игрок
@@ -663,6 +636,7 @@ components:
       required:
       - nickname
       - score
+      - isPlaying
       properties:
         nickname:
           $ref: '#/components/schemas/playerNickname'
@@ -670,8 +644,15 @@ components:
           description: Счет игрока
           type: integer
           minimum: 0
+        isPlaying:
+          description: Играет ли игрок
+          type: boolean
         answer:
           $ref: '#/components/schemas/answer'
+
+    playerNickname:
+      description: Ник игрока
+      type: string
 
     answer:
       description: Ответ
@@ -687,26 +668,111 @@ components:
           description: Корректность ответа
           type: boolean
 
-    playerNickname:
-      description: Ник игрока
-      type: string
-
-    questionChoice:
-      required:
-      - themeOrder
-      - questionOrder
+    gameStateCurrentRound:
+      description: Описание текущего раунда игровой сессии
       type: object
+      required:
+      - order
+      - themes
       properties:
-        themeOrder:
+        order:
+          description: Номер раунда
+          type: integer
+          minimum: 1
+        themes:
+          description: Темы раунда
+          type: array
+          items:
+            $ref: '#/components/schemas/gameStateTheme'
+
+    gameStateTheme:
+      description: Описание темы текущего раунда игровой сессии
+      type: object
+      required:
+      - name
+      - questions
+      properties:
+        name:
+          description: Название темы
+          type: string
+        questions:
+          description: Вопросы темы
+          type: array
+          items:
+            $ref: '#/components/schemas/gameStateQuestion'
+
+    gameStateQuestion:
+      description: Описание вопроса текущего раунда игровой сессии
+      type: object
+      required:
+      - value
+      - isAnswered
+      properties:
+        value:
+          description: Стоимость вопроса
+          type: integer
+          minimum: 0
+        isAnswered:
+          description: Отвеченный ли вопрос
+          type: boolean
+
+    gameStateCurrentQuestion:
+      description: Текущий вопрос
+      type: object
+      required:
+      - text
+      - themeIndex
+      - questionIndex
+      properties:
+        text:
+          description: Текст вопроса
+          type: string
+        themeIndex:
           description: Индекс темы вопроса
           type: integer
           minimum: 0
-        questionOrder:
+        questionIndex:
           description: Индекс вопроса в теме
           type: integer
           minimum: 0
 
-    playerAnswer:
+    gameStateFinalRound:
+      description: Вопрос финального раунда
+      type: object
+      required:
+      - text
+      - value
+      properties:
+        text:
+          description: Текст финального вопроса
+          type: string
+        value:
+          description: Стоимость финального вопроса
+          type: integer
+          minimum: 0
+        answer:
+          $ref: '#/components/schemas/correctAnswer'
+
+    correctAnswer:
+      description: Текст ответа
+      type: string
+
+    questionChoice:
+      required:
+      - themeIndex
+      - questionIndex
+      type: object
+      properties:
+        themeIndex:
+          description: Индекс темы вопроса
+          type: integer
+          minimum: 0
+        questionIndex:
+          description: Индекс вопроса в теме
+          type: integer
+          minimum: 0
+
+    answerRequest:
       required:
       - answer
       type: object
