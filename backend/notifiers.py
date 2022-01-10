@@ -1,103 +1,116 @@
+from typing import Dict, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from backend.events import GameSessionCreatedEvent, PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
+        FinalRoundStartedEvent, CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, AnswerTimeoutEvent, \
+        FinalRoundTimeoutEvent, GameSessionDeletedEvent, PlayerCorrectlyAnsweredEvent, \
+        PlayerIncorrectlyAnsweredEvent
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
-from backend.serializers import GameSessionDescriptionSerializer, RoundDescriptionSerializer, PlayerSerializer, \
-    QuestionDescriptionSerializer
+from backend.dtos import GameSessionDescriptionDTO, GameSessionIdDTO, CurrentRoundDTO, FinalRoundQuestionDTO, \
+    PlayerNicknameDTO, ChosenQuestionDTO, FinalRoundTimeoutDTO, PlayerDTO, CorrectAnswerDTO
+
+channel_layer = get_channel_layer()
 
 
-class GameSessionNotifier:
-    def __init__(self, repo):
-        self.channel_layer = get_channel_layer()
-        self.repo = repo
+def websocket_notify(group_name: str, data: Dict, notification_type: str, event_type: str):
+    notification_dict = {
+        'type': notification_type,
+        'event': event_type,
+        'data': data
+    }
 
-    def _notify(self, group_name, data, type, event):
-        notification_dict = {
-            'type': type,
-            'event': event,
-            'data': data
-        }
+    async_to_sync(channel_layer.group_send)(group_name, notification_dict)
 
-        async_to_sync(self.channel_layer.group_send)(group_name, notification_dict)
 
-    def game_session_created(self, game_session_id):
-        game_session_description = self.repo.get_description(game_session_id)
-        description_dict = GameSessionDescriptionSerializer(game_session_description).data
+def notify_to_lobby(data: Dict, event_type: str):
+    websocket_notify('lobby', data, 'lobby_event', event_type)
 
-        self._notify('lobby', description_dict, 'lobby_event', 'game_session_created')
 
-    def game_session_deleted(self, game_session_id):
-        deletion_dict = dict(id=game_session_id)
+def notify_to_game_session(game_session_id: int, data: Dict, event_type: str):
+    websocket_notify(str(game_session_id), data, 'game_session_event', event_type)
 
-        self._notify('lobby', deletion_dict, 'lobby_event', 'game_session_deleted')
 
-    def player_joined(self, game_session_id, username):
-        join_dict = dict(id=game_session_id)
+def notify_of_game_session_created(event: 'GameSessionCreatedEvent'):
+    gs = event.game_session
 
-        player = self.repo.get_player(game_session_id, username)
-        player_dict = PlayerSerializer(player).data
+    # TODO здесь id == None
 
-        self._notify('lobby', join_dict, 'lobby_event', 'player_joined')
-        self._notify(str(game_session_id), player_dict, 'game_session_event', 'player_joined')
+    notify_to_lobby(GameSessionDescriptionDTO(gs).to_response(), 'game_session_created')
 
-    def player_left(self, game_session_id, username):
-        leave_dict = dict(id=game_session_id)
 
-        player = self.repo.get_player(game_session_id, username)
-        player_dict = PlayerSerializer(player).data
+def notify_of_game_session_deleted(event: 'GameSessionDeletedEvent'):
+    gs = event.game_session
 
-        self._notify('lobby', leave_dict, 'lobby_event', 'player_left')
-        self._notify(str(game_session_id), player_dict, 'game_session_event', 'player_left')
+    notify_to_lobby(GameSessionIdDTO(gs).to_response(), 'game_session_deleted')
 
-    def round_started(self, game_session_id):
-        round_description = self.repo.get_current_round_description(game_session_id)
-        round_dict = RoundDescriptionSerializer(round_description).data
 
-        self._notify(str(game_session_id), round_dict, 'game_session_event', 'round_started')
+def notify_of_player_joined(event: 'PlayerJoinedEvent'):
+    gs = event.game_session
+    player = event.player
 
-    def final_round_started(self, game_session_id):
-        question_description = self.repo.get_final_round_description(game_session_id)
-        question_dict = QuestionDescriptionSerializer(question_description).data
+    notify_to_lobby(GameSessionIdDTO(gs).to_response(), 'player_joined')
+    notify_to_game_session(gs.id, PlayerNicknameDTO(player).to_response(), 'player_joined')
 
-        self._notify(str(game_session_id), question_dict, 'game_session_event', 'final_round_started')
 
-    def current_player_chosen(self, game_session_id):
-        player = self.repo.get_current_player(game_session_id)
-        player_dict = PlayerSerializer(player).data
+def notify_of_player_left(event: 'PlayerLeftEvent'):
+    gs = event.game_session
+    player = event.player
 
-        self._notify(str(game_session_id), player_dict, 'game_session_event', 'current_player_chosen')
+    notify_to_lobby(GameSessionIdDTO(gs).to_response(), 'player_left')
+    notify_to_game_session(gs.id, PlayerNicknameDTO(player).to_response(), 'player_left')
 
-    def current_question_chosen(self, game_session_id, theme_order, question_order):
-        question_description = self.repo.get_current_question(game_session_id)
-        question_dict = QuestionDescriptionSerializer(question_description).data
-        question_dict.update(
-            {
-                'theme_order': theme_order,
-                'question_order': question_order
-            }
-        )
 
-        self._notify(str(game_session_id), question_dict, 'game_session_event', 'current_question_chosen')
+def notify_of_round_started(event: 'RoundStartedEvent'):
+    gs = event.game_session
+    current_round = event.round
 
-    def player_answered(self, game_session_id, username, answer, is_correct=True):
-        player = self.repo.get_player(game_session_id, username)
-        player_dict = PlayerSerializer(player).data
-        answer_dict = {
-            'player': player_dict,
-            'text': answer,
-            'is_correct': is_correct
-        }
+    current_round_dto = CurrentRoundDTO(current_round, [])
 
-        self._notify(str(game_session_id), answer_dict, 'game_session_event', 'player_answered')
+    notify_to_game_session(gs.id, current_round_dto.to_response(), 'round_started')
 
-    def question_timeout(self, game_session_id):
-        answer = self.repo.get_current_question_answer(game_session_id)
-        answer_dict = dict(text=answer)
 
-        self._notify(str(game_session_id), answer_dict, 'game_session_event', 'question_timeout')
+def notify_of_final_round_started(event: 'FinalRoundStartedEvent'):
+    gs = event.game_session
+    final_round_question = event.final_round
 
-    def final_round_timeout(self, game_session_id):
-        players = self.repo.get_all_players(game_session_id)
-        players_list = [PlayerSerializer(player).data for player in players]
-        players_dict = dict(players=players_list)
+    question_dto = FinalRoundQuestionDTO(final_round_question,
+                                         with_answer=False)
 
-        self._notify(str(game_session_id), players_dict, 'game_session_event', 'final_round_timeout')
+    notify_to_game_session(gs.id, question_dto.to_response(), 'final_round_started')
+
+
+def notify_of_current_player_chosen(event: 'CurrentPlayerChosenEvent'):
+    gs = event.game_session
+    player = event.player
+
+    notify_to_game_session(gs.id, PlayerNicknameDTO(player).to_response(), 'current_player_chosen')
+
+
+def notify_of_current_question_chosen(event: 'CurrentQuestionChosenEvent'):
+    gs = event.game_session
+    current_question = event.question
+
+    notify_to_game_session(gs.id, ChosenQuestionDTO(current_question).to_response(), 'current_question_chosen')
+
+
+def notify_of_player_answered(event: Union['PlayerCorrectlyAnsweredEvent', 'PlayerIncorrectlyAnsweredEvent']):
+    gs = event.game_session
+    player = event.player
+
+    notify_to_game_session(gs.id, PlayerDTO(player).to_response(), 'player_answered')
+
+
+def notify_of_question_timeout(event: 'AnswerTimeoutEvent'):
+    gs = event.game_session
+    question = event.question
+
+    notify_to_game_session(gs.id, CorrectAnswerDTO(question).to_response(), 'question_timeout')
+
+
+def notify_of_final_round_timeout(event: 'FinalRoundTimeoutEvent'):
+    gs = event.game_session
+
+    notify_to_game_session(gs.id, FinalRoundTimeoutDTO(gs).to_response(), 'final_round_timeout')

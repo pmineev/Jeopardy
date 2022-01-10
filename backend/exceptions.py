@@ -22,6 +22,10 @@ class InvalidGameData(Exception):
     pass
 
 
+class GameSessionNotFound(Exception):
+    pass
+
+
 class TooManyPlayers(Exception):
     pass
 
