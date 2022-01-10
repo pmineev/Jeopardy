@@ -22,6 +22,10 @@ class InvalidGameData(Exception):
     pass
 
 
+class GameSessionNotFound(Exception):
+    pass
+
+
 class TooManyPlayers(Exception):
     pass
 
@@ -39,4 +43,8 @@ class WrongQuestionRequest(Exception):
 
 
 class AlreadyPlaying(Exception):
+    pass
+
+
+class WrongStage(Exception):
     pass

@@ -1,60 +1,52 @@
-from django_enum_choices.serializers import EnumChoiceField
-from rest_framework.serializers import Serializer, CharField, IntegerField, BooleanField
-
-from backend.enums import State
+from rest_framework.serializers import Serializer, CharField, IntegerField, ListField
 
 
-class SessionSerializer(Serializer):
-    access = CharField()
-    refresh = CharField()
-
-
-class UserSerializer(Serializer):
+class RegisterUserCredentialsSerializer(Serializer):
     username = CharField()
-    nickname = CharField()
+    nickname = CharField(required=False)
+    password = CharField()
 
 
-class PlayerSerializer(Serializer):
-    nickname = CharField()
-    score = IntegerField()
-    is_playing = BooleanField(default=True)
-    answer = CharField(required=False)
+class LoginUserCredentialsSerializer(Serializer):
+    username = CharField()
+    password = CharField()
 
 
-class GameDescriptionSerializer(Serializer):
+class ChangeUserCredentialsSerializer(Serializer):
+    nickname = CharField(required=False)
+    password = CharField(required=False)
+
+
+class QuestionSerializer(Serializer):
+    text = CharField()
+    answer = CharField()
+    value = IntegerField(min_value=0)
+
+
+class ThemeSerializer(Serializer):
     name = CharField()
-    author = CharField()
-    rounds_count = IntegerField()
+    questions = ListField(child=QuestionSerializer())
 
 
-class GameSessionDescriptionSerializer(Serializer):
-    id = IntegerField()
-    creator = CharField()
-    game_name = CharField()
-    max_players = IntegerField()
-    current_players = IntegerField()
-    players = PlayerSerializer(many=True, required=False)
+class RoundSerializer(Serializer):
+    themes = ListField(child=ThemeSerializer())
 
 
-class QuestionDescriptionSerializer(Serializer):
-    value = IntegerField()
-    text = CharField(required=False)
-    is_answered = BooleanField(required=False, default=False)
-
-
-class ThemeDescriptionSerializer(Serializer):
+class GameSerializer(Serializer):
     name = CharField()
-    questions = QuestionDescriptionSerializer(many=True)
+    rounds = ListField(child=RoundSerializer())
+    finalRound = QuestionSerializer(source='final_round')
 
 
-class RoundDescriptionSerializer(Serializer):
-    order = IntegerField()
-    themes = ThemeDescriptionSerializer(many=True)
+class CreateGameSessionSerializer(Serializer):
+    gameName = CharField(source='game_name')
+    maxPlayers = IntegerField(source='max_players')
 
 
-class GameStateSerializer(Serializer):
-    state = EnumChoiceField(State)
-    players = PlayerSerializer(many=True)
-    current_round = RoundDescriptionSerializer(required=False)
-    current_player = PlayerSerializer(required=False)
-    current_question = QuestionDescriptionSerializer(required=False)
+class QuestionChoiceSerializer(Serializer):
+    themeIndex = IntegerField(min_value=0, source='theme_index')
+    questionIndex = IntegerField(min_value=0, source='question_index')
+
+
+class AnswerRequestSerializer(Serializer):
+    answer = CharField()

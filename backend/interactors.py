@@ -1,32 +1,40 @@
-from backend.entities import UserProfile, Game, Round, Theme, Question, GameSession
-from backend.enums import State
-from backend.exceptions import InvalidCredentials, NotPlayer, NotCurrentPlayer
-from backend.notifiers import GameSessionNotifier
-from backend.timers import GameSessionTimer
+from typing import TYPE_CHECKING, List
+
+if TYPE_CHECKING:
+    from backend.repos import GameSessionRepo, UserRepo, GameRepo
+
+from backend.entities import User, Game, Round, Theme, Question, GameSession
+from backend.dtos import GameSessionIdDTO, GameStateDTO, GameSessionDescriptionDTO, GameDescriptionDTO, UserDTO, \
+    SessionDTO
+from backend.events import GameSessionDeletedEvent, GameSessionCreatedEvent
+from backend.exceptions import NotPlayer, UserAlreadyExists, UserNotFound, GameAlreadyExists, AlreadyPlaying
 
 
 class UserInteractor:
-    def __init__(self, repo):
+    def __init__(self, repo: 'UserRepo'):
         self.repo = repo
 
-    def get(self, username):
+    def get(self, username: str) -> UserDTO:
+        if not self.repo.is_exists(username):
+            raise UserNotFound
+
         user = self.repo.get(username)
-        return user
+
+        return UserDTO(user)
 
     def create(self, user_data):
-        if not user_data['username'] or not user_data['password']:
-            raise InvalidCredentials
+        if self.repo.is_exists(user_data['username']):
+            raise UserAlreadyExists
 
-        user = UserProfile(username=user_data['username'],
-                           password=user_data['password'])
+        user = User(**user_data)
 
-        if 'nickname' in user_data and user_data['nickname']:
-            user.nickname = user_data['nickname']
+        self.repo.save(user)
 
-        self.repo.create(user)
+    def update(self, user_data, username: str):
+        if not self.repo.is_exists(username):
+            raise UserNotFound
 
-    def update(self, user_data, username):
-        user = UserProfile(username=username)
+        user = self.repo.get(username)
 
         if 'nickname' in user_data:
             user.nickname = user_data['nickname']
@@ -34,229 +42,174 @@ class UserInteractor:
         if 'password' in user_data:
             user.password = user_data['password']
 
-        return self.repo.update(user)
+        self.repo.save(user)
 
-    def create_session(self, user_data):
-        if not user_data['username'] or not user_data['password']:
-            raise InvalidCredentials
+    def authenticate(self, user_data) -> SessionDTO:
+        user = User(**user_data)
 
-        user = UserProfile(username=user_data['username'],
-                           password=user_data['password'])
+        session = self.repo.authenticate(user)
 
-        return self.repo.create_session(user)
+        return SessionDTO(session)
 
 
 class GameInteractor:
-    def __init__(self, repo):
+    def __init__(self, repo: 'GameRepo', user_repo: 'UserRepo'):
         self.repo = repo
+        self.user_repo = user_repo
 
-    def create(self, game_data, username):
-        final_round_data = game_data['finalRound']
+    def create(self, game_data, username: str):
+        if not self.user_repo.is_exists(username):
+            raise UserNotFound
+
+        user = self.user_repo.get(username)
+
+        if self.repo.is_exists(game_data['name']):
+            raise GameAlreadyExists
+
+        rounds = list()
+
+        for round_index, round_data in enumerate(game_data['rounds']):  # TODO выделить создание сущностей
+            themes = list()
+
+            for theme_data in round_data['themes']:
+                questions = list()
+
+                for question_data in theme_data['questions']:
+                    questions.append(Question(text=question_data['text'],
+                                              answer=question_data['answer'],
+                                              value=question_data['value']))
+
+                themes.append(Theme(name=theme_data['name'],
+                                    questions=questions))
+
+            rounds.append(Round(order=round_index + 1,
+                                themes=themes))
+
+        final_round_data = game_data['final_round']
         final_round = Question(text=final_round_data['text'],
                                answer=final_round_data['answer'],
                                value=final_round_data['value'])
+
         game = Game(name=game_data['name'],
-                    author=UserProfile(username=username),
-                    final_round=final_round,
-                    rounds=list())
+                    author=user,
+                    rounds=rounds,
+                    final_round=final_round)
 
-        for round_order, round_data in enumerate(game_data['rounds']):
-            round = Round(order=round_order,
-                          themes=list())
+        self.repo.save(game)
 
-            for theme_order, theme_data in enumerate(round_data['themes']):
-                theme = Theme(name=theme_data['name'],
-                              order=theme_order,
-                              questions=list())
+    def get_all_descriptions(self) -> List[GameDescriptionDTO]:
+        games = self.repo.get_all()
 
-                for question_order, question_data in enumerate(theme_data['questions']):
-                    question = Question(order=question_order,
-                                        text=question_data['text'],
-                                        answer=question_data['answer'],
-                                        value=question_data['value'])
-
-                    theme.questions.append(question)
-
-                round.themes.append(theme)
-
-            game.rounds.append(round)
-
-        self.repo.create(game)
-
-    def get_all_descriptions(self):
-        return self.repo.get_all_descriptions()
+        return [GameDescriptionDTO(game) for game in games]
 
 
 class GameSessionInteractor:
-    def __init__(self, repo):
+    def __init__(self, repo: 'GameSessionRepo', game_repo: 'GameRepo', user_repo: 'UserRepo'):
         self.repo = repo
-        self.notifier = GameSessionNotifier(repo)
-        self.timer = GameSessionTimer(self)
+        self.game_repo = game_repo
+        self.user_repo = user_repo
 
-    def get_game_session_id(self, username):
-        game_session_id = self.repo.get_id(username)
+    def get_game_session_id(self, username: str) -> GameSessionIdDTO:
+        user = self.user_repo.get(username)
 
-        return game_session_id
+        game_session = self.repo.get_by_user(user)
 
-    def get_game_state(self, game_session_id):
-        game_state = self.repo.get_game_state(game_session_id)
+        return GameSessionIdDTO(game_session)
 
-        return game_state
+    def get_game_state(self, game_session_id: int, username: str) -> GameStateDTO:
+        game_session = self.repo.get(game_session_id)
+        user = self.user_repo.get(username)
 
-    def create(self, game_session_data, username):
-        game = Game(name=game_session_data['game_name'])
-        game_session = GameSession(creator=username,
+        if not game_session.is_player(user):
+            raise NotPlayer
+
+        return GameStateDTO(game_session)
+
+    def create(self, game_session_data, username: str) -> GameStateDTO:
+        user = self.user_repo.get(username)
+
+        if self.repo.is_exists(user):
+            raise AlreadyPlaying
+
+        game = self.game_repo.get(game_session_data['game_name'])
+
+        game_session = GameSession(creator=user,
                                    game=game,
                                    max_players=game_session_data['max_players'])
 
-        game_session_description = self.repo.create(game_session)
+        game_session.add_event(GameSessionCreatedEvent(game_session))
 
-        self.notifier.game_session_created(game_session_description.id)
+        print(f'{username} has created gs')
 
-        return game_session_description
+        self.repo.save(game_session)
 
-    def get_all_descriptions(self):
-        return self.repo.get_all_descriptions()
+        return GameStateDTO(game_session)
 
-    def join(self, game_session_id, username):
-        state = self.repo.get_state(game_session_id)
-        if state == State.WAITING:
-            self.repo.join(game_session_id, username)
+    def get_all_descriptions(self) -> List[GameSessionDescriptionDTO]:
+        game_sessions = self.repo.get_all()
 
-            if self.repo.is_all_players_joined(game_session_id):
-                self.notifier.player_joined(game_session_id, username)
+        return [GameSessionDescriptionDTO(game_session) for game_session in game_sessions]
 
-                self._start_game(game_session_id)
-        elif self.repo.is_player(game_session_id, username):
-            self.repo.set_player_state(game_session_id, username, is_playing=True)
+    def join(self, game_session_id: int, username: str) -> GameStateDTO:
+        game_session = self.repo.get(game_session_id)
+        user = self.user_repo.get(username)
 
-            self.notifier.player_joined(game_session_id, username)
+        # TODO добавить в бд ограничение: пользователь может быть игроком только в одной игре
 
+        game_session.join(user)
+
+        self.repo.save(game_session)
+
+        return GameStateDTO(game_session)
+
+    def leave(self, game_session_id: int, username: str):
+        game_session = self.repo.get(game_session_id)
+        user = self.user_repo.get(username)
+
+        game_session.leave(user)
+
+        if game_session.is_all_players_left():
+            game_session.add_event(GameSessionDeletedEvent(game_session))
+
+            print('gs deleted')
+
+            self.repo.delete(game_session)
         else:
-            raise NotPlayer
+            self.repo.save(game_session)
 
-        game_state = self.repo.get_game_state(game_session_id)
+    def choose_question(self, game_session_id: int, question_data, username: str):
+        game_session: GameSession = self.repo.get(game_session_id)
+        user = self.user_repo.get(username)
 
-        return game_state
+        theme_index = question_data['theme_index']
+        question_index = question_data['question_index']
 
-    def leave(self, game_session_id, username):
-        if not self.repo.is_player(game_session_id, username):
-            raise NotPlayer
+        game_session.choose_question(user, theme_index, question_index)
 
-        state = self.repo.get_state(game_session_id)
+        self.repo.save(game_session)
 
-        self.notifier.player_left(game_session_id, username)
+    def answer_timeout(self, game_session_id: int):
+        game_session = self.repo.get(game_session_id)
 
-        if state == State.WAITING:
-            self.repo.leave(game_session_id, username)
-            print(f'user {username} left')
-        else:
-            self.repo.set_player_state(game_session_id, username, is_playing=False)
-            print(f'player {username} left')
+        print(f'question timeout, current player: {game_session.current_player.user.username}')
 
-        if self.repo.is_all_players_left(game_session_id):
-            self.repo.delete_game_session(game_session_id)
+        game_session.answer_timeout()
 
-            self.notifier.game_session_deleted(game_session_id)
-            print(f'game deleted')
+        self.repo.save(game_session)
 
-    def _start_game(self, game_session_id):
-        print('game started')
-        self._set_next_round(game_session_id)
+    def final_round_timeout(self, game_session_id: int):
+        game_session = self.repo.get(game_session_id)
 
-    def _set_next_round(self, game_session_id):
-        self.repo.set_next_round(game_session_id)
+        game_session.final_round_timeout()
 
-        if not self.repo.get_state(game_session_id) == State.FINAL_ROUND:
-            self._set_first_player(game_session_id)
+        self.repo.delete(game_session)
 
-            self.notifier.current_player_chosen(game_session_id)
-            self.notifier.round_started(game_session_id)
+        print('game ended')
 
-            self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
-        else:
-            self.notifier.final_round_started(game_session_id)
+    def submit_answer(self, game_session_id: int, username: str, answer_data):
+        game_session: GameSession = self.repo.get(game_session_id)
+        user = self.user_repo.get(username)
 
-            self.timer.final_round_started(game_session_id)
+        game_session.submit_answer(user, answer_data['answer'])
 
-    def _set_first_player(self, game_session_id):
-        state = self.repo.get_state(game_session_id)
-
-        if state == State.WAITING:
-            self.repo.set_random_current_player(game_session_id)
-        elif state == State.END_ROUND:
-            self.repo.set_winner_current_player(game_session_id)
-
-    def choose_question(self, game_session_id, question_data, username):
-        if not self.repo.is_player(game_session_id, username):
-            raise NotPlayer
-        print(f'user {username} is player')
-
-        if not self.repo.is_current_player(game_session_id, username):
-            raise NotCurrentPlayer
-        print(f'user {username} is current player')
-
-        print(f'state: {self.repo.get_state(game_session_id)}')
-        if self.repo.get_state(game_session_id) == State.CHOOSING_QUESTION:
-            theme_order = question_data['theme_order']
-            question_order = question_data['question_order']
-            self.repo.set_current_question(game_session_id, theme_order, question_order)
-
-            self.notifier.current_question_chosen(game_session_id, theme_order, question_order)
-            self.timer.question_chosen(game_session_id)
-
-            self.repo.set_state(game_session_id, State.ANSWERING)
-        else:
-            pass
-
-    def question_timeout(self, game_session_id):
-        self.repo.mark_current_question_as_answered(game_session_id)
-
-        self.notifier.question_timeout(game_session_id)
-
-        if self.repo.is_no_more_questions(game_session_id):
-            print('no more questions!')
-            self._set_next_round(game_session_id)
-        else:
-            self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
-
-    def final_round_timeout(self, game_session_id):
-        self.repo.check_players_final_answers(game_session_id)
-
-        self.notifier.final_round_timeout(game_session_id)
-
-    def submit_answer(self, game_session_id, username, answer):
-        if not self.repo.is_player(game_session_id, username):
-            raise NotPlayer
-        print(f'user {username} is player')
-        print(f'{username} answer: {answer}')
-
-        state = self.repo.get_state(game_session_id)
-        print(f'state: {state}')
-        if state == State.ANSWERING:
-            value = self.repo.get_current_question_value(game_session_id)
-            if self.repo.is_correct_answer(game_session_id, answer):
-                print('correct')
-                self.repo.change_player_score(game_session_id, username, value)
-                self.repo.mark_current_question_as_answered(game_session_id)
-
-                self.notifier.player_answered(game_session_id, username, answer)
-                self.timer.player_answered(game_session_id)
-
-                if self.repo.is_no_more_questions(game_session_id):
-                    print('no more questions!')
-                    self._set_next_round(game_session_id)
-                else:
-                    self.repo.set_current_player(game_session_id, username)
-                    self.repo.set_state(game_session_id, State.CHOOSING_QUESTION)
-            else:
-                print('wrong')
-                self.repo.change_player_score(game_session_id, username, -value)
-
-                self.notifier.player_answered(game_session_id, username, answer, is_correct=False)
-                self.timer.player_answered(game_session_id, is_correct=False)
-
-        elif state == State.FINAL_ROUND:
-            self.repo.set_player_answer(game_session_id, username, answer)
-        else:
-            pass
+        self.repo.save(game_session)
