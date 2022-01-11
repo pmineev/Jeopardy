@@ -23,6 +23,10 @@ class QuestionSerializer(Serializer):
     value = IntegerField(min_value=0)
 
 
+class CreatorNicknameSerializer(Serializer):
+    creator = CharField()
+
+
 class ThemeSerializer(Serializer):
     name = CharField()
     questions = ListField(child=QuestionSerializer())

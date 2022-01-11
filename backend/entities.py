@@ -7,7 +7,7 @@ from backend.enums import State
 from backend.events import PlayerLeftEvent, PlayerJoinedEvent, CurrentPlayerChosenEvent, \
     RoundStartedEvent, FinalRoundStartedEvent, CurrentQuestionChosenEvent, Event, \
     PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent
-from backend.exceptions import NotPlayer, WrongQuestionRequest, NotCurrentPlayer, WrongStage, TooManyPlayers
+from backend.exceptions import WrongQuestionRequest, NotCurrentPlayer, WrongStage, TooManyPlayers
 
 
 class Entity(ABC):
@@ -166,8 +166,6 @@ class GameSession(Entity):
 
     def leave(self, user: User):
         player = self._get_player(user)
-        if not player:
-            raise NotPlayer
 
         if self.state == State.WAITING:
             self.players.remove(player)
@@ -216,8 +214,6 @@ class GameSession(Entity):
 
     def choose_question(self, user: User, theme_index, question_index):
         player = self._get_player(user)
-        if not player:
-            raise NotPlayer
 
         if player != self.current_player:
             raise NotCurrentPlayer
@@ -246,8 +242,6 @@ class GameSession(Entity):
 
     def submit_answer(self, user: User, answer_text):
         player = self._get_player(user)
-        if not player:
-            raise NotPlayer
 
         if self.state == State.ANSWERING:
             value = self.current_question.value

@@ -4,10 +4,10 @@ if TYPE_CHECKING:
     from backend.repos import GameSessionRepo, UserRepo, GameRepo
 
 from backend.entities import User, Game, Round, Theme, Question, GameSession
-from backend.dtos import GameSessionIdDTO, GameStateDTO, GameSessionDescriptionDTO, GameDescriptionDTO, UserDTO, \
+from backend.dtos import GameStateDTO, GameSessionDescriptionDTO, GameDescriptionDTO, UserDTO, \
     SessionDTO
 from backend.events import GameSessionDeletedEvent, GameSessionCreatedEvent
-from backend.exceptions import NotPlayer, UserAlreadyExists, UserNotFound, GameAlreadyExists, AlreadyPlaying
+from backend.exceptions import UserAlreadyExists, UserNotFound, GameAlreadyExists, AlreadyPlaying
 
 
 class UserInteractor:
@@ -109,19 +109,9 @@ class GameSessionInteractor:
         self.game_repo = game_repo
         self.user_repo = user_repo
 
-    def get_game_session_id(self, username: str) -> GameSessionIdDTO:
+    def get_game_state(self, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)
-
         game_session = self.repo.get_by_user(user)
-
-        return GameSessionIdDTO(game_session)
-
-    def get_game_state(self, game_session_id: int, username: str) -> GameStateDTO:
-        game_session = self.repo.get(game_session_id)
-        user = self.user_repo.get(username)
-
-        if not game_session.is_player(user):
-            raise NotPlayer
 
         return GameStateDTO(game_session)
 
@@ -150,9 +140,15 @@ class GameSessionInteractor:
 
         return [GameSessionDescriptionDTO(game_session) for game_session in game_sessions]
 
-    def join(self, game_session_id: int, username: str) -> GameStateDTO:
-        game_session = self.repo.get(game_session_id)
+    def join(self, username: str, join_data) -> GameStateDTO:
         user = self.user_repo.get(username)
+
+        if self.repo.is_exists(user):
+            raise AlreadyPlaying
+
+        creator_nickname = join_data['creator']
+
+        game_session = self.repo.get_by_creator(creator_nickname)
 
         # TODO добавить в бд ограничение: пользователь может быть игроком только в одной игре
 
@@ -162,9 +158,9 @@ class GameSessionInteractor:
 
         return GameStateDTO(game_session)
 
-    def leave(self, game_session_id: int, username: str):
-        game_session = self.repo.get(game_session_id)
+    def leave(self, username: str):
         user = self.user_repo.get(username)
+        game_session = self.repo.get_by_user(user)
 
         game_session.leave(user)
 
@@ -177,9 +173,9 @@ class GameSessionInteractor:
         else:
             self.repo.save(game_session)
 
-    def choose_question(self, game_session_id: int, question_data, username: str):
-        game_session: GameSession = self.repo.get(game_session_id)
+    def choose_question(self, username: str, question_data):
         user = self.user_repo.get(username)
+        game_session = self.repo.get_by_user(user)
 
         theme_index = question_data['theme_index']
         question_index = question_data['question_index']
@@ -206,9 +202,9 @@ class GameSessionInteractor:
 
         print('game ended')
 
-    def submit_answer(self, game_session_id: int, username: str, answer_data):
-        game_session: GameSession = self.repo.get(game_session_id)
+    def submit_answer(self, username: str, answer_data):
         user = self.user_repo.get(username)
+        game_session = self.repo.get_by_user(user)
 
         game_session.submit_answer(user, answer_data['answer'])
 

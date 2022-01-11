@@ -30,10 +30,6 @@ class TooManyPlayers(Exception):
     pass
 
 
-class NotPlayer(Exception):
-    pass
-
-
 class NotCurrentPlayer(Exception):
     pass
 
