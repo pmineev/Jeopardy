@@ -179,7 +179,6 @@ class GameStateDTO(DTO):
 
 class GameSessionDescriptionDTO(DTO):
     def __init__(self, gs: 'GameSession'):
-        self.id = gs.id
         self.creator = gs.creator.nickname
         self.game_name = gs.game.name
         self.max_players = gs.max_players
@@ -187,7 +186,6 @@ class GameSessionDescriptionDTO(DTO):
 
     def to_response(self):
         return dict(
-            id=self.id,
             creator=self.creator,
             gameName=self.game_name,
             maxPlayers=self.max_players,

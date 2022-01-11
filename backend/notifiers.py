@@ -36,8 +36,6 @@ def notify_to_game_session(game_session_id: int, data: Dict, event_type: str):
 def notify_of_game_session_created(event: 'GameSessionCreatedEvent'):
     gs = event.game_session
 
-    # TODO здесь id == None
-
     notify_to_lobby(GameSessionDescriptionDTO(gs).to_response(), 'game_session_created')
 
 
