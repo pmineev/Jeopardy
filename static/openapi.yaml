@@ -224,40 +224,11 @@ paths:
         '422':
           description: Некорректные данные
 
-  /game_sessions/id/:
-    get:
-      tags:
-      - game_sessions
-      summary: Получение игроком идентификатора игровой сессии
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                description: Идентификатор игровой сессии
-                type: object
-                required:
-                - id
-                properties:
-                  id:
-                    type: integer
-                    minimum: 1
-        '404':
-          description: Пользователь не играет
-
-  /game_sessions/{game_session_id}/:
+  /game_sessions/current/:
     get:
       tags:
       - game_sessions
       summary: Получение игроком текущего состояния игровой сессии
-      parameters:
-      - name: game_session_id
-        in: path
-        description: Идентификатор игровой сессии
-        required: true
-        schema:
-          type: integer
       responses:
         '200':
           description: OK
@@ -265,23 +236,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/gameState'
-        '403':
-          description: Пользователя нет в указанной игровой сессии
         '404':
-          description: Игровая сессия не найдена
+          description: Пользователь не играет
 
-  /game_sessions/{game_session_id}/actions/join/:
+  /game_sessions/current/actions/join/:
     post:
       tags:
       - game_sessions
       summary: Присоединение к игре
-      parameters:
-      - name: game_session_id
-        in: path
-        description: Идентификатор игровой сессии
+      requestBody:
+        description: Ник создателя игровой сессии
         required: true
-        schema:
-          type: integer
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - creator
+              properties:
+                creator:
+                  description: Ник
+                  type: string
       responses:
         '201':
           description: Пользователь успешно присоединился к игре
@@ -290,7 +265,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/gameState'
         '404':
-          description: Игровая сессия не найдена
+          description: Пользователь не играет
         '409':
           description: |
             Пользователь не присоединен к игре.
@@ -303,37 +278,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/requestRejectReason'
 
-  /game_sessions/{game_session_id}/actions/leave/:
+  /game_sessions/current/actions/leave/:
     post:
       tags:
       - game_sessions
       summary: Выход из игры
-      parameters:
-      - name: game_session_id
-        in: path
-        description: Идентификатор игровой сессии
-        required: true
-        schema:
-          type: integer
       responses:
         '201':
           description: Пользователь успешно вышел из игры
-        '403':
-          description: Пользователя нет в указанной игровой сессии
         '404':
-          description: Игровая сессия не найдена
+          description: Пользователь не играет
 
-  /game_sessions/{game_session_id}/current_question/:
+  /game_sessions/current/current_question/:
     post:
       tags:
       - game_sessions
       summary: Выбор текущего вопроса
-      parameters:
-      - name: game_session_id
-        in: path
-        description: Идентификатор игровой сессии
-        schema:
-          type: integer
       requestBody:
         description: Параметры вопроса
         required: true
@@ -349,7 +309,6 @@ paths:
             Выбор вопроса отклонен.
 
             Возможные причины:
-            - пользователя нет в указанной игровой сессии;
             - пользователь не является текущим игроком;
             - текущая стадия игры не предполагает выбора ответа;
           content:
@@ -357,22 +316,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/requestRejectReason'
         '404':
-          description: Игровая сессия не найдена
+          description: Пользователь не играет
         '422':
           description: Некорректные данные
 
-  /game_sessions/{game_session_id}/answer/:
+  /game_sessions/current/answer/:
     post:
       tags:
       - game_sessions
       summary: Отправка ответа на текущий вопрос
-      parameters:
-      - name: game_session_id
-        in: path
-        description: Идентификатор игровой сессии
-        required: true
-        schema:
-          type: string
       requestBody:
         description: Ответ на вопрос
         content:
@@ -383,12 +335,7 @@ paths:
         '201':
           description: OK
         '403':
-          description: |
-            Отправка ответа отклонена.
-
-            Возможные причины:
-            - пользователя нет в указанной игровой сессии;
-            - текущая стадия игры не предполагает ответа на вопрос.
+          description: Отправка ответа отклонена, текущая стадия игры не предполагает ответа на вопрос.
           content:
             application/json:
               schema:
@@ -396,7 +343,7 @@ paths:
         '422':
           description: Некорректные данные
         '404':
-          description: Игровая сессия не найдена
+          description: Пользователь не играет
 
 components:
   securitySchemes:
@@ -565,16 +512,11 @@ components:
       type: object
       additionalProperties: false
       required:
-      - id
       - creator
       - gameName
       - maxPlayers
       - currentPlayers
       properties:
-        id:
-          description: Идентификатор игровой сессии
-          type: integer
-          minimum: 1
         creator:
           description: Ник создателя игровой сессии
           type: string
