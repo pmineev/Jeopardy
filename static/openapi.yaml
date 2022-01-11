@@ -219,6 +219,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/gameState'
+        '404':
+          description: Игра не найдена
         '409':
           description: Пользователь уже играет
         '422':
@@ -239,7 +241,7 @@ paths:
         '404':
           description: Пользователь не играет
 
-  /game_sessions/current/actions/join/:
+  /game_sessions/actions/join/:
     post:
       tags:
       - game_sessions
@@ -265,7 +267,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/gameState'
         '404':
-          description: Пользователь не играет
+          description: Игровая сессия не найдена
         '409':
           description: |
             Пользователь не присоединен к игре.
