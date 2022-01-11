@@ -322,12 +322,16 @@ class GameSession(Entity):
         value = self.game.final_round.value
         answer_text = self.game.final_round.answer
         for player in self.players:
-            if player.answer and player.answer.text == answer_text:
-                player.score += value
-                player.answer.is_correct = True
+            if player.answer:
+                if player.answer.text == answer_text:
+                    player.score += value
+                    player.answer.is_correct = True
+                else:
+                    player.score -= value
+                    player.answer.is_correct = False
             else:
                 player.score -= value
-                player.answer.is_correct = False
+                player.answer = Answer('', is_correct=False)
 
     def _get_player(self, user: User) -> Optional[Player]:
         for player in self.players:
