@@ -113,6 +113,8 @@ class GameSessionListView(APIView):
             serializer.is_valid(raise_exception=True)
             game_session_description_dto = GameSessionListView.interactor.create(serializer.validated_data,
                                                                                  request.user.username)
+        except GameNotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except AlreadyPlaying:
