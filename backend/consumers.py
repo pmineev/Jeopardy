@@ -8,8 +8,9 @@ class LobbyConsumer(WebsocketConsumer):
     groups = ['lobby']
 
     def lobby_event(self, event):
-        event.pop('type')
+        event_type = event.pop('type')
         self.send(json.dumps(event, ensure_ascii=False))
+        event['type'] = event_type
 
 
 class GameSessionConsumer(WebsocketConsumer):
@@ -26,5 +27,6 @@ class GameSessionConsumer(WebsocketConsumer):
         self.close()
 
     def game_session_event(self, event):
-        event.pop('type')
+        event_type = event.pop('type')
         self.send(json.dumps(event, ensure_ascii=False))
+        event['type'] = event_type
