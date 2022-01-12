@@ -18,7 +18,6 @@ from django.urls import path, re_path
 from django.views.generic import TemplateView
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from backend.consumers import LobbyConsumer, GameSessionConsumer
 from backend.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, GameSessionViewSet
 
 urlpatterns = [
@@ -37,9 +36,4 @@ urlpatterns = [
     re_path(r'', TemplateView.as_view(
         template_name='index.html'
     )),
-]
-
-websocket_urlpatterns = [
-    re_path(r'^ws/lobby/$', LobbyConsumer.as_asgi()),
-    re_path(r'^ws/game_sessions/(?P<game_session_id>\d+)/$', GameSessionConsumer.as_asgi()),
 ]

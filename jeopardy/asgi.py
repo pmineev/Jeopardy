@@ -11,10 +11,16 @@ import os
 
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
+from django.urls import re_path
 
-from jeopardy.urls import websocket_urlpatterns
+from backend.consumers import LobbyConsumer, GameSessionConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'jeopardy.settings')
+
+websocket_urlpatterns = [
+    re_path(r'^ws/lobby/$', LobbyConsumer.as_asgi()),
+    re_path(r'^ws/game_sessions/(?P<game_session_id>\d+)/$', GameSessionConsumer.as_asgi()),
+]
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
