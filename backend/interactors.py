@@ -127,6 +127,10 @@ class GameSessionInteractor:
                                    game=game,
                                    max_players=game_session_data['max_players'])
 
+        self.repo.save(game_session)
+
+        game_session = self.repo.get_by_user(user)  # для присвоения id
+
         game_session.add_event(GameSessionCreatedEvent(game_session))
 
         print(f'{username} has created gs')
@@ -197,6 +201,8 @@ class GameSessionInteractor:
         game_session = self.repo.get(game_session_id)
 
         game_session.final_round_timeout()
+
+        game_session.add_event(GameSessionDeletedEvent(game_session))
 
         self.repo.delete(game_session)
 
