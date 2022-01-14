@@ -10,7 +10,7 @@ from backend.events import GameSessionDeletedEvent, GameSessionCreatedEvent
 from backend.exceptions import UserAlreadyExists, UserNotFound, GameAlreadyExists, AlreadyPlaying
 
 
-class UserInteractor:
+class UserService:
     def __init__(self, repo: 'UserRepo'):
         self.repo = repo
 
@@ -52,7 +52,7 @@ class UserInteractor:
         return SessionDTO(session)
 
 
-class GameInteractor:
+class GameService:
     def __init__(self, repo: 'GameRepo', user_repo: 'UserRepo'):
         self.repo = repo
         self.user_repo = user_repo
@@ -103,7 +103,7 @@ class GameInteractor:
         return [GameDescriptionDTO(game) for game in games]
 
 
-class GameSessionInteractor:
+class GameSessionService:
     def __init__(self, repo: 'GameSessionRepo', game_repo: 'GameRepo', user_repo: 'UserRepo'):
         self.repo = repo
         self.game_repo = game_repo

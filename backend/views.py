@@ -16,15 +16,15 @@ from backend.serializers import RegisterUserCredentialsSerializer, LoginUserCred
 class UserListView(APIView):
     permission_classes = [AllowAny]
 
-    interactor = UserFactory.get()
+    service = UserFactory.get()
 
     def post(self, request):
         serializer = RegisterUserCredentialsSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
-            UserListView.interactor.create(serializer.validated_data)
-            session_dto = UserListView.interactor.authenticate(serializer.validated_data)
+            UserListView.service.create(serializer.validated_data)
+            session_dto = UserListView.service.authenticate(serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except UserAlreadyExists:
@@ -36,14 +36,14 @@ class UserListView(APIView):
 class SessionView(APIView):
     permission_classes = [AllowAny]
 
-    interactor = UserFactory.get()
+    service = UserFactory.get()
 
     def post(self, request):
         serializer = LoginUserCredentialsSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
-            session_dto = SessionView.interactor.authenticate(serializer.validated_data)
+            session_dto = SessionView.service.authenticate(serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except UserNotFound:
@@ -53,14 +53,14 @@ class SessionView(APIView):
 
 
 class UserView(APIView):
-    interactor = UserFactory.get()
+    service = UserFactory.get()
 
     def get(self, request, username):
         if username != request.user.username:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         try:
-            user_dto = UserView.interactor.get(username)
+            user_dto = UserView.service.get(username)
         except UserNotFound:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -74,7 +74,7 @@ class UserView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            UserView.interactor.update(serializer.validated_data, username)
+            UserView.service.update(serializer.validated_data, username)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
@@ -82,14 +82,14 @@ class UserView(APIView):
 
 
 class GameListView(APIView):
-    interactor = GameFactory.get()
+    service = GameFactory.get()
 
     def post(self, request):
         serializer = GameSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
-            GameListView.interactor.create(serializer.validated_data, request.user.username)
+            GameListView.service.create(serializer.validated_data, request.user.username)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except GameAlreadyExists:
@@ -98,7 +98,7 @@ class GameListView(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
     def get(self, request):
-        game_description_dtos = GameListView.interactor.get_all_descriptions()
+        game_description_dtos = GameListView.service.get_all_descriptions()
 
         return Response(data=[dto.to_response() for dto in game_description_dtos])
 
@@ -129,11 +129,11 @@ class GameSessionListView(APIView):
 
 
 class GameSessionViewSet(ViewSet):
-    interactor = GameSessionFactory.get()
+    service = GameSessionFactory.get()
 
     def get_state(self, request):
         try:
-            game_state_dto = GameSessionViewSet.interactor.get_game_state(request.user.username)
+            game_state_dto = GameSessionViewSet.service.get_game_state(request.user.username)
         except GameSessionNotFound:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -144,7 +144,7 @@ class GameSessionViewSet(ViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-            game_state_dto = GameSessionViewSet.interactor.join(request.user.username, serializer.validated_data)
+            game_state_dto = GameSessionViewSet.service.join(request.user.username, serializer.validated_data)
 
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -157,7 +157,7 @@ class GameSessionViewSet(ViewSet):
 
     def leave(self, request):
         try:
-            GameSessionViewSet.interactor.leave(request.user.username)
+            GameSessionViewSet.service.leave(request.user.username)
         except GameSessionNotFound:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -168,7 +168,7 @@ class GameSessionViewSet(ViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-            GameSessionViewSet.interactor.choose_question(request.user.username, serializer.validated_data)
+            GameSessionViewSet.service.choose_question(request.user.username, serializer.validated_data)
         except (ValidationError, WrongQuestionRequest):
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except GameSessionNotFound:
@@ -183,7 +183,7 @@ class GameSessionViewSet(ViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-            GameSessionViewSet.interactor.submit_answer(request.user.username, serializer.validated_data)
+            GameSessionViewSet.service.submit_answer(request.user.username, serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except GameSessionNotFound:

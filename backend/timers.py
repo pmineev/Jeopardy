@@ -29,11 +29,11 @@ class Timers:
 
 def start_question_timer(event: 'CurrentQuestionChosenEvent'):
     gs = event.game_session
-    interactor = factories.GameSessionFactory.get()
+    service = factories.GameSessionFactory.get()
 
     Timers.start(key=gs.id,
                  interval=CHOOSING_QUESTION_INTERVAL,
-                 callback=interactor.answer_timeout,
+                 callback=service.answer_timeout,
                  args=(gs.id,))
 
 
@@ -45,20 +45,20 @@ def stop_question_timer(event: 'PlayerCorrectlyAnsweredEvent'):
 
 def restart_question_timer(event: 'PlayerIncorrectlyAnsweredEvent'):
     gs = event.game_session
-    interactor = factories.GameSessionFactory.get()
+    service = factories.GameSessionFactory.get()
 
     Timers.stop(gs.id)
     Timers.start(key=gs.id,
                  interval=CHOOSING_QUESTION_INTERVAL,
-                 callback=interactor.answer_timeout,
+                 callback=service.answer_timeout,
                  args=(gs.id,))
 
 
 def start_final_round_timer(event: 'FinalRoundStartedEvent'):
     gs = event.game_session
-    interactor = factories.GameSessionFactory.get()
+    service = factories.GameSessionFactory.get()
 
     Timers.start(key=gs.id,
                  interval=FINAL_ROUND_INTERVAL,
-                 callback=interactor.final_round_timeout,
+                 callback=service.final_round_timeout,
                  args=(gs.id,))

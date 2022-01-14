@@ -1,5 +1,5 @@
-import backend.interactors as interactors
 import backend.repos as repos
+import backend.services as services
 
 user_repo = repos.UserRepo()
 game_repo = repos.GameRepo()
@@ -7,24 +7,24 @@ game_session_repo = repos.GameSessionRepo()
 
 
 class UserFactory:
-    interactor = interactors.UserInteractor(user_repo)
+    service = services.UserService(user_repo)
 
     @staticmethod
     def get():
-        return UserFactory.interactor
+        return UserFactory.service
 
 
 class GameFactory:
-    interactor = interactors.GameInteractor(game_repo, user_repo)
+    service = services.GameService(game_repo, user_repo)
 
     @staticmethod
     def get():
-        return GameFactory.interactor
+        return GameFactory.service
 
 
 class GameSessionFactory:
-    interactor = interactors.GameSessionInteractor(game_session_repo, game_repo, user_repo)
+    service = services.GameSessionService(game_session_repo, game_repo, user_repo)
 
     @staticmethod
     def get():
-        return GameSessionFactory.interactor
+        return GameSessionFactory.service
