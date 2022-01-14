@@ -19,7 +19,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'jeopardy.settings')
 
 websocket_urlpatterns = [
     re_path(r'^ws/lobby/$', LobbyConsumer.as_asgi()),
-    re_path(r'^ws/game_sessions/(?P<game_session_id>\d+)/$', GameSessionConsumer.as_asgi()),
+    re_path(r'^ws/game_session/$', GameSessionConsumer.as_asgi()),
 ]
 
 application = ProtocolTypeRouter({

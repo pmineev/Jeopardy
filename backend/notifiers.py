@@ -30,7 +30,7 @@ def notify_to_lobby(data: Dict, event_type: str):
 
 
 def notify_to_game_session(game_session_id: int, data: Dict, event_type: str):
-    websocket_notify(str(game_session_id), data, 'game_session_event', event_type)
+    websocket_notify(f'game_session_{game_session_id}', data, 'game_session_event', event_type)
 
 
 def notify_of_game_session_created(event: 'GameSessionCreatedEvent'):

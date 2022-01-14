@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from entities import Entity
 
+from backend.consumers import add_creator_to_notifier, remove_group_from_notifier, add_player_to_notifier, \
+    remove_player_from_notifier
 from backend.events import GameSessionCreatedEvent, GameSessionDeletedEvent, PlayerJoinedEvent, PlayerLeftEvent, \
     RoundStartedEvent, CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, \
     PlayerIncorrectlyAnsweredEvent, FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent
@@ -13,10 +15,10 @@ from backend.notifiers import notify_of_game_session_created, notify_of_game_ses
 from backend.timers import start_question_timer, stop_question_timer, restart_question_timer, start_final_round_timer
 
 EVENT_HANDLERS = {
-    GameSessionCreatedEvent: [notify_of_game_session_created],
-    GameSessionDeletedEvent: [notify_of_game_session_deleted],
-    PlayerJoinedEvent: [notify_of_player_joined],
-    PlayerLeftEvent: [notify_of_player_left],
+    GameSessionCreatedEvent: [add_creator_to_notifier, notify_of_game_session_created],
+    GameSessionDeletedEvent: [remove_group_from_notifier, notify_of_game_session_deleted],
+    PlayerJoinedEvent: [add_player_to_notifier, notify_of_player_joined],
+    PlayerLeftEvent: [remove_player_from_notifier, notify_of_player_left],
     RoundStartedEvent: [notify_of_round_started],
     CurrentPlayerChosenEvent: [notify_of_current_player_chosen],
     CurrentQuestionChosenEvent: [notify_of_current_question_chosen, start_question_timer],
