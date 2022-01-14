@@ -24,6 +24,8 @@ info:
     - начался финальный раунд;
     - закончился финальный раунд.
 
+    Для получения сообщений об игровых событиях после соединения пользователь должен отправить свой юзернейм.
+
 defaultContentType: application/json
 
 servers:
@@ -39,17 +41,14 @@ channels:
       message:
         $ref: '#/components/messages/lobbyMessage'
 
-  /game_sessions/{id}/:
+  /game_session/:
     description: Канал для игровых событий.
-    parameters:
-      id:
-        description: Идентификатор игровой сессии
-        schema:
-          type: integer
-          minimum: 1
     subscribe:
       message:
         $ref: '#/components/messages/gameSessionMessage'
+    publish:
+      message:
+        $ref: '#/components/messages/gameSessionIdentificationMessage'
 
 components:
   messages:
@@ -80,7 +79,23 @@ components:
         - $ref: '#/components/schemas/finalRoundStartedEvent'
         - $ref: '#/components/schemas/finalRoundTimeoutEvent'
 
+    gameSessionIdentificationMessage:
+      summary: Сообщение для идентификации пользователя
+      title: Юзернейм игрока
+      name: gameSessionIdentificationMessage
+      payload:
+        $ref: '#/components/schemas/username'
+
   schemas:
+    username:
+      description: Имя пользователя
+      type: object
+      required:
+      - username
+      properties:
+        username:
+          type: string
+
     gameSessionCreatedEvent:
       description: Игровая сессия создана
       type: object
