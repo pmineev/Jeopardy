@@ -1,8 +1,5 @@
 import json
-from typing import Dict, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from backend.events import GameSessionCreatedEvent, PlayerJoinedEvent, PlayerLeftEvent, GameSessionDeletedEvent
+from typing import Dict
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
@@ -57,27 +54,3 @@ class GameSessionConsumer(WebsocketConsumer):
         event['type'] = event_type
 
 
-def add_creator_to_notifier(event: 'GameSessionCreatedEvent'):
-    game_session_id = event.game_session.id
-    creator_username = event.game_session.creator.username
-
-    GameSessionConsumer.add_user(creator_username, game_session_id)
-
-
-def add_player_to_notifier(event: 'PlayerJoinedEvent'):
-    game_session_id = event.game_session.id
-    player_username = event.player.user.username
-
-    GameSessionConsumer.add_user(player_username, game_session_id)
-
-
-def remove_player_from_notifier(event: 'PlayerLeftEvent'):
-    player_username = event.player.user.username
-
-    GameSessionConsumer.remove_user(player_username)
-
-
-def remove_group_from_notifier(event: 'GameSessionDeletedEvent'):
-    game_session_id = event.game_session.id
-
-    GameSessionConsumer.remove_group(game_session_id)

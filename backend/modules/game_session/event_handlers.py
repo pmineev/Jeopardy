@@ -1,36 +1,16 @@
-from typing import Dict, Union, TYPE_CHECKING
+from typing import Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.events import GameSessionCreatedEvent, PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
-        FinalRoundStartedEvent, CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, AnswerTimeoutEvent, \
-        FinalRoundTimeoutEvent, GameSessionDeletedEvent, PlayerCorrectlyAnsweredEvent, \
-        PlayerIncorrectlyAnsweredEvent
+    from .events import GameSessionCreatedEvent, GameSessionDeletedEvent, PlayerJoinedEvent, PlayerLeftEvent, \
+        RoundStartedEvent, FinalRoundStartedEvent, CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, \
+        PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent
 
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-
-from backend.dtos import GameSessionDescriptionDTO, GameSessionIdDTO, CurrentRoundDTO, FinalRoundQuestionDTO, \
-    PlayerNicknameDTO, ChosenQuestionDTO, FinalRoundTimeoutDTO, PlayerDTO, CorrectAnswerDTO
-
-channel_layer = get_channel_layer()
-
-
-def websocket_notify(group_name: str, data: Dict, notification_type: str, event_type: str):
-    notification_dict = {
-        'type': notification_type,
-        'event': event_type,
-        'data': data
-    }
-
-    async_to_sync(channel_layer.group_send)(group_name, notification_dict)
-
-
-def notify_to_lobby(data: Dict, event_type: str):
-    websocket_notify('lobby', data, 'lobby_event', event_type)
-
-
-def notify_to_game_session(game_session_id: int, data: Dict, event_type: str):
-    websocket_notify(f'game_session_{game_session_id}', data, 'game_session_event', event_type)
+from ...infra import factories
+from ...infra.consumers import GameSessionConsumer
+from ...infra.notifiers import notify_to_lobby, notify_to_game_session
+from ...infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND_INTERVAL
+from .dtos import GameSessionDescriptionDTO, GameSessionIdDTO, PlayerNicknameDTO, \
+    CurrentRoundDTO, FinalRoundQuestionDTO, ChosenQuestionDTO, PlayerDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO
 
 
 def notify_of_game_session_created(event: 'GameSessionCreatedEvent'):
@@ -112,3 +92,66 @@ def notify_of_final_round_timeout(event: 'FinalRoundTimeoutEvent'):
     gs = event.game_session
 
     notify_to_game_session(gs.id, FinalRoundTimeoutDTO(gs).to_response(), 'final_round_timeout')
+
+
+def add_creator_to_notifier(event: 'GameSessionCreatedEvent'):
+    game_session_id = event.game_session.id
+    creator_username = event.game_session.creator.username
+
+    GameSessionConsumer.add_user(creator_username, game_session_id)
+
+
+def add_player_to_notifier(event: 'PlayerJoinedEvent'):
+    game_session_id = event.game_session.id
+    player_username = event.player.user.username
+
+    GameSessionConsumer.add_user(player_username, game_session_id)
+
+
+def remove_player_from_notifier(event: 'PlayerLeftEvent'):
+    player_username = event.player.user.username
+
+    GameSessionConsumer.remove_user(player_username)
+
+
+def remove_group_from_notifier(event: 'GameSessionDeletedEvent'):
+    game_session_id = event.game_session.id
+
+    GameSessionConsumer.remove_group(game_session_id)
+
+
+def start_question_timer(event: 'CurrentQuestionChosenEvent'):
+    gs = event.game_session
+    service = factories.GameSessionFactory.get()
+
+    Timers.start(key=gs.id,
+                 interval=CHOOSING_QUESTION_INTERVAL,
+                 callback=service.answer_timeout,
+                 args=(gs.id,))
+
+
+def stop_question_timer(event: 'PlayerCorrectlyAnsweredEvent'):
+    gs = event.game_session
+
+    Timers.stop(gs.id)
+
+
+def restart_question_timer(event: 'PlayerIncorrectlyAnsweredEvent'):
+    gs = event.game_session
+    service = factories.GameSessionFactory.get()
+
+    Timers.stop(gs.id)
+    Timers.start(key=gs.id,
+                 interval=CHOOSING_QUESTION_INTERVAL,
+                 callback=service.answer_timeout,
+                 args=(gs.id,))
+
+
+def start_final_round_timer(event: 'FinalRoundStartedEvent'):
+    gs = event.game_session
+    service = factories.GameSessionFactory.get()
+
+    Timers.start(key=gs.id,
+                 interval=FINAL_ROUND_INTERVAL,
+                 callback=service.final_round_timeout,
+                 args=(gs.id,))

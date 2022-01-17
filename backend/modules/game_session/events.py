@@ -1,12 +1,10 @@
-from abc import ABC
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.entities import GameSession, Player, Round, Question
+    from ..game.entities import Question, Round
+    from .entities import GameSession, Player
 
-
-class Event(ABC):
-    pass
+from ...core.events import Event
 
 
 class GameSessionCreatedEvent(Event):

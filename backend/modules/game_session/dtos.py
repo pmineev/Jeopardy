@@ -1,40 +1,11 @@
-from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List
+from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.entities import Session, User, Answer, Player, Question, Theme, Round, GameSession, Game
+    from ..game.entities import Round, Theme, Question
+    from .entities import GameSession, Player, Answer
 
-from backend.enums import State
-
-
-class DTO(ABC):
-    @abstractmethod
-    def to_response(self):
-        pass
-
-
-class SessionDTO(DTO):
-    def __init__(self, session: 'Session'):
-        self.access = session.access
-        self.refresh = session.refresh
-
-    def to_response(self):
-        return dict(
-            access=self.access,
-            refresh=self.refresh
-        )
-
-
-class UserDTO(DTO):
-    def __init__(self, user: 'User'):
-        self.username = user.username
-        self.nickname = user.nickname
-
-    def to_response(self):
-        return dict(
-            username=self.username,
-            nickname=self.nickname
-        )
+from ...core.dtos import DTO
+from .enums import State
 
 
 class CorrectAnswerDTO(DTO):
@@ -193,28 +164,6 @@ class GameSessionDescriptionDTO(DTO):
         )
 
 
-class GameDescriptionDTO(DTO):
-    def __init__(self, game: 'Game'):
-        self.name = game.name
-        self.author = game.author.nickname
-        self.rounds_count = len(game.rounds) + 1
-
-    def to_response(self):
-        return dict(
-            name=self.name,
-            author=self.author,
-            roundsCount=self.rounds_count
-        )
-
-
-class GameSessionIdDTO(DTO):
-    def __init__(self, gs: 'GameSession'):
-        self.id = gs.id
-
-    def to_response(self):
-        return dict(id=self.id)
-
-
 class PlayerNicknameDTO(DTO):
     def __init__(self, player: 'Player'):
         self.nickname = player.user.nickname
@@ -247,3 +196,11 @@ class FinalRoundTimeoutDTO(DTO):
             players=[dto.to_response() for dto in self.players],
             **self.answer.to_response()
         )
+
+
+class GameSessionIdDTO(DTO):
+    def __init__(self, gs: 'GameSession'):
+        self.id = gs.id
+
+    def to_response(self):
+        return dict(id=self.id)

@@ -1,49 +1,17 @@
 import random
-from abc import ABC
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 
-from backend.enums import State
-from backend.events import PlayerLeftEvent, PlayerJoinedEvent, CurrentPlayerChosenEvent, \
-    RoundStartedEvent, FinalRoundStartedEvent, CurrentQuestionChosenEvent, Event, \
-    PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent
-from backend.exceptions import WrongQuestionRequest, NotCurrentPlayer, WrongStage, TooManyPlayers
+if TYPE_CHECKING:
+    from ..user.entities import User
+    from ..game.entities import Question, Round, Game
 
-
-class Entity(ABC):
-    def __init__(self, id: Optional[int] = None):
-        self.id = id
-        self._events: List[Event] = []
-
-    def add_event(self, event):
-        self._events.append(event)
-
-    def get_events(self):
-        return self._events
-
-    def clear_events(self):
-        self._events.clear()
-
-    def __eq__(self, other):
-        return self.id == other.id
-
-
-class User(Entity):
-    def __init__(self,
-                 username: str,
-                 nickname: Optional[str] = None,
-                 password: Optional[str] = None,
-                 id: Optional[int] = None):
-        super().__init__(id)
-        self.username = username
-        self.nickname = nickname or username
-        self.password = password
-
-
-@dataclass
-class Session:
-    access: str
-    refresh: str
+from ...core.entities import Entity
+from .enums import State
+from .exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
+from .events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
+    CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, \
+    PlayerIncorrectlyAnsweredEvent, FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent
 
 
 @dataclass
@@ -54,7 +22,7 @@ class Answer:
 
 class Player(Entity):
     def __init__(self,
-                 user: User,
+                 user: 'User',
                  score: int = 0,
                  is_playing: bool = True,
                  answer: Optional[Answer] = None,
@@ -66,67 +34,17 @@ class Player(Entity):
         self.answer = answer
 
 
-class Question(Entity):
-    def __init__(self,
-                 text: str,
-                 answer: str,
-                 value: int,
-                 theme_index: Optional[int] = None,
-                 question_index: Optional[int] = None,
-                 id: Optional[int] = None):
-        super().__init__(id)
-        self.text = text
-        self.answer = answer
-        self.value = value
-        self.theme_index = theme_index
-        self.question_index = question_index
-
-
-class Theme(Entity):
-    def __init__(self,
-                 name: str,
-                 questions: List[Question],
-                 id: Optional[int] = None):
-        super().__init__(id)
-        self.name = name
-        self.questions = questions
-
-
-class Round(Entity):
-    def __init__(self,
-                 themes: List[Theme],
-                 order: int,
-                 id: Optional[int] = None):
-        super().__init__(id)
-        self.themes = themes
-        self.order = order
-
-
-class Game(Entity):
-    def __init__(self,
-                 name: str,
-                 author: User,
-                 rounds: List[Round],
-                 final_round: Question,
-                 id: Optional[int] = None):
-        super().__init__(id)
-        self.name = name
-        self.author = author
-        self.rounds = rounds
-        self.final_round = final_round
-
-
 class GameSession(Entity):
-    def __init__(self, creator: User,
-                 game: Game,
+    def __init__(self, creator: 'User',
+                 game: 'Game',
                  max_players: int,
                  state: State = State.WAITING,
                  id: Optional[int] = None,
                  players: Optional[List[Player]] = None,
                  current_player: Optional[Player] = None,
-                 current_round: Optional[Round] = None,
-                 current_question: Optional[Question] = None,
-                 answered_questions: Optional[List[Question]] = None):
+                 current_round: Optional['Round'] = None,
+                 current_question: Optional['Question'] = None,
+                 answered_questions: Optional[List['Question']] = None):
         super().__init__(id)
         self.creator = creator
         self.game = game
@@ -144,7 +62,7 @@ class GameSession(Entity):
 
         self.answered_questions = answered_questions or []
 
-    def join(self, user: User):
+    def join(self, user: 'User'):
         player = self._get_player(user)
         if player:
             if not player.is_playing:
@@ -164,7 +82,7 @@ class GameSession(Entity):
 
         print(f'{user.username} has joined')
 
-    def leave(self, user: User):
+    def leave(self, user: 'User'):
         player = self._get_player(user)
 
         if self.state == State.WAITING:
@@ -212,7 +130,7 @@ class GameSession(Entity):
 
         print(f'final round started, q:{self.game.final_round.text}, a:{self.game.final_round.answer}')
 
-    def choose_question(self, user: User, theme_index, question_index):
+    def choose_question(self, user: 'User', theme_index, question_index):
         player = self._get_player(user)
 
         if player != self.current_player:
@@ -240,7 +158,7 @@ class GameSession(Entity):
         print(f'{user.username} has chosen question, ti={theme_index} qi={question_index},'
               f' q:{self.current_question.text}, a:{self.current_question.answer}')
 
-    def submit_answer(self, user: User, answer_text):
+    def submit_answer(self, user: 'User', answer_text):
         player = self._get_player(user)
 
         if self.state == State.ANSWERING:
@@ -296,7 +214,7 @@ class GameSession(Entity):
 
         self.add_event(FinalRoundTimeoutEvent(self))
 
-    def is_player(self, user: User) -> bool:
+    def is_player(self, user: 'User') -> bool:
         return bool(self._get_player(user))
 
     def _is_all_players_joined(self) -> bool:
@@ -327,7 +245,7 @@ class GameSession(Entity):
                 player.score -= value
                 player.answer = Answer('', is_correct=False)
 
-    def _get_player(self, user: User) -> Optional[Player]:
+    def _get_player(self, user: 'User') -> Optional[Player]:
         for player in self.players:
             if user == player.user:
                 return player

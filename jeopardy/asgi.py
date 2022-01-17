@@ -13,7 +13,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 from django.urls import re_path
 
-from backend.consumers import LobbyConsumer, GameSessionConsumer
+from backend.infra.consumers import LobbyConsumer, GameSessionConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'jeopardy.settings')
 

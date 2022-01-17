@@ -18,7 +18,8 @@ from django.urls import path, re_path
 from django.views.generic import TemplateView
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from backend.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, GameSessionViewSet
+from backend.infra.http.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, \
+    GameSessionViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),

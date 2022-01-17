@@ -5,12 +5,14 @@ from rest_framework.serializers import ValidationError
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 
-from backend.exceptions import UserNotFound, UserAlreadyExists, GameAlreadyExists, TooManyPlayers, NotCurrentPlayer, \
-    WrongQuestionRequest, GameNotFound, AlreadyPlaying, WrongStage, GameSessionNotFound
-from backend.factories import UserFactory, GameFactory, GameSessionFactory
-from backend.serializers import RegisterUserCredentialsSerializer, LoginUserCredentialsSerializer, \
+from .serializers import RegisterUserCredentialsSerializer, LoginUserCredentialsSerializer, \
     ChangeUserCredentialsSerializer, GameSerializer, CreateGameSessionSerializer, \
     QuestionChoiceSerializer, AnswerRequestSerializer, CreatorNicknameSerializer
+from ..factories import UserFactory, GameFactory, GameSessionFactory
+from ...modules.game.exceptions import GameAlreadyExists, GameNotFound
+from ...modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
+    WrongQuestionRequest, AlreadyPlaying, WrongStage
+from ...modules.user.exceptions import UserAlreadyExists, UserNotFound
 
 
 class UserListView(APIView):

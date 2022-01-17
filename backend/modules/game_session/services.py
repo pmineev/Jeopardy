@@ -1,106 +1,14 @@
-from typing import TYPE_CHECKING, List
+from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.repos import GameSessionRepo, UserRepo, GameRepo
+    from ..user.repos import UserRepo
+    from ..game.repos import GameRepo
+    from .repos import GameSessionRepo
 
-from backend.entities import User, Game, Round, Theme, Question, GameSession
-from backend.dtos import GameStateDTO, GameSessionDescriptionDTO, GameDescriptionDTO, UserDTO, \
-    SessionDTO
-from backend.events import GameSessionDeletedEvent, GameSessionCreatedEvent
-from backend.exceptions import UserAlreadyExists, UserNotFound, GameAlreadyExists, AlreadyPlaying
-
-
-class UserService:
-    def __init__(self, repo: 'UserRepo'):
-        self.repo = repo
-
-    def get(self, username: str) -> UserDTO:
-        if not self.repo.is_exists(username):
-            raise UserNotFound
-
-        user = self.repo.get(username)
-
-        return UserDTO(user)
-
-    def create(self, user_data):
-        if self.repo.is_exists(user_data['username']):
-            raise UserAlreadyExists
-
-        user = User(**user_data)
-
-        self.repo.save(user)
-
-    def update(self, user_data, username: str):
-        if not self.repo.is_exists(username):
-            raise UserNotFound
-
-        user = self.repo.get(username)
-
-        if 'nickname' in user_data:
-            user.nickname = user_data['nickname']
-
-        if 'password' in user_data:
-            user.password = user_data['password']
-
-        self.repo.save(user)
-
-    def authenticate(self, user_data) -> SessionDTO:
-        user = User(**user_data)
-
-        session = self.repo.authenticate(user)
-
-        return SessionDTO(session)
-
-
-class GameService:
-    def __init__(self, repo: 'GameRepo', user_repo: 'UserRepo'):
-        self.repo = repo
-        self.user_repo = user_repo
-
-    def create(self, game_data, username: str):
-        if not self.user_repo.is_exists(username):
-            raise UserNotFound
-
-        user = self.user_repo.get(username)
-
-        if self.repo.is_exists(game_data['name']):
-            raise GameAlreadyExists
-
-        rounds = list()
-
-        for round_index, round_data in enumerate(game_data['rounds']):  # TODO выделить создание сущностей
-            themes = list()
-
-            for theme_data in round_data['themes']:
-                questions = list()
-
-                for question_data in theme_data['questions']:
-                    questions.append(Question(text=question_data['text'],
-                                              answer=question_data['answer'],
-                                              value=question_data['value']))
-
-                themes.append(Theme(name=theme_data['name'],
-                                    questions=questions))
-
-            rounds.append(Round(order=round_index + 1,
-                                themes=themes))
-
-        final_round_data = game_data['final_round']
-        final_round = Question(text=final_round_data['text'],
-                               answer=final_round_data['answer'],
-                               value=final_round_data['value'])
-
-        game = Game(name=game_data['name'],
-                    author=user,
-                    rounds=rounds,
-                    final_round=final_round)
-
-        self.repo.save(game)
-
-    def get_all_descriptions(self) -> List[GameDescriptionDTO]:
-        games = self.repo.get_all()
-
-        return [GameDescriptionDTO(game) for game in games]
+from .dtos import GameStateDTO, GameSessionDescriptionDTO
+from .events import GameSessionCreatedEvent, GameSessionDeletedEvent
+from .exceptions import AlreadyPlaying
+from .entities import GameSession
 
 
 class GameSessionService:
