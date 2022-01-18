@@ -4,7 +4,7 @@ from pathlib import Path
 
 import dj_database_url
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 REACT_APP_DIR = BASE_DIR / 'frontend' / 'build'
 
 SECRET_KEY = 'jp#%3h8jdub%+50*e3x-s7(@t2adr7ug+y3iu02w2z*8+5gq&#'
@@ -39,7 +39,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-ROOT_URLCONF = 'jeopardy.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -57,8 +57,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'jeopardy.wsgi.application'
-ASGI_APPLICATION = 'jeopardy.asgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
 
 DATABASES = {
     'default': {

@@ -15,7 +15,7 @@ from django.urls import re_path
 
 from backend.infra.consumers import LobbyConsumer, GameSessionConsumer
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'jeopardy.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 websocket_urlpatterns = [
     re_path(r'^ws/lobby/$', LobbyConsumer.as_asgi()),
