@@ -99,7 +99,7 @@ class GameSessionRepo(Repository):
         else:
             orm_game_session.current_player = None
 
-        orm_game_session.state = game_session.state
+        orm_game_session.stage = game_session.stage
 
         answered_questions_ids = [question.id for question in game_session.answered_questions]
         orm_questions_qs = ORMQuestion.objects.filter(pk__in=answered_questions_ids)

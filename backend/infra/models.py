@@ -5,7 +5,7 @@ from django_enum_choices.fields import EnumChoiceField
 
 from ..modules.game.entities import Question, Theme, Round, Game
 from ..modules.game_session.entities import Answer, Player, GameSession
-from ..modules.game_session.enums import State
+from ..modules.game_session.enums import Stage
 from ..modules.user.entities import User
 
 
@@ -108,8 +108,8 @@ class ORMGameSession(Model):
     current_player = OneToOneField(ORMPlayer,
                                    on_delete=CASCADE,
                                    null=True)
-    state = EnumChoiceField(State,
-                            default=State.WAITING)
+    stage = EnumChoiceField(Stage,
+                            default=Stage.WAITING)
     answered_questions = ManyToManyField(ORMQuestion,
                                          related_name='answered_questions')
 
@@ -122,5 +122,5 @@ class ORMGameSession(Model):
                            current_round=self.current_round.to_domain() if self.current_round else None,
                            current_question=self.current_question.to_domain() if self.current_question else None,
                            current_player=self.current_player.to_domain() if self.current_player else None,
-                           state=self.state,
+                           stage=self.stage,
                            answered_questions=[question.to_domain() for question in self.answered_questions.all()])

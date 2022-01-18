@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from ..game.entities import Question, Round, Game
 
 from ...core.entities import Entity
-from .enums import State
+from .enums import Stage
 from .exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
 from .events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
     CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, \
@@ -38,7 +38,7 @@ class GameSession(Entity):
     def __init__(self, creator: 'User',
                  game: 'Game',
                  max_players: int,
-                 state: State = State.WAITING,
+                 stage: Stage = Stage.WAITING,
                  id: Optional[int] = None,
                  players: Optional[List[Player]] = None,
                  current_player: Optional[Player] = None,
@@ -49,7 +49,7 @@ class GameSession(Entity):
         self.creator = creator
         self.game = game
         self.max_players = max_players
-        self.state = state
+        self.stage = stage
 
         if id:
             self.players = players
@@ -77,7 +77,7 @@ class GameSession(Entity):
 
             self.add_event(PlayerJoinedEvent(self, player))
 
-        if self.state == State.WAITING and self._is_all_players_joined():
+        if self.stage == Stage.WAITING and self._is_all_players_joined():
             self.start_game()
 
         print(f'{user.username} has joined')
@@ -85,7 +85,7 @@ class GameSession(Entity):
     def leave(self, user: 'User'):
         player = self._get_player(user)
 
-        if self.state == State.WAITING:
+        if self.stage == Stage.WAITING:
             self.players.remove(player)
         else:
             player.is_playing = False
@@ -97,7 +97,7 @@ class GameSession(Entity):
     def start_game(self):
         self.current_round = self.game.rounds[0]
         self.current_player = random.choice(self.players)
-        self.state = State.CHOOSING_QUESTION
+        self.stage = Stage.CHOOSING_QUESTION
 
         self.add_event(CurrentPlayerChosenEvent(self, self.current_player))  # TODO объединить в одно событие
         self.add_event(RoundStartedEvent(self, self.current_round))
@@ -111,7 +111,7 @@ class GameSession(Entity):
         if self.current_round.order < len(self.game.rounds):
             self.current_round = self.game.rounds[self.current_round.order]
             self._set_winner_current_player()
-            self.state = State.CHOOSING_QUESTION
+            self.stage = Stage.CHOOSING_QUESTION
 
             self.add_event(CurrentPlayerChosenEvent(self, self.current_player))
             self.add_event(RoundStartedEvent(self, self.current_round))
@@ -121,7 +121,7 @@ class GameSession(Entity):
             self._set_final_round()
 
     def _set_final_round(self):
-        self.state = State.FINAL_ROUND
+        self.stage = Stage.FINAL_ROUND
 
         self.current_round = None
         self.current_player = None
@@ -136,7 +136,7 @@ class GameSession(Entity):
         if player != self.current_player:
             raise NotCurrentPlayer
 
-        if not self.state == State.CHOOSING_QUESTION:
+        if not self.stage == Stage.CHOOSING_QUESTION:
             raise WrongStage
 
         try:
@@ -151,7 +151,7 @@ class GameSession(Entity):
         self.current_question.theme_index = theme_index
         self.current_question.question_index = question_index
 
-        self.state = State.ANSWERING
+        self.stage = Stage.ANSWERING
 
         self.add_event(CurrentQuestionChosenEvent(self, self.current_question))
 
@@ -161,7 +161,7 @@ class GameSession(Entity):
     def submit_answer(self, user: 'User', answer_text):
         player = self._get_player(user)
 
-        if self.state == State.ANSWERING:
+        if self.stage == Stage.ANSWERING:
             value = self.current_question.value
 
             if self.current_question.answer == answer_text:
@@ -179,7 +179,7 @@ class GameSession(Entity):
                     self.set_next_round()
                 else:
                     self.current_player = player
-                    self.state = State.CHOOSING_QUESTION
+                    self.stage = Stage.CHOOSING_QUESTION
             else:
                 answer = Answer(answer_text, is_correct=False)
                 player.answer = answer
@@ -189,7 +189,7 @@ class GameSession(Entity):
 
             print(f'{user.username} has answered {answer_text}:', 'correct' if answer.is_correct else 'wrong')
 
-        elif self.state == State.FINAL_ROUND:
+        elif self.stage == Stage.FINAL_ROUND:
             player.answer = Answer(answer_text)
 
             print(f'{user.username} final answer: {answer_text}')
@@ -206,11 +206,11 @@ class GameSession(Entity):
         if self.is_no_more_questions():
             self.set_next_round()
         else:
-            self.state = State.CHOOSING_QUESTION
+            self.stage = Stage.CHOOSING_QUESTION
 
     def final_round_timeout(self):
         self.check_players_final_answers()
-        self.state = State.END_GAME
+        self.stage = Stage.END_GAME
 
         self.add_event(FinalRoundTimeoutEvent(self))
 
@@ -221,7 +221,7 @@ class GameSession(Entity):
         return self.max_players == len(self.players)
 
     def is_all_players_left(self) -> bool:
-        if self.state == State.WAITING:
+        if self.stage == Stage.WAITING:
             return len(self.players) == 0
         else:
             return not any(player.is_playing for player in self.players)

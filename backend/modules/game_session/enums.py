@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class State(Enum):
+class Stage(Enum):
     WAITING = 'WAITING'
     CHOOSING_QUESTION = 'CHOOSING_QUESTION'
     ANSWERING = 'ANSWERING'
