@@ -1,0 +1,9 @@
+from enum import Enum
+
+
+class Stage(Enum):
+    WAITING = 'WAITING'
+    CHOOSING_QUESTION = 'CHOOSING_QUESTION'
+    ANSWERING = 'ANSWERING'
+    FINAL_ROUND = 'FINAL_ROUND'
+    END_GAME = 'END_GAME'
