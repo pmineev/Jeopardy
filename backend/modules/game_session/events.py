@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..game.entities import Question, Round
+    from ..game.entities import Round
+    from ..game_session.entities import CurrentQuestion
     from .entities import GameSession, Player
 
 from ...core.events import Event
@@ -42,7 +43,7 @@ class CurrentPlayerChosenEvent(Event):
 
 
 class CurrentQuestionChosenEvent(Event):
-    def __init__(self, game_session: 'GameSession', question: 'Question'):
+    def __init__(self, game_session: 'GameSession', question: 'CurrentQuestion'):
         self.game_session = game_session
         self.question = question
 
@@ -66,7 +67,7 @@ class FinalRoundStartedEvent(Event):
 
 
 class AnswerTimeoutEvent(Event):
-    def __init__(self, game_session: 'GameSession', question: 'Question'):
+    def __init__(self, game_session: 'GameSession', question: 'CurrentQuestion'):
         self.game_session = game_session
         self.question = question
 

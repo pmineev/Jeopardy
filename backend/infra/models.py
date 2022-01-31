@@ -4,7 +4,7 @@ from django.db.models import Model, CharField, TextField, IntegerField, \
 from django_enum_choices.fields import EnumChoiceField
 
 from ..modules.game.entities import Question, Theme, Round, Game
-from ..modules.game_session.entities import Answer, Player, GameSession
+from ..modules.game_session.entities import Answer, Player, GameSession, CurrentQuestion
 from ..modules.game_session.enums import Stage
 from ..modules.user.entities import User
 
@@ -113,6 +113,13 @@ class ORMGameSession(Model):
     answered_questions = ManyToManyField(ORMQuestion,
                                          related_name='answered_questions')
 
+    @property
+    def current_question_indexes(self):
+        question_index = self.current_question.order - 1
+        orm_theme = self.current_round.themes.get(questions=self.current_question)
+        theme_index = orm_theme.order - 1
+        return theme_index, question_index
+
     def to_domain(self):
         return GameSession(id=self.pk,
                            creator=self.creator.to_domain(),
@@ -120,7 +127,9 @@ class ORMGameSession(Model):
                            max_players=self.max_players,
                            players=[player.to_domain() for player in self.players.all()],
                            current_round=self.current_round.to_domain() if self.current_round else None,
-                           current_question=self.current_question.to_domain() if self.current_question else None,
+                           current_question=CurrentQuestion(self.current_question.to_domain(),
+                                                            *self.current_question_indexes)
+                           if self.current_question else None,
                            current_player=self.current_player.to_domain() if self.current_player else None,
                            stage=self.stage,
                            answered_questions=[question.to_domain() for question in self.answered_questions.all()])

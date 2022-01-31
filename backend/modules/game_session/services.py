@@ -23,7 +23,7 @@ class GameSessionService:
 
         return GameStateDTO(game_session)
 
-    def create(self, game_session_data, username: str) -> GameStateDTO:
+    def create(self, game_session_data, username: str):
         user = self.user_repo.get(username)
 
         if self.repo.is_exists(user):
@@ -45,14 +45,12 @@ class GameSessionService:
 
         self.repo.save(game_session)
 
-        return GameStateDTO(game_session)
-
     def get_all_descriptions(self) -> List[GameSessionDescriptionDTO]:
         game_sessions = self.repo.get_all()
 
         return [GameSessionDescriptionDTO(game_session) for game_session in game_sessions]
 
-    def join(self, username: str, join_data) -> GameStateDTO:
+    def join(self, username: str, join_data):
         user = self.user_repo.get(username)
 
         if self.repo.is_exists(user):
@@ -67,8 +65,6 @@ class GameSessionService:
         game_session.join(user)
 
         self.repo.save(game_session)
-
-        return GameStateDTO(game_session)
 
     def leave(self, username: str):
         user = self.user_repo.get(username)

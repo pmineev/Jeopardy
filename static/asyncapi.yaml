@@ -120,12 +120,7 @@ components:
           type: string
           const: gameSessionDeleted
         data:
-          type: object
-          required:
-          - id
-          properties:
-            id:
-              $ref: '#/components/schemas/gameSessionId'
+          $ref: '#/components/schemas/creatorNickname'
 
     playerJoinedLobbyEvent:
       description: Игрок присоединился
@@ -138,12 +133,7 @@ components:
           type: string
           const: playerJoined
         data:
-          type: object
-          required:
-          - id
-          properties:
-            id:
-              $ref: '#/components/schemas/gameSessionId'
+          $ref: '#/components/schemas/creatorNickname'
 
     playerJoinedGameSessionEvent:
       description: Игрок присоединился
@@ -174,12 +164,7 @@ components:
           type: string
           const: playerLeft
         data:
-          type: object
-          required:
-          - id
-          properties:
-            id:
-              $ref: '#/components/schemas/gameSessionId'
+          $ref: '#/components/schemas/creatorNickname'
 
     playerLeftGameSessionEvent:
       description: Игрок вышел
@@ -332,19 +317,26 @@ components:
             answer:
               $ref: '#/components/schemas/correctAnswer'
 
+    creatorNickname:
+      description: Ник создателя игровой сессии
+      type: object
+      required:
+      - creator
+      properties:
+        creator:
+          description: Ник
+          type: integer
+
     gameSessionDescription:
       description: Описание игровой сессии
       type: object
       additionalProperties: false
       required:
-      - id
       - creator
       - gameName
       - maxPlayers
       - currentPlayers
       properties:
-        id:
-          $ref: '#/components/schemas/gameSessionId'
         creator:
           description: Ник создателя игровой сессии
           type: string
@@ -359,11 +351,6 @@ components:
           description: Текущее количество игроков
           type: integer
           minimum: 1
-
-    gameSessionId:
-      description: Идентификатор игровой сессии
-      type: integer
-      minimum: 1
 
     gameStateCurrentRound:
       description: Описание текущего раунда игровой сессии

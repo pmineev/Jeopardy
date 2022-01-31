@@ -34,6 +34,26 @@ class Player(Entity):
         self.answer = answer
 
 
+class CurrentQuestion(Entity):
+    def __init__(self, question: 'Question', theme_index: int, question_index: int):
+        super().__init__(question.id)
+        self._question = question
+        self.theme_index = theme_index
+        self.question_index = question_index
+
+    @property
+    def text(self):
+        return self._question.text
+
+    @property
+    def answer(self):
+        return self._question.answer
+
+    @property
+    def value(self):
+        return self._question.value
+
+
 class GameSession(Entity):
     def __init__(self, creator: 'User',
                  game: 'Game',
@@ -43,8 +63,8 @@ class GameSession(Entity):
                  players: Optional[List[Player]] = None,
                  current_player: Optional[Player] = None,
                  current_round: Optional['Round'] = None,
-                 current_question: Optional['Question'] = None,
-                 answered_questions: Optional[List['Question']] = None):
+                 current_question: Optional['CurrentQuestion'] = None,
+                 answered_questions: Optional[List['CurrentQuestion']] = None):
         super().__init__(id)
         self.creator = creator
         self.game = game
@@ -147,9 +167,7 @@ class GameSession(Entity):
         if question in self.answered_questions:
             raise WrongQuestionRequest
 
-        self.current_question = question
-        self.current_question.theme_index = theme_index
-        self.current_question.question_index = question_index
+        self.current_question = CurrentQuestion(question, theme_index, question_index)
 
         self.stage = Stage.ANSWERING
 

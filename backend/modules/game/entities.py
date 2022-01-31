@@ -11,15 +11,11 @@ class Question(Entity):
                  text: str,
                  answer: str,
                  value: int,
-                 theme_index: Optional[int] = None,
-                 question_index: Optional[int] = None,
                  id: Optional[int] = None):
         super().__init__(id)
         self.text = text
         self.answer = answer
         self.value = value
-        self.theme_index = theme_index
-        self.question_index = question_index
 
 
 class Theme(Entity):

@@ -9,7 +9,7 @@ from ...infra import factories
 from ...infra.consumers import GameSessionConsumer
 from ...infra.notifiers import notify_to_lobby, notify_to_game_session
 from ...infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND_INTERVAL
-from .dtos import GameSessionDescriptionDTO, GameSessionIdDTO, PlayerNicknameDTO, \
+from .dtos import GameSessionDescriptionDTO, CreatorNicknameDTO, PlayerNicknameDTO, \
     CurrentRoundDTO, FinalRoundQuestionDTO, ChosenQuestionDTO, PlayerDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO
 
 
@@ -22,14 +22,14 @@ def notify_of_game_session_created(event: 'GameSessionCreatedEvent'):
 def notify_of_game_session_deleted(event: 'GameSessionDeletedEvent'):
     gs = event.game_session
 
-    notify_to_lobby(GameSessionIdDTO(gs).to_response(), 'game_session_deleted')
+    notify_to_lobby(CreatorNicknameDTO(gs).to_response(), 'game_session_deleted')
 
 
 def notify_of_player_joined(event: 'PlayerJoinedEvent'):
     gs = event.game_session
     player = event.player
 
-    notify_to_lobby(GameSessionIdDTO(gs).to_response(), 'player_joined')
+    notify_to_lobby(CreatorNicknameDTO(gs).to_response(), 'player_joined')
     notify_to_game_session(gs.id, PlayerNicknameDTO(player).to_response(), 'player_joined')
 
 
@@ -37,7 +37,7 @@ def notify_of_player_left(event: 'PlayerLeftEvent'):
     gs = event.game_session
     player = event.player
 
-    notify_to_lobby(GameSessionIdDTO(gs).to_response(), 'player_left')
+    notify_to_lobby(CreatorNicknameDTO(gs).to_response(), 'player_left')
     notify_to_game_session(gs.id, PlayerNicknameDTO(player).to_response(), 'player_left')
 
 
