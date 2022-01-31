@@ -198,9 +198,9 @@ class FinalRoundTimeoutDTO(DTO):
         )
 
 
-class GameSessionIdDTO(DTO):
+class CreatorNicknameDTO(DTO):
     def __init__(self, gs: 'GameSession'):
-        self.id = gs.id
+        self.nickname = gs.creator.nickname
 
     def to_response(self):
-        return dict(id=self.id)
+        return dict(creator=self.nickname)
