@@ -113,8 +113,8 @@ class GameSessionListView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            game_session_description_dto = GameSessionListView.interactor.create(serializer.validated_data,
-                                                                                 request.user.username)
+            GameSessionListView.interactor.create(serializer.validated_data,
+                                                  request.user.username)
         except GameNotFound:
             return Response(status=status.HTTP_404_NOT_FOUND)
         except ValidationError:
@@ -122,7 +122,7 @@ class GameSessionListView(APIView):
         except AlreadyPlaying:
             return Response(status=status.HTTP_409_CONFLICT)
 
-        return Response(status=status.HTTP_201_CREATED, data=game_session_description_dto.to_response())
+        return Response(status=status.HTTP_201_CREATED)
 
     def get(self, request):
         game_session_description_dtos = GameSessionListView.interactor.get_all_descriptions()
@@ -146,7 +146,7 @@ class GameSessionViewSet(ViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-            game_state_dto = GameSessionViewSet.service.join(request.user.username, serializer.validated_data)
+            GameSessionViewSet.service.join(request.user.username, serializer.validated_data)
 
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -155,7 +155,7 @@ class GameSessionViewSet(ViewSet):
         except (TooManyPlayers, AlreadyPlaying):
             return Response(status=status.HTTP_409_CONFLICT)
 
-        return Response(status=status.HTTP_201_CREATED, data=game_state_dto.to_response())
+        return Response(status=status.HTTP_201_CREATED)
 
     def leave(self, request):
         try:
