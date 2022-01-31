@@ -1,7 +1,8 @@
-from typing import List, TYPE_CHECKING
+from typing import List, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..game.entities import Round, Theme, Question
+    from ..game_session.entities import CurrentQuestion
     from .entities import GameSession, Player, Answer
 
 from ...core.dtos import DTO
@@ -9,7 +10,7 @@ from .enums import Stage
 
 
 class CorrectAnswerDTO(DTO):
-    def __init__(self, question: 'Question'):
+    def __init__(self, question: Union['Question', 'CurrentQuestion']):
         self.answer = question.answer
 
     def to_response(self):
@@ -67,14 +68,14 @@ class FinalRoundQuestionDTO(DTO):
 
 
 class CurrentQuestionDTO(DTO):
-    def __init__(self, question: 'Question'):
-        self.value = question.value
+    def __init__(self, question: 'CurrentQuestion'):
+        self.text = question.text
         self.theme_index = question.theme_index
         self.question_index = question.question_index
 
     def to_response(self):
         return dict(
-            value=self.value,
+            text=self.text,
             themeIndex=self.theme_index,
             questionIndex=self.question_index
         )
@@ -173,7 +174,7 @@ class PlayerNicknameDTO(DTO):
 
 
 class ChosenQuestionDTO(DTO):
-    def __init__(self, question: 'Question'):
+    def __init__(self, question: 'CurrentQuestion'):
         self.text = question.text
         self.theme_index = question.theme_index
         self.question_index = question.question_index
