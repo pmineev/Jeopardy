@@ -215,10 +215,6 @@ paths:
       responses:
         '201':
           description: Игровая сессия создана
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/gameState'
         '404':
           description: Игра не найдена
         '409':
@@ -262,10 +258,6 @@ paths:
       responses:
         '201':
           description: Пользователь успешно присоединился к игре
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/gameState'
         '404':
           description: Игровая сессия не найдена
         '409':
