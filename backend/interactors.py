@@ -1,6 +1,6 @@
 from backend.entities import UserProfile, Game, Round, Theme, Question, GameSession
 from backend.enums import State
-from backend.exceptions import InvalidCredentials, NotPlayer, NotCurrentPlayer
+from backend.exceptions import NotPlayer, NotCurrentPlayer, GameNotFound, WrongStage
 from backend.notifiers import GameSessionNotifier
 from backend.timers import GameSessionTimer
 
@@ -14,9 +14,6 @@ class UserInteractor:
         return user
 
     def create(self, user_data):
-        if not user_data['username'] or not user_data['password']:
-            raise InvalidCredentials
-
         user = UserProfile(username=user_data['username'],
                            password=user_data['password'])
 
@@ -34,11 +31,9 @@ class UserInteractor:
         if 'password' in user_data:
             user.password = user_data['password']
 
-        return self.repo.update(user)
+        self.repo.update(user)
 
     def create_session(self, user_data):
-        if not user_data['username'] or not user_data['password']:
-            raise InvalidCredentials
 
         user = UserProfile(username=user_data['username'],
                            password=user_data['password'])
@@ -51,7 +46,7 @@ class GameInteractor:
         self.repo = repo
 
     def create(self, game_data, username):
-        final_round_data = game_data['finalRound']
+        final_round_data = game_data['final_round']
         final_round = Question(text=final_round_data['text'],
                                answer=final_round_data['answer'],
                                value=final_round_data['value'])
@@ -98,8 +93,11 @@ class GameSessionInteractor:
 
         return game_session_id
 
-    def get_game_state(self, game_session_id):
+    def get_game_state(self, game_session_id, username):
         game_state = self.repo.get_game_state(game_session_id)
+
+        if not self.repo.is_player(game_session_id, username):
+            raise NotPlayer
 
         return game_state
 
@@ -119,27 +117,29 @@ class GameSessionInteractor:
         return self.repo.get_all_descriptions()
 
     def join(self, game_session_id, username):
-        state = self.repo.get_state(game_session_id)
-        if state == State.WAITING:
+        if not self.repo.is_game_session_exists(game_session_id):
+            raise GameNotFound
+
+        if not self.repo.is_player(game_session_id, username):
             self.repo.join(game_session_id, username)
 
             if self.repo.is_all_players_joined(game_session_id):
                 self.notifier.player_joined(game_session_id, username)
 
                 self._start_game(game_session_id)
-        elif self.repo.is_player(game_session_id, username):
+        else:
             self.repo.set_player_state(game_session_id, username, is_playing=True)
 
             self.notifier.player_joined(game_session_id, username)
-
-        else:
-            raise NotPlayer
 
         game_state = self.repo.get_game_state(game_session_id)
 
         return game_state
 
     def leave(self, game_session_id, username):
+        if not self.repo.is_game_session_exists(game_session_id):
+            raise GameNotFound
+
         if not self.repo.is_player(game_session_id, username):
             raise NotPlayer
 
@@ -188,6 +188,9 @@ class GameSessionInteractor:
             self.repo.set_winner_current_player(game_session_id)
 
     def choose_question(self, game_session_id, question_data, username):
+        if not self.repo.is_game_session_exists(game_session_id):
+            raise GameNotFound
+
         if not self.repo.is_player(game_session_id, username):
             raise NotPlayer
         print(f'user {username} is player')
@@ -207,7 +210,7 @@ class GameSessionInteractor:
 
             self.repo.set_state(game_session_id, State.ANSWERING)
         else:
-            pass
+            raise WrongStage
 
     def question_timeout(self, game_session_id):
         self.repo.mark_current_question_as_answered(game_session_id)
@@ -226,6 +229,9 @@ class GameSessionInteractor:
         self.notifier.final_round_timeout(game_session_id)
 
     def submit_answer(self, game_session_id, username, answer):
+        if not self.repo.is_game_session_exists(game_session_id):
+            raise GameNotFound
+
         if not self.repo.is_player(game_session_id, username):
             raise NotPlayer
         print(f'user {username} is player')
@@ -259,4 +265,4 @@ class GameSessionInteractor:
         elif state == State.FINAL_ROUND:
             self.repo.set_player_answer(game_session_id, username, answer)
         else:
-            pass
+            raise WrongStage

@@ -40,3 +40,7 @@ class WrongQuestionRequest(Exception):
 
 class AlreadyPlaying(Exception):
     pass
+
+
+class WrongStage(Exception):
+    pass
