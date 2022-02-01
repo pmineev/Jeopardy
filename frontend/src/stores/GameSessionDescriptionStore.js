@@ -14,22 +14,22 @@ const GameSessionDescriptionStore = types
                     break;
                 }
                 case 'game_session_created': {
-                    self.addDescription(data.id, data.creator, data.game_name, data.max_players, data.current_players);
+                    self.addDescription(data.creator, data.creator, data.gameName, data.maxPlayers, data.currentPlayers);
                     break;
                 }
                 case 'game_session_deleted': {
-                    self.deleteDescription(data.id);
+                    self.deleteDescription(data.creator);
                     break;
                 }
                 case 'player_joined': {
-                    self.descriptions.get(data.id).setPlayerJoined();
+                    self.descriptions.get(data.creator).setPlayerJoined();
                     break;
                 }
                 case 'player_left': {
                     console.log(self.descriptions)
-                    let descr = self.descriptions.get(data.id);
+                    let descr = self.descriptions.get(data.creator);
                     if (descr) {
-                        self.descriptions.get(data.id).setPlayerLeft();
+                        self.descriptions.get(data.creator).setPlayerLeft();
                     }
                     console.log(self.descriptions)
                     break;
@@ -41,11 +41,11 @@ const GameSessionDescriptionStore = types
         initialize(data) {
             data.forEach(descr =>
                 self.addDescription(
-                    descr.id,
                     descr.creator,
-                    descr.game_name,
-                    descr.max_players,
-                    descr.current_players))
+                    descr.creator,
+                    descr.gameName,
+                    descr.maxPlayers,
+                    descr.currentPlayers))
         },
         addDescription(id, creator, gameName, maxPlayers, currentPlayers) {
             self.descriptions.set(id, GameSessionDescription.create({

@@ -137,13 +137,8 @@ class UserProfileService {
 }
 
 class GameSessionService {
-    getId() {
-        const url = `game_sessions/id/`;
-        return axios.get(url);
-    }
-
-    getGameState(gameSessionId) {
-        const url = `game_sessions/${gameSessionId}/`;
+    getGameState() {
+        const url = `game_sessions/current/`;
         return axios.get(url);
     }
 
@@ -151,32 +146,32 @@ class GameSessionService {
         const url = '/game_sessions/';
         console.log('create');
         return axios.post(url, {
-            game_name: gameName,
-            max_players: maxPlayers
+            gameName: gameName,
+            maxPlayers: maxPlayers
         })
     }
 
-    join(gameSessionId) {
-        const url = `game_sessions/${gameSessionId}/join/`;
-        return axios.post(url);
+    join(creator) {
+        const url = `game_sessions/actions/join/`;
+        axios.post(url, {creator: creator});
     }
 
-    leave(gameSessionId) {
-        const url = `game_sessions/${gameSessionId}/leave/`;
+    leave() {
+        const url = 'game_sessions/current/actions/leave/';
         axios.delete(url);
     }
 
-    chooseQuestion(gameSessionId, themeOrder, questionOrder) {
-        const url = `game_sessions/${gameSessionId}/question/`;
+    chooseQuestion(themeIndex, questionIndex) {
+        const url = 'game_sessions/current/question/';
         axios.post(url, {
-            theme_order: themeOrder,
-            question_order: questionOrder
+            themeIndex: themeIndex,
+            questionIndex: questionIndex
         })
             .catch(error => console.log(error));
     }
 
-    submitAnswer(gameSessionId, answer) {
-        const url = `game_sessions/${gameSessionId}/answer/`;
+    submitAnswer(answer) {
+        const url = 'game_sessions/current/answer/';
         axios.post(url, {answer: answer});
     }
 

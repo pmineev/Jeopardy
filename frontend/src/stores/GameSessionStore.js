@@ -1,12 +1,18 @@
-import {applySnapshot, types} from "mobx-state-tree";
-import {State, toOrdinal} from "../utils";
+import {applySnapshot, getSnapshot, types} from "mobx-state-tree";
+import {Stage, toOrdinal} from "../utils";
+
+const Answer = types
+    .model({
+        text: '',
+        isCorrect: types.maybe(types.boolean)
+    });
 
 const Player = types
     .model({
         nickname: types.identifier,
-        score: types.integer,
-        isPlaying: types.boolean,
-        answer: types.maybe(types.string)
+        score: 0,
+        isPlaying: true,
+        answer: types.maybe(Answer)
     })
     .actions(self => ({
         setIsPlaying(isPlaying) {
@@ -14,10 +20,11 @@ const Player = types
         }
     }));
 
-const Answer = types
+const FinalRound = types
     .model({
-        text: '',
-        isCorrect: false
+        text: types.string,
+        value: types.number,
+        answer: types.maybe(types.string)
     });
 
 const Question = types
@@ -53,8 +60,7 @@ const Round = types
 
 const GameSessionStore = types
     .model({
-        id: types.maybe(types.number),
-        state: types.optional(types.enumeration('state', Object.values(State)), State.WAITING),
+        stage: types.optional(types.enumeration('stage', Object.values(Stage)), Stage.WAITING),
         players: types.array(Player),
         currentPlayer: types.maybe(types.reference(Player)),
         currentRound: types.maybe(Round),
@@ -63,13 +69,15 @@ const GameSessionStore = types
             theme: -1,
             question: -1
         }),
-        finalQuestion: types.maybe(Question),
-        currentAnswer: types.maybe(Answer),
+        finalRound: types.maybe(FinalRound),
+        answeringPlayer: types.maybe(types.reference(Player)),
+        correctAnswer: types.maybe(types.string),
         roundText: ''
 
     })
     .actions(self => ({
         listener(event, data) {
+            console.log("listener", event, getSnapshot(self), data);
             switch (event) {
                 case 'player_joined': {
                     const player = self.players.find(player => player.nickname === data.nickname);
@@ -78,9 +86,7 @@ const GameSessionStore = types
                         player.setIsPlaying(true);
                     else
                         self.players.push({
-                            nickname: data.nickname,
-                            score: data.score,
-                            isPlaying: data.is_playing
+                            nickname: data.nickname
                         });
 
                     break;
@@ -88,7 +94,7 @@ const GameSessionStore = types
                 case 'player_left': {
                     const playerIndex = self.players.findIndex(player => player.nickname === data.nickname);
 
-                    if (self.state === State.WAITING)
+                    if (self.stage === Stage.WAITING)
                         self.players.splice(playerIndex, 1);
                     else
                         self.players[playerIndex].isPlaying = false;
@@ -96,70 +102,68 @@ const GameSessionStore = types
                     break;
                 }
                 case 'current_player_chosen': {
-                    self.setCurrentPlayer(data);
+                    self.setCurrentPlayer(data.nickname);
 
                     break;
                 }
                 case 'round_started': {
                     console.log(data);
                     self.setCurrentRound(data);
-                    self.roundText = toOrdinal(self.currentRound.order + 1) + ' раунд';
-                    self.state = self.currentRound.order > 0 ? State.ROUND_ENDED : State.ROUND_STARTED;
+                    self.roundText = toOrdinal(self.currentRound.order) + ' раунд';
+
+                    if (self.stage === Stage.WAITING)
+                        self.stage = Stage.ROUND_STARTED;
 
                     break;
                 }
                 case 'current_question_chosen': {
+                    self.clearAnswers();
+
                     self.setCurrentQuestion(data);
 
-                    self.state = State.ANSWERING;
+                    self.stage = Stage.ANSWERING;
 
                     break;
                 }
                 case 'player_answered': {
-                    self.currentAnswer = Answer.create({
-                        text: data.text,
-                        isCorrect: data.is_correct
-                    });
+                    const player = self.players.find(player => player.nickname === data.nickname);
 
-                    const player = self.players.find(player => player.nickname === data.player.nickname);
+                    self.answeringPlayer = player;
 
-                    self.currentPlayer = player;
+                    player.score = data.score;
+                    player.answer = Answer.create({
+                        text: data.answer.text,
+                        isCorrect: data.answer.isCorrect
+                    })
 
-                    player.score = data.player.score;
+                    if (player.answer.isCorrect) {
+                        self.currentQuestion.isAnswered = true;
 
-                    if (self.currentAnswer.isCorrect) {
-                        self.currentRound
-                            .themes[self.currentQuestionIndexes.theme]
-                            .questions[self.currentQuestionIndexes.question]
-                            .isAnswered = true;
+                        self.currentPlayer = player;
 
-
-                        if (self.notAnsweredQuestionsCount !== 1)
-                            self.state = State.CHOOSING_QUESTION;
+                        self.stage = self.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
                     }
+
+                    console.log("answered", getSnapshot(self));
 
                     break;
                 }
                 case 'question_timeout': {
                     self.currentQuestion.isAnswered = true;
-                    self.currentAnswer = Answer.create({
-                        text: data.text,
-                        isCorrect: true
-                    });
-                    self.state = State.TIMEOUT;
+                    self.correctAnswer = data.answer;
+                    self.stage = Stage.TIMEOUT;
 
                     break;
                 }
                 case 'final_round_started': {
-                    self.finalQuestion = Question.create({
-                        id: 'final',
-                        value: data.value,
+                    self.finalRound = FinalRound.create({
                         text: data.text,
-                        isAnswered: false
+                        value: data.value
                     })
-                    self.currentQuestion = self.finalQuestion;
 
-                    self.state = State.FINAL_ROUND_STARTED;
+                    self.roundText = 'Финальный раунд';
+
+                    //self.stage = Stage.FINAL_ROUND_STARTED;
 
                     break;
                 }
@@ -167,9 +171,15 @@ const GameSessionStore = types
                     self.players.forEach(player => {
                         const playerData = data.players.find(pd => pd.nickname === player.nickname);
                         player.score = playerData.score;
-                        player.answer = playerData.answer ?? undefined;
+                        player.answer = Answer.create({
+                            text: playerData.answer.text,
+                            isCorrect: playerData.answer.isCorrect
+                        });
                     })
-                    self.state = State.END_GAME;
+
+                    self.finalRound.answer = data.answer
+
+                    self.stage = Stage.END_GAME;
 
                     break;
                 }
@@ -177,38 +187,45 @@ const GameSessionStore = types
                     throw new Error('нет такого события');
             }
         },
-        initializeCreated(data) {
-            self.id = Number(data.id);
-            self.players.push({
-                nickname: data.players[0].nickname,
-                score: data.players[0].score,
-                isPlaying: data.players[0].is_playing
-            })
-        },
-        initializeJoined(data) {
+        initialize(data) {
             self.clear();
 
-            self.state = data.state;
-            data.players.forEach(player =>
-                self.players.push({
-                    nickname: player.nickname,
-                    score: player.score,
-                    isPlaying: player.is_playing
-                })
+            console.log("init", data)
+            self.stage = data.stage;
+            data.players.forEach(player_data =>
+                self.addPlayer(player_data)
             );
+            if (data.currentRound)
+                self.setCurrentRound(data.currentRound);
+            if (data.currentPlayer)
+                self.setCurrentPlayer(data.currentPlayer);
+            if (data.currentQuestion)
+                self.setCurrentQuestion(data.currentQuestion);
+            if (data.finalRound)
+                self.setCurrentQuestion(data.finalRound);
 
-            if (data.current_round)
-                self.setCurrentRound(data.current_round);
-            if (data.current_player)
-                self.setCurrentPlayer(data.current_player);
-            if (data.current_question)
-                self.setCurrentQuestion(data.current_question);
+            console.log("inited", getSnapshot(self))
+
         },
-        setState(state) {
-            self.state = state;
+        setStage(stage) {
+            self.stage = stage;
         },
-        setId(id) {
-            self.id = id;
+        addPlayer(data) {
+            console.log(data)
+            const player = Player.create({
+                nickname: data.nickname,
+                score: data.score,
+                isPlaying: data.isPlaying
+            });
+            self.players.push(player);
+            if (data.answer) {
+                player.answer = Answer.create({
+                    text: data.answer.text,
+                    isCorrect: data.answer.isCorrect !== null ? data.answer.isCorrect : undefined
+                });
+            }
+
+
         },
         setCurrentRound(data) {
             self.currentRound = Round.create({
@@ -220,46 +237,55 @@ const GameSessionStore = types
                             Question.create({
                                 id: theme.name + question.value,
                                 value: question.value,
-                                isAnswered: question.is_answered
+                                isAnswered: question.isAnswered
                             })
                         ))
                     })
                 ))
             });
+            console.log("setCurrentRound", getSnapshot(self))
         },
-        setCurrentPlayer(data) {
-            self.currentPlayer = self.players.find(player => player.nickname === data.nickname);
+        setCurrentPlayer(nickname) {
+            console.log(nickname)
+            self.currentPlayer = self.players.find(player => player.nickname === nickname);
         },
         setCurrentQuestion(data) {
-            if (data) {
-                self.currentQuestion = self.currentRound
-                    .themes[data.theme_order]
-                    .questions[data.question_order];
-                self.currentQuestion.setText(data.text);
+            self.currentQuestion = self.currentRound
+                .themes[data.themeIndex]
+                .questions[data.questionIndex];
+            self.currentQuestion.setText(data.text);
 
-                self.currentQuestionIndexes.theme = data.theme_order
-                self.currentQuestionIndexes.question = data.question_order
-            }
+            self.currentQuestionIndexes.theme = data.themeIndex
+            self.currentQuestionIndexes.question = data.questionIndex
+
         },
-        clearCurrentAnswer() {
-            self.currentAnswer = undefined;
+        setFinalRound(data) {
+            self.finalRound = FinalRound.create({
+                text: data.text,
+                value: data.value
+            });
+            if (data.answer)
+                self.finalRound.answer = data.answer;
+        },
+        clearAnswers() {
+            self.correctAnswer = undefined;
+            self.answeringPlayer = undefined;
+            self.players.forEach(player => {
+                player.answer = undefined;
+                console.log(`cleared ${player.nickname} answer`)
+            })
         },
         clear() {
             applySnapshot(self, {});
         }
     }))
     .views(self => ({
-        get notAnsweredQuestionsCount() {
-            let notAnswered = 0;
-
-            self.currentRound.themes.forEach(theme => {
-                theme.questions.forEach(question => {
-                    if (!question.isAnswered)
-                        notAnswered++;
-                })
-            })
-
-            return notAnswered;
+        get isNoMoreQuestions() {
+            return self.currentRound.themes.every(theme =>
+                theme.questions.every(question =>
+                    question.isAnswered
+                )
+            )
         }
     }));
 

@@ -6,14 +6,12 @@ import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 
 import {GameSessionService, LobbyService} from "./services";
-import Notifier from "./notifiers";
+import {Notifier, notifierUrls} from "./notifiers";
 import {useStore} from "./stores/RootStore";
 
 const gameSessionService = new GameSessionService();
 
 const GameSessionDescriptionView = observer(({descr, history}) => {
-    const {gameSessionStore} = useStore();
-
     return (
         <tr>
             <td>{descr.creator}</td>
@@ -22,11 +20,7 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
             <td>
                 <button
                     onClick={() => {
-                        gameSessionService.join(descr.id)
-                            .then(response => {
-                                gameSessionStore.initializeJoined(response.data);
-                                gameSessionStore.setId(descr.id);
-                            });
+                        gameSessionService.join(descr.creator);
                         history.push('/game');
                     }}
                 >
@@ -45,7 +39,7 @@ const Lobby = observer(() => {
     useEffect(() => {
         document.title = 'Лобби'
 
-        const notifier = new Notifier('lobby');
+        const notifier = new Notifier(notifierUrls.lobby);
         notifier.setListener(store.listener);
 
         const lobbyService = new LobbyService();

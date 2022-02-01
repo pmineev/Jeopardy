@@ -1,20 +1,14 @@
-class Notifier {
-    constructor(type, id = '') {
-        this.url = Notifier.createUrl(type, id);
+export const notifierUrls = {
+    lobby: 'ws://127.0.0.1:8000/ws/lobby/',
+    gameSession: 'ws://127.0.0.1:8000/ws/game_session/'
+}
+
+export class Notifier {
+    constructor(url) {
+        this.url = url;
         this.listener = null;
 
         this.ws = new WebSocket(this.url);
-    }
-
-    static createUrl(type, id) {
-        switch (type) {
-            case 'lobby':
-                return 'ws://127.0.0.1:8000/ws/lobby/'
-            case 'game':
-                return `ws://127.0.0.1:8000/ws/game_sessions/${id}/`
-            default:
-                throw new Error('нет такого типа уведомлений')
-        }
     }
 
     setListener(listener) {
@@ -34,4 +28,14 @@ class Notifier {
 
 }
 
-export default Notifier;
+export class GameSessionNotifier extends Notifier {
+    constructor(url) {
+        super(url);
+        this.ws.onopen = () => {
+            const username = localStorage.getItem("username");
+            this.ws.send(JSON.stringify({username}));
+        }
+
+
+    }
+}

@@ -14,7 +14,7 @@ const GameListStore = types
                     descr.name,
                     descr.name,
                     descr.author,
-                    descr.rounds_count)
+                    descr.roundsCount)
             });
         },
         addDescription(id, name, author, roundsCount) {
