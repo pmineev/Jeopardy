@@ -18,8 +18,8 @@ from django.urls import path, re_path
 from django.views.generic import TemplateView
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from backend.consumers import LobbyConsumer, GameSessionConsumer
-from backend.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, GameSessionViewSet
+from backend.infra.http.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, \
+    GameSessionViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -29,18 +29,12 @@ urlpatterns = [
     path('api/sessions/new_token/', TokenRefreshView.as_view()),
     path('api/games/', GameListView.as_view()),
     path('api/game_sessions/', GameSessionListView.as_view()),
-    path('api/game_sessions/id/', GameSessionViewSet.as_view({'get': 'id'})),
-    path('api/game_sessions/<int:game_session_id>/', GameSessionViewSet.as_view({'get': 'get_state'})),
-    path('api/game_sessions/<int:game_session_id>/join/', GameSessionViewSet.as_view({'post': 'join'})),
-    path('api/game_sessions/<int:game_session_id>/leave/', GameSessionViewSet.as_view({'delete': 'leave'})),
-    path('api/game_sessions/<int:game_session_id>/question/', GameSessionViewSet.as_view({'post': 'choose_question'})),
-    path('api/game_sessions/<int:game_session_id>/answer/', GameSessionViewSet.as_view({'post': 'submit_answer'})),
+    path('api/game_sessions/current/', GameSessionViewSet.as_view({'get': 'get_state'})),
+    path('api/game_sessions/actions/join/', GameSessionViewSet.as_view({'post': 'join'})),
+    path('api/game_sessions/current/actions/leave/', GameSessionViewSet.as_view({'delete': 'leave'})),
+    path('api/game_sessions/current/question/', GameSessionViewSet.as_view({'post': 'choose_question'})),
+    path('api/game_sessions/current/answer/', GameSessionViewSet.as_view({'post': 'submit_answer'})),
     re_path(r'', TemplateView.as_view(
         template_name='index.html'
     )),
-]
-
-websocket_urlpatterns = [
-    re_path(r'^ws/lobby/$', LobbyConsumer.as_asgi()),
-    re_path(r'^ws/game_sessions/(?P<game_session_id>\d+)/$', GameSessionConsumer.as_asgi()),
 ]
