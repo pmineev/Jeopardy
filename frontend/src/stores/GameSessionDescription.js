@@ -2,7 +2,7 @@ import {types} from "mobx-state-tree";
 
 const GameSessionDescription = types
     .model({
-        id: types.number,
+        id: types.string,
         creator: types.string,
         gameName: types.string,
         maxPlayers: types.number,

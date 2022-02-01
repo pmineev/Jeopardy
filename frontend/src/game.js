@@ -7,16 +7,17 @@ import {useHistory} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
 import ReactTooltip from 'react-tooltip';
 
-import Notifier from "./notifiers";
+import {GameSessionNotifier, notifierUrls} from "./notifiers";
 import {GameSessionService} from "./services";
-import {State} from "./utils";
+import {Stage} from "./utils";
 import {useStore} from "./stores/RootStore";
+
+import {getSnapshot} from "mobx-state-tree";
 
 
 const gameSessionService = new GameSessionService();
 
-const PlayerControls = observer(() => {
-    const {gameSessionStore: store} = useStore();
+const PlayerControls = () => {
     const history = useHistory();
 
     return (
@@ -27,7 +28,7 @@ const PlayerControls = observer(() => {
                 }}
                 onSubmit={(values, {setSubmitting, resetForm}) => {
                     if (values.answer?.length > 0) {
-                        gameSessionService.submitAnswer(store.id, values.answer);
+                        gameSessionService.submitAnswer(values.answer);
                         resetForm();
                         setSubmitting(false);
                     }
@@ -41,7 +42,7 @@ const PlayerControls = observer(() => {
 
             <button
                 onClick={() => {
-                    gameSessionService.leave(store.id);
+                    gameSessionService.leave();
                     history.push('/games');
                 }}
             >
@@ -49,66 +50,72 @@ const PlayerControls = observer(() => {
             </button>
         </div>
     )
-});
+};
 
 const HostCard = observer(() => {
     const {gameSessionStore: store} = useStore();
     let hostText = '';
     let hostImageURL;
 
-    switch (store.state) {
-        case State.WAITING: {
+    console.log("hostcard", getSnapshot(store));
+
+    switch (store.stage) {
+        case Stage.WAITING: {
             hostText = 'ожидаем игроков';
-            hostImageURL = gameSessionService.getHostImageUrl(State.WAITING);
+            hostImageURL = gameSessionService.getHostImageUrl(Stage.WAITING);
             break;
         }
-        case State.ROUND_ENDED:
-        case State.FINAL_ROUND_STARTED:
-        case State.CHOOSING_QUESTION:
-        case State.TIMEOUT: {
-            if (store.state === State.TIMEOUT)
-                hostText = `Правильный ответ: ${store.currentAnswer.text}. `
-            else if (store.currentAnswer?.isCorrect)
-                hostText = 'Правильно! ';
+        case Stage.TIMEOUT: {
+            if (store.stage === Stage.TIMEOUT)
+                hostText = `Правильный ответ: ${store.correctAnswer}. `
+            hostImageURL = gameSessionService.getHostImageUrl(Stage.CHOOSING_QUESTION);
+            break;
+        }
+        case Stage.ROUND_ENDED:
+        case Stage.FINAL_ROUND_STARTED:
+        case Stage.CHOOSING_QUESTION: {
+            if (store.answeringPlayer?.answer.isCorrect)
+                hostText = 'Правильно!\n';
 
-            if (store.state === State.ROUND_ENDED) {
+            if (store.stage === Stage.ROUND_ENDED) {
                 hostText += 'Раунд закончен.';
-                hostImageURL = gameSessionService.getHostImageUrl(State.ROUND_STARTED);
-            } else if (store.state === State.FINAL_ROUND_STARTED) {
+                hostImageURL = gameSessionService.getHostImageUrl(Stage.ROUND_STARTED);
+            } else if (store.stage === Stage.FINAL_ROUND_STARTED) {
                 hostText += 'Впереди финальный раунд.';
-                hostImageURL = gameSessionService.getHostImageUrl(State.ROUND_STARTED);
-            } else {
+                hostImageURL = gameSessionService.getHostImageUrl(Stage.ROUND_STARTED);
+            } else if (!store.isNoMoreQuestions) {
                 hostText += `${store.currentPlayer.nickname}, выбирайте вопрос.`;
-                hostImageURL = gameSessionService.getHostImageUrl(State.CHOOSING_QUESTION);
+                hostImageURL = gameSessionService.getHostImageUrl(Stage.CHOOSING_QUESTION);
             }
             break;
         }
-        case State.ANSWERING: {
+        case Stage.ANSWERING: {
             const themeName = store.currentRound.themes[store.currentQuestionIndexes.theme].name;
             const value = store.currentQuestion.value;
             hostText = `${themeName} за ${value}`;
-            hostImageURL = gameSessionService.getHostImageUrl(State.ANSWERING);
+            hostImageURL = gameSessionService.getHostImageUrl(Stage.ANSWERING);
 
-            if (store.currentAnswer?.text.length > 0) {
-                hostText = 'Неверно.';
-                hostImageURL = gameSessionService.getHostImageUrl('wrong');
-            }
+            if (store.answeringPlayer)
+                if (!store.answeringPlayer.answer.isCorrect) {
+                    hostText = 'Неверно.';
+                    hostImageURL = gameSessionService.getHostImageUrl('wrong');
+                }
             break;
         }
-        case State.FINAL_ROUND: {
-            hostImageURL = gameSessionService.getHostImageUrl(State.FINAL_ROUND);
+        case Stage.FINAL_ROUND: {
+            hostImageURL = gameSessionService.getHostImageUrl(Stage.FINAL_ROUND);
             hostText = 'Финальный раунд';
             break;
         }
-        case State.END_GAME: {
+        case Stage.END_GAME: {
             const winner = store.players.reduce((a, b) => a.score > b.score ? a : b);
             hostText = `Победил ${winner.nickname}!`;
-            hostImageURL = gameSessionService.getHostImageUrl(State.END_GAME);
+            hostImageURL = gameSessionService.getHostImageUrl(Stage.END_GAME);
             break;
         }
         default: {
             hostText = '';
-            hostImageURL = gameSessionService.getHostImageUrl(State.WAITING);
+            hostImageURL = gameSessionService.getHostImageUrl(Stage.WAITING);
         }
     }
 
@@ -127,27 +134,48 @@ const HostCard = observer(() => {
 
 const QuestionScreen = observer(() => {
     const {gameSessionStore: store} = useStore();
+    const [screenText, setScreenText] = useState('')
+
+    useEffect(() => {
+        switch (store.stage) {
+            case Stage.ROUND_STARTED:
+            case Stage.FINAL_ROUND_STARTED: {
+                setScreenText(store.roundText);
+                break;
+            }
+            case Stage.ROUND_ENDED: {
+                setScreenText('');
+                break;
+            }
+            case Stage.ANSWERING: {
+                setScreenText(store.currentQuestion.text);
+                break;
+            }
+            case Stage.FINAL_ROUND: {
+                setScreenText(store.finalRound.text);
+                break;
+            }
+            default:
+                break;
+        }
+    }, [store.stage])
+
 
     return (
         <div className='question'>
-            {
-                ([State.ROUND_STARTED, State.ROUND_ENDED, State.FINAL_ROUND_STARTED, State.WAITING].includes(store.state))
-                    ? store.roundText
-                    : store.currentQuestion.text
-            }
+            {screenText}
         </div>
     )
 });
 
-const QuestionCell = observer(({question, theme_order, question_order}) => {
-    const {gameSessionStore: store} = useStore();
+const QuestionCell = observer(({question, themeIndex, questionIndex}) => {
     const [clicked, setClicked] = useState(false);
 
     return (
         <td className={`question-cell ${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
             onClick={() => {
                 setClicked(true);
-                gameSessionService.chooseQuestion(store.id, theme_order, question_order);
+                gameSessionService.chooseQuestion(themeIndex, questionIndex);
             }}
         >
             {question.value}
@@ -155,7 +183,7 @@ const QuestionCell = observer(({question, theme_order, question_order}) => {
     )
 });
 
-const Theme = ({theme, theme_order}) => {
+const Theme = ({theme, themeIndex}) => {
     return (
         <tr>
             <td>
@@ -164,9 +192,9 @@ const Theme = ({theme, theme_order}) => {
             {theme.questions.map((question, index) =>
                 <QuestionCell
                     key={question.value}
-                    theme_order={theme_order}
+                    themeIndex={themeIndex}
                     question={question}
-                    question_order={index}
+                    questionIndex={index}
                 />
             )}
         </tr>
@@ -182,7 +210,7 @@ const RoundTable = ({themes}) => {
                     <Theme
                         key={theme.name}
                         theme={theme}
-                        theme_order={index}
+                        themeIndex={index}
                     />
                 )}
             </tbody>
@@ -193,7 +221,7 @@ const RoundTable = ({themes}) => {
 const GameScreen = observer(() => {
     const {gameSessionStore: store} = useStore();
     return (
-        [State.CHOOSING_QUESTION, State.TIMEOUT].includes(store.state)
+        store.stage === Stage.CHOOSING_QUESTION
             ? <RoundTable
                 key='table'
                 themes={store.currentRound.themes}
@@ -214,19 +242,9 @@ const PlayerCard = observer(({player}) => {
     }
 
     useEffect(() => {
-        if (store.currentAnswer?.text.length > 0
-            && store.currentPlayer?.nickname === player.nickname) {
-            setAnswer(store.currentAnswer.text);
-            ReactTooltip.show(tooltipRef);
-
-            wait();
-        }
-
-    }, [store.currentAnswer])
-
-    useEffect(() => {
-        if (player.answer) {
-            setAnswer(player.answer);
+        if (store.answeringPlayer === player ||
+            (store.stage === Stage.END_GAME && player.answer)) {
+            setAnswer(player.answer.text);
             ReactTooltip.show(tooltipRef);
 
             wait()
@@ -283,48 +301,59 @@ const Game = observer(() => {
     useEffect(() => {
         document.title = 'Игра';
 
-        let gameSessionId;
         let notifier;
 
-        if (!store.id) {
-            gameSessionService.getId()
-                .then(response => {
-                    gameSessionId = response.data.id;
-
-                    store.setId(gameSessionId);
-                    gameSessionService.getGameState(gameSessionId)
-                        .then(r =>
-                            store.initializeJoined(r.data));
-
-                    notifier = new Notifier('game', gameSessionId);
-                    notifier.setListener(store.listener);
-
-                })
-                .catch(error => {
-                    if (error.response.data.detail === 'not player')
-                        history.push('/games');
-                })
-
-        }
+        gameSessionService.getGameState()
+            .then(response => {
+                store.initialize(response.data);
+                notifier = new GameSessionNotifier(notifierUrls.gameSession);
+                notifier.setListener(store.listener);
+            })
+            .catch(() => {
+                history.push('/games');
+            })
 
         return () => {
             notifier?.close();
+            store.clear();
         }
     }, [store]);
 
     useEffect(() => {
-        function wait(state) {
-            setTimeout(store.setState, 5000, state);
+        function wait(callback) {
+            setTimeout(callback, 5000)
         }
 
-        if (store.state === State.ROUND_ENDED)
-            wait(State.ROUND_STARTED)
-        else if (store.state === State.ROUND_STARTED) {
-            store.clearCurrentAnswer();
-            wait(State.CHOOSING_QUESTION)
-        } else if (store.state === State.FINAL_ROUND_STARTED)
-            wait(State.FINAL_ROUND)
-    }, [store, store.state]);
+        switch (store.stage) {
+            case Stage.ROUND_ENDED:
+                wait(() => {
+                    const nextStage = store.finalRound ? Stage.FINAL_ROUND_STARTED : Stage.ROUND_STARTED
+                    store.setStage(nextStage)
+                });
+                break;
+            case Stage.ROUND_STARTED:
+                wait(() => {
+                    store.setStage(Stage.CHOOSING_QUESTION);
+                    store.clearAnswers();
+                });
+                break;
+            case Stage.TIMEOUT:
+                wait(() => {
+                    const nextStage = store.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
+                    store.setStage(nextStage);
+                    store.clearAnswers();
+                });
+                break;
+            case Stage.FINAL_ROUND_STARTED:
+                wait(() => {
+                    store.setStage(Stage.FINAL_ROUND);
+                    store.clearAnswers();
+                });
+                break;
+            default:
+                break;
+        }
+    }, [store, store.stage]);
 
     return (
         <div className='game'>
