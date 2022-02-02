@@ -1,5 +1,5 @@
 import {applySnapshot, getSnapshot, types} from "mobx-state-tree";
-import {Stage, toOrdinal} from "../utils";
+import {Stage} from "../utils";
 
 const Answer = types
     .model({
@@ -66,9 +66,7 @@ const GameSessionStore = types
         }),
         finalRound: types.maybe(FinalRound),
         answeringPlayer: types.maybe(types.reference(Player)),
-        correctAnswer: types.maybe(types.string),
-        roundText: ''
-
+        correctAnswer: types.maybe(types.string)
     })
     .actions(self => ({
         listener(event, data) {
@@ -112,7 +110,6 @@ const GameSessionStore = types
         onRoundStarted(data) {
             console.log(data);
             self.setCurrentRound(data);
-            self.roundText = toOrdinal(self.currentRound.order) + ' раунд';
 
             if (self.stage === Stage.WAITING)
                 self.stage = Stage.ROUND_STARTED;
@@ -155,8 +152,6 @@ const GameSessionStore = types
                 text: data.text,
                 value: data.value
             })
-
-            self.roundText = 'Финальный раунд';
         },
         onFinalRoundTimeout(data) {
             self.players.forEach(player => {

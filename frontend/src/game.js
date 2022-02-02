@@ -9,7 +9,7 @@ import ReactTooltip from 'react-tooltip';
 
 import {GameSessionNotifier, notifierUrls} from "./notifiers";
 import {GameSessionService} from "./services";
-import {Stage} from "./utils";
+import {Stage, toOrdinal} from "./utils";
 import {useStore} from "./stores/RootStore";
 
 import {getSnapshot} from "mobx-state-tree";
@@ -138,9 +138,12 @@ const QuestionScreen = observer(() => {
 
     useEffect(() => {
         switch (store.stage) {
-            case Stage.ROUND_STARTED:
+            case Stage.ROUND_STARTED: {
+                setScreenText(toOrdinal(store.currentRound.order) + ' раунд');
+                break;
+            }
             case Stage.FINAL_ROUND_STARTED: {
-                setScreenText(store.roundText);
+                setScreenText('Финальный раунд');
                 break;
             }
             case Stage.ROUND_ENDED: {
