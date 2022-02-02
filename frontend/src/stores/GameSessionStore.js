@@ -182,8 +182,8 @@ const GameSessionStore = types
 
             console.log("init", data)
             self.stage = data.stage;
-            data.players.forEach(player_data =>
-                self.addPlayer(player_data)
+            data.players.forEach(playerData =>
+                self.addPlayer(playerData)
             );
             if (data.currentRound)
                 self.setCurrentRound(data.currentRound);
