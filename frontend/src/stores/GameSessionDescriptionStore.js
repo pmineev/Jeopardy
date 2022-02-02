@@ -8,6 +8,7 @@ const GameSessionDescriptionStore = types
     })
     .actions(self => ({
         listener(event, data) {
+            console.log("lobby", event, data);
             const handlers = {
                 'game_session_created': self.onGameSessionCreated,
                 'game_session_deleted': self.onGameSessionDeleted,
@@ -18,37 +19,21 @@ const GameSessionDescriptionStore = types
             handlers[event](data);
         },
         onGameSessionCreated(data) {
-            self.addDescription(data.creator, data.gameName, data.maxPlayers, data.currentPlayers);
+            self.descriptions.put(data);
         },
         onGameSessionDeleted(data) {
-            self.deleteDescription(data.creator);
+            self.descriptions.delete(data.creator);
         },
         onPlayerJoined(data) {
             self.descriptions.get(data.creator).setPlayerJoined();
         },
         onPlayerLeft(data) {
-            console.log(self.descriptions)
-            let descr = self.descriptions.get(data.creator);
-            if (descr) {
-                self.descriptions.get(data.creator).setPlayerLeft();
-            }
-            console.log(self.descriptions)
+            self.descriptions.get(data.creator).setPlayerLeft();
         },
         initialize(data) {
-            data.forEach(descr =>
-                self.addDescription(
-                    descr.creator,
-                    descr.gameName,
-                    descr.maxPlayers,
-                    descr.currentPlayers))
-        },
-        addDescription(creator, gameName, maxPlayers, currentPlayers) {
-            self.descriptions.put(GameSessionDescription.create({
-                creator, gameName, maxPlayers, currentPlayers
-            }))
-        },
-        deleteDescription(creator) {
-            self.descriptions.delete(creator);
+            data.forEach(descriptionData =>
+                self.descriptions.put(descriptionData)
+            )
         }
     }))
 
