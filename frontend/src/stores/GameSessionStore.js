@@ -78,114 +78,104 @@ const GameSessionStore = types
     .actions(self => ({
         listener(event, data) {
             console.log("listener", event, getSnapshot(self), data);
-            switch (event) {
-                case 'player_joined': {
-                    const player = self.players.find(player => player.nickname === data.nickname);
 
-                    if (player)
-                        player.setIsPlaying(true);
-                    else
-                        self.players.push({
-                            nickname: data.nickname
-                        });
+            const handlers = {
+                'player_joined': self.onPlayerJoined,
+                'player_left': self.onPlayerLeft,
+                'current_player_chosen': self.onCurrentPlayerChosen,
+                'round_started': self.onRoundStarted,
+                'current_question_chosen': self.onCurrentQuestionChosen,
+                'player_answered': self.onPlayerAnswered,
+                'question_timeout': self.onQuestionTimeout,
+                'final_round_started': self.onFinalRoundStarted,
+                'final_round_timeout': self.onFinalRoundTimeout,
+            };
 
-                    break;
-                }
-                case 'player_left': {
-                    const playerIndex = self.players.findIndex(player => player.nickname === data.nickname);
+            handlers[event](data);
+        },
+        onPlayerJoined(data) {
+            const player = self.players.find(player => player.nickname === data.nickname);
 
-                    if (self.stage === Stage.WAITING)
-                        self.players.splice(playerIndex, 1);
-                    else
-                        self.players[playerIndex].isPlaying = false;
+            if (player)
+                player.setIsPlaying(true);
+            else
+                self.players.push({
+                    nickname: data.nickname
+                });
+        },
+        onPlayerLeft(data) {
+            const playerIndex = self.players.findIndex(player => player.nickname === data.nickname);
 
-                    break;
-                }
-                case 'current_player_chosen': {
-                    self.setCurrentPlayer(data.nickname);
+            if (self.stage === Stage.WAITING)
+                self.players.splice(playerIndex, 1);
+            else
+                self.players[playerIndex].isPlaying = false;
+        },
+        onCurrentPlayerChosen(data) {
+            self.setCurrentPlayer(data.nickname);
+        },
+        onRoundStarted(data) {
+            console.log(data);
+            self.setCurrentRound(data);
+            self.roundText = toOrdinal(self.currentRound.order) + ' раунд';
 
-                    break;
-                }
-                case 'round_started': {
-                    console.log(data);
-                    self.setCurrentRound(data);
-                    self.roundText = toOrdinal(self.currentRound.order) + ' раунд';
+            if (self.stage === Stage.WAITING)
+                self.stage = Stage.ROUND_STARTED;
+        },
+        onCurrentQuestionChosen(data) {
+            self.clearAnswers();
 
-                    if (self.stage === Stage.WAITING)
-                        self.stage = Stage.ROUND_STARTED;
+            self.setCurrentQuestion(data);
 
-                    break;
-                }
-                case 'current_question_chosen': {
-                    self.clearAnswers();
+            self.stage = Stage.ANSWERING;
+        },
+        onPlayerAnswered(data) {
+            const player = self.players.find(player => player.nickname === data.nickname);
 
-                    self.setCurrentQuestion(data);
+            self.answeringPlayer = player;
 
-                    self.stage = Stage.ANSWERING;
+            player.score = data.score;
+            player.answer = Answer.create({
+                text: data.answer.text,
+                isCorrect: data.answer.isCorrect
+            })
 
-                    break;
-                }
-                case 'player_answered': {
-                    const player = self.players.find(player => player.nickname === data.nickname);
+            if (player.answer.isCorrect) {
+                self.currentQuestion.isAnswered = true;
 
-                    self.answeringPlayer = player;
+                self.currentPlayer = player;
 
-                    player.score = data.score;
-                    player.answer = Answer.create({
-                        text: data.answer.text,
-                        isCorrect: data.answer.isCorrect
-                    })
-
-                    if (player.answer.isCorrect) {
-                        self.currentQuestion.isAnswered = true;
-
-                        self.currentPlayer = player;
-
-                        self.stage = self.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
-                    }
-
-                    console.log("answered", getSnapshot(self));
-
-                    break;
-                }
-                case 'question_timeout': {
-                    self.currentQuestion.isAnswered = true;
-                    self.correctAnswer = data.answer;
-                    self.stage = Stage.TIMEOUT;
-
-                    break;
-                }
-                case 'final_round_started': {
-                    self.finalRound = FinalRound.create({
-                        text: data.text,
-                        value: data.value
-                    })
-
-                    self.roundText = 'Финальный раунд';
-
-                    //self.stage = Stage.FINAL_ROUND_STARTED;
-
-                    break;
-                }
-                case 'final_round_timeout': {
-                    self.players.forEach(player => {
-                        const playerData = data.players.find(pd => pd.nickname === player.nickname);
-                        player.score = playerData.score;
-                        player.answer = Answer.create({
-                            text: playerData.answer.text,
-                            isCorrect: playerData.answer.isCorrect
-                        });
-                    })
-
-                    self.finalRound.answer = data.answer
-
-                    self.stage = Stage.END_GAME;
-
-                    break;
-                }
-                default:
-                    throw new Error('нет такого события');
+                self.stage = self.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
             }
+
+            console.log("answered", getSnapshot(self));
+        },
+        onQuestionTimeout(data) {
+            self.currentQuestion.isAnswered = true;
+            self.correctAnswer = data.answer;
+            self.stage = Stage.TIMEOUT;
+        },
+        onFinalRoundStarted(data) {
+            self.finalRound = FinalRound.create({
+                text: data.text,
+                value: data.value
+            })
+
+            self.roundText = 'Финальный раунд';
+        },
+        onFinalRoundTimeout(data) {
+            self.players.forEach(player => {
+                const playerData = data.players.find(pd => pd.nickname === player.nickname);
+                player.score = playerData.score;
+                player.answer = Answer.create({
+                    text: playerData.answer.text,
+                    isCorrect: playerData.answer.isCorrect
+                });
+            })
+
+            self.finalRound.answer = data.answer
+
+            self.stage = Stage.END_GAME;
         },
         initialize(data) {
             self.clear();

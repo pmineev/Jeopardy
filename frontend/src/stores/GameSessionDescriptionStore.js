@@ -8,31 +8,31 @@ const GameSessionDescriptionStore = types
     })
     .actions(self => ({
         listener(event, data) {
-            switch (event) {
-                case 'game_session_created': {
-                    self.addDescription(data.creator, data.creator, data.gameName, data.maxPlayers, data.currentPlayers);
-                    break;
-                }
-                case 'game_session_deleted': {
-                    self.deleteDescription(data.creator);
-                    break;
-                }
-                case 'player_joined': {
-                    self.descriptions.get(data.creator).setPlayerJoined();
-                    break;
-                }
-                case 'player_left': {
-                    console.log(self.descriptions)
-                    let descr = self.descriptions.get(data.creator);
-                    if (descr) {
-                        self.descriptions.get(data.creator).setPlayerLeft();
-                    }
-                    console.log(self.descriptions)
-                    break;
-                }
-                default:
-                    throw new Error('нет такого события')
+            const handlers = {
+                'game_session_created': self.onGameSessionCreated,
+                'game_session_deleted': self.onGameSessionDeleted,
+                'player_joined': self.onPlayerJoined,
+                'player_left': self.onPlayerLeft
             }
+
+            handlers[event](data);
+        },
+        onGameSessionCreated(data) {
+            self.addDescription(data.creator, data.creator, data.gameName, data.maxPlayers, data.currentPlayers);
+        },
+        onGameSessionDeleted(data) {
+            self.deleteDescription(data.creator);
+        },
+        onPlayerJoined(data) {
+            self.descriptions.get(data.creator).setPlayerJoined();
+        },
+        onPlayerLeft(data) {
+            console.log(self.descriptions)
+            let descr = self.descriptions.get(data.creator);
+            if (descr) {
+                self.descriptions.get(data.creator).setPlayerLeft();
+            }
+            console.log(self.descriptions)
         },
         initialize(data) {
             data.forEach(descr =>
