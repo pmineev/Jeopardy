@@ -7,7 +7,7 @@ import {useHistory} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
 import ReactTooltip from 'react-tooltip';
 
-import {GameSessionNotifier, notifierUrls} from "./notifiers";
+import {GameSessionListener, listenerUrls} from "./notifiers";
 import {GameSessionService} from "./services";
 import {Stage, toOrdinal} from "./utils";
 import {useStore} from "./stores/RootStore";
@@ -304,20 +304,20 @@ const Game = observer(() => {
     useEffect(() => {
         document.title = 'Игра';
 
-        let notifier;
+        let listener;
 
         gameSessionService.getGameState()
             .then(response => {
                 store.initialize(response.data);
-                notifier = new GameSessionNotifier(notifierUrls.gameSession);
-                notifier.setListener(store.listener);
+                listener = new GameSessionListener(listenerUrls.gameSession);
+                listener.setHandler(store.eventHandler);
             })
             .catch(() => {
                 history.push('/games');
             })
 
         return () => {
-            notifier?.close();
+            listener?.close();
             store.clear();
         }
     }, [store]);

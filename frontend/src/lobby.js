@@ -6,7 +6,7 @@ import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 
 import {GameSessionService, LobbyService} from "./services";
-import {Notifier, notifierUrls} from "./notifiers";
+import {Listener, listenerUrls} from "./notifiers";
 import {useStore} from "./stores/RootStore";
 
 const gameSessionService = new GameSessionService();
@@ -39,8 +39,8 @@ const Lobby = observer(() => {
     useEffect(() => {
         document.title = 'Лобби'
 
-        const notifier = new Notifier(notifierUrls.lobby);
-        notifier.setListener(store.listener);
+        const listener = new Listener(listenerUrls.lobby);
+        listener.setHandler(store.eventHandler);
 
         const lobbyService = new LobbyService();
         lobbyService.getDescriptions()
@@ -48,7 +48,7 @@ const Lobby = observer(() => {
                 store.initialize(result.data);
             });
 
-        return () => notifier.close()
+        return () => listener.close()
     }, [store]);
 
     return (

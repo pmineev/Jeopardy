@@ -69,7 +69,7 @@ const GameSessionStore = types
         correctAnswer: types.maybe(types.string)
     })
     .actions(self => ({
-        listener(event, data) {
+        eventHandler(event, data) {
             console.log("listener", event, getSnapshot(self), data);
 
             const handlers = {

@@ -1,23 +1,23 @@
-export const notifierUrls = {
+export const listenerUrls = {
     lobby: 'ws://127.0.0.1:8000/ws/lobby/',
     gameSession: 'ws://127.0.0.1:8000/ws/game_session/'
 }
 
-export class Notifier {
+export class Listener {
     constructor(url) {
         this.url = url;
-        this.listener = null;
+        this.handler = null;
 
         this.ws = new WebSocket(this.url);
     }
 
-    setListener(listener) {
-        this.listener = listener;
+    setHandler(handler) {
+        this.handler = handler;
 
         this.ws.onmessage = (message) => {
             const data = JSON.parse(message.data);
             console.log('ws', data);
-            this.listener(data.event, data.data);
+            this.handler(data.event, data.data);
         }
     }
 
@@ -28,7 +28,7 @@ export class Notifier {
 
 }
 
-export class GameSessionNotifier extends Notifier {
+export class GameSessionListener extends Listener {
     constructor(url) {
         super(url);
         this.ws.onopen = () => {

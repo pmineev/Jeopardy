@@ -7,7 +7,7 @@ const GameSessionDescriptionStore = types
         descriptions: types.map(GameSessionDescription)
     })
     .actions(self => ({
-        listener(event, data) {
+        eventHandler(event, data) {
             console.log("lobby", event, data);
             const handlers = {
                 'game_session_created': self.onGameSessionCreated,
