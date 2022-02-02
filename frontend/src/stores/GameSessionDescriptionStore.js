@@ -9,10 +9,6 @@ const GameSessionDescriptionStore = types
     .actions(self => ({
         listener(event, data) {
             switch (event) {
-                case 'init': {
-                    self.init(data);
-                    break;
-                }
                 case 'game_session_created': {
                     self.addDescription(data.creator, data.creator, data.gameName, data.maxPlayers, data.currentPlayers);
                     break;
