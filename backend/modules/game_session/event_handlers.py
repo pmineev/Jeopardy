@@ -3,7 +3,8 @@ from typing import Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from .events import GameSessionCreatedEvent, GameSessionDeletedEvent, PlayerJoinedEvent, PlayerLeftEvent, \
         RoundStartedEvent, FinalRoundStartedEvent, CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, \
-        PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent
+        PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
+        PlayerInactiveEvent
 
 from ...infra import factories
 from ...infra.consumers import GameSessionConsumer
@@ -38,6 +39,13 @@ def notify_of_player_left(event: 'PlayerLeftEvent'):
     player = event.player
 
     notify_to_lobby(CreatorNicknameDTO(gs).to_response(), 'player_left')
+    notify_to_game_session(gs.id, PlayerNicknameDTO(player).to_response(), 'player_left')
+
+
+def notify_of_player_inactive(event: 'PlayerInactiveEvent'):
+    gs = event.game_session
+    player = event.player
+
     notify_to_game_session(gs.id, PlayerNicknameDTO(player).to_response(), 'player_left')
 
 

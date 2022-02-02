@@ -30,6 +30,12 @@ class PlayerLeftEvent(Event):
         self.player = player
 
 
+class PlayerInactiveEvent(Event):
+    def __init__(self, game_session: 'GameSession', player: 'Player'):
+        self.game_session = game_session
+        self.player = player
+
+
 class RoundStartedEvent(Event):
     def __init__(self, game_session: 'GameSession', round: 'Round'):
         self.game_session = game_session
