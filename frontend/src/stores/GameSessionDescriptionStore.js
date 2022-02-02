@@ -18,7 +18,7 @@ const GameSessionDescriptionStore = types
             handlers[event](data);
         },
         onGameSessionCreated(data) {
-            self.addDescription(data.creator, data.creator, data.gameName, data.maxPlayers, data.currentPlayers);
+            self.addDescription(data.creator, data.gameName, data.maxPlayers, data.currentPlayers);
         },
         onGameSessionDeleted(data) {
             self.deleteDescription(data.creator);
@@ -38,18 +38,17 @@ const GameSessionDescriptionStore = types
             data.forEach(descr =>
                 self.addDescription(
                     descr.creator,
-                    descr.creator,
                     descr.gameName,
                     descr.maxPlayers,
                     descr.currentPlayers))
         },
-        addDescription(id, creator, gameName, maxPlayers, currentPlayers) {
-            self.descriptions.set(id, GameSessionDescription.create({
-                id, creator, gameName, maxPlayers, currentPlayers
+        addDescription(creator, gameName, maxPlayers, currentPlayers) {
+            self.descriptions.put(GameSessionDescription.create({
+                creator, gameName, maxPlayers, currentPlayers
             }))
         },
-        deleteDescription(id) {
-            self.descriptions.delete(id);
+        deleteDescription(creator) {
+            self.descriptions.delete(creator);
         }
     }))
 
