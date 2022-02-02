@@ -13,12 +13,7 @@ const Player = types
         score: 0,
         isPlaying: true,
         answer: types.maybe(Answer)
-    })
-    .actions(self => ({
-        setIsPlaying(isPlaying) {
-            self.isPlaying = isPlaying;
-        }
-    }));
+    });
 
 const FinalRound = types
     .model({
@@ -97,7 +92,7 @@ const GameSessionStore = types
             const player = self.players.find(player => player.nickname === data.nickname);
 
             if (player)
-                player.setIsPlaying(true);
+                player.isPlaying = true;
             else
                 self.players.push({
                     nickname: data.nickname
@@ -243,7 +238,7 @@ const GameSessionStore = types
             self.currentQuestion = self.currentRound
                 .themes[data.themeIndex]
                 .questions[data.questionIndex];
-            self.currentQuestion.setText(data.text);
+            self.currentQuestion.text = data.text;
 
             self.currentQuestionIndexes.theme = data.themeIndex
             self.currentQuestionIndexes.question = data.questionIndex
