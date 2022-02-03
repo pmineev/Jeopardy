@@ -1,8 +1,10 @@
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import {SubmitError, TextInput} from "./inputs";
-import {useAuth} from "./auth";
 import {Link, useHistory} from "react-router-dom";
+
+import SubmitError from "../../common/forms/SubmitError";
+import TextInput from "../../common/forms/TextInput";
+import {useAuth} from "../../common/auth/auth";
 
 const RegisterForm = () => {
     const auth = useAuth();
@@ -73,4 +75,4 @@ const RegisterForm = () => {
     );
 };
 
-export {RegisterForm};
+export default RegisterForm;

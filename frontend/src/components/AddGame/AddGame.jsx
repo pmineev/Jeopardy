@@ -1,5 +1,3 @@
-import './round.css';
-
 import {useEffect} from "react";
 import {useHistory} from 'react-router-dom';
 import {Form, Formik} from "formik";
@@ -8,10 +6,13 @@ import Modal from "react-modal";
 import {observer} from "mobx-react-lite";
 import {getSnapshot} from "mobx-state-tree";
 
+import '../../common/round.css';
+
+import {toOrdinal} from "../../common/utils";
+import {useStore} from "../../common/RootStore";
+import SubmitError from "../../common/forms/SubmitError";
+import TextInput from "../../common/forms/TextInput";
 import {AddGameService} from "./services";
-import {SubmitError, TextInput} from "./inputs";
-import {toOrdinal} from "./utils";
-import {useStore} from "./stores/RootStore";
 
 const addGameService = new AddGameService();
 

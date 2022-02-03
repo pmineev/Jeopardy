@@ -1,6 +1,8 @@
-import './header.css';
 import {Link, NavLink} from "react-router-dom";
-import {useAuth} from "./auth";
+
+import './Header.css';
+
+import {useAuth} from "./auth/auth";
 
 function Header() {
     const auth = useAuth();

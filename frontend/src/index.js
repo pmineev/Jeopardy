@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
-import {ProvideAuth} from "./auth";
+
+import {ProvideAuth} from "./common/auth/auth";
+import App from './components/App/App';
 
 ReactDOM.render(
     <React.StrictMode>

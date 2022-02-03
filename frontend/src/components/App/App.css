@@ -1,11 +1,11 @@
 @font-face {
     font-family: 'Montserrat';
-    src: url('fonts/Montserrat.woff2') format('woff2');
+    src: url('../../common/fonts/Montserrat.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Oswald';
-    src: url('fonts/Oswald.woff2') format('woff2');
+    src: url('../../common/fonts/Oswald.woff2') format('woff2');
 }
 
 html {

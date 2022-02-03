@@ -1,9 +1,9 @@
-export const listenerUrls = {
+const listenerUrls = {
     lobby: 'ws://127.0.0.1:8000/ws/lobby/',
     gameSession: 'ws://127.0.0.1:8000/ws/game_session/'
 }
 
-export class Listener {
+class Listener {
     constructor(url) {
         this.url = url;
         this.handler = null;
@@ -28,14 +28,4 @@ export class Listener {
 
 }
 
-export class GameSessionListener extends Listener {
-    constructor(url) {
-        super(url);
-        this.ws.onopen = () => {
-            const username = localStorage.getItem("username");
-            this.ws.send(JSON.stringify({username}));
-        }
-
-
-    }
-}
+export {listenerUrls, Listener};

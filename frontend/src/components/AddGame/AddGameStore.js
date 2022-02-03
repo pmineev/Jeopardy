@@ -1,6 +1,6 @@
 import {types} from "mobx-state-tree";
 
-import {questionValues} from "../utils";
+import {questionValues} from "../../common/utils";
 
 const Question = types
     .model({

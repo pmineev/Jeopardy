@@ -1,13 +1,14 @@
-import './list.css';
-
 import {useEffect} from 'react';
 import {useHistory} from "react-router-dom";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 
-import {GameSessionService, LobbyService} from "./services";
-import {Listener, listenerUrls} from "./notifiers";
-import {useStore} from "./stores/RootStore";
+import '../../common/list.css';
+
+import {Listener, listenerUrls} from "../../common/listener";
+import {useStore} from "../../common/RootStore";
+import {GameSessionService} from "../Game/services";
+import {LobbyService} from "./services";
 
 const gameSessionService = new GameSessionService();
 

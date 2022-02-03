@@ -1,5 +1,6 @@
 import {applySnapshot, getSnapshot, types} from "mobx-state-tree";
-import {Stage} from "../utils";
+
+import {Stage} from "../../common/utils";
 
 const Answer = types
     .model({

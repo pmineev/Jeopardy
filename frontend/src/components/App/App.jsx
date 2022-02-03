@@ -1,16 +1,17 @@
 import React, {Fragment} from "react";
-import './App.css'
-import {RegisterForm} from "./registration";
-import {PrivateRoute, useAuth} from "./auth";
-import LoginForm from "./login";
-import GameList from "./games";
-import Header from "./header";
-import Lobby from "./lobby";
-import AddGame from "./addGame";
-import UserProfileForm from "./userProfile";
-import Game from "./game";
-
 import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom";
+
+import './App.css'
+
+import {PrivateRoute, useAuth} from "../../common/auth/auth";
+import Header from "../../common/Header";
+import RegisterForm from "../RegisterForm/RegisterForm";
+import LoginForm from "../LoginForm/LoginForm";
+import UserProfileForm from "../UserProfileForm/UserProfileForm";
+import GameList from "../GameList/GameList";
+import AddGame from "../AddGame/AddGame";
+import Lobby from "../Lobby/Lobby";
+import Game from "../Game/Game";
 
 function App() {
     const auth = useAuth();

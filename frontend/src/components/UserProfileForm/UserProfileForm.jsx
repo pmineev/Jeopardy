@@ -1,9 +1,11 @@
-import {useAuth} from "./auth";
+import {useEffect, useState} from 'react';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import {SubmitError, TextInput} from "./inputs";
+
+import {useAuth} from "../../common/auth/auth";
+import SubmitError from "../../common/forms/SubmitError";
+import TextInput from "../../common/forms/TextInput";
 import {UserProfileService} from "./services";
-import {useEffect, useState} from 'react'
 
 const userProfileService = new UserProfileService()
 

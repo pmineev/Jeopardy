@@ -1,5 +1,3 @@
-import './list.css';
-
 import {useEffect} from 'react'
 import {useHistory} from "react-router-dom";
 import {Form, Formik} from "formik";
@@ -8,9 +6,12 @@ import Modal from "react-modal";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 
-import {GameListService, GameSessionService} from "./services";
-import {TextInput} from "./inputs";
-import {useStore} from "./stores/RootStore";
+import '../../common/list.css';
+
+import TextInput from "../../common/forms/TextInput";
+import {useStore} from "../../common/RootStore";
+import {GameSessionService} from "../Game/services";
+import {GameListService} from "./services";
 
 const gameListService = new GameListService();
 const gameSessionService = new GameSessionService();

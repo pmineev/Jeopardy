@@ -1,19 +1,18 @@
-import './game.css';
-import './round.css';
-
 import {useEffect, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {useHistory} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
 import ReactTooltip from 'react-tooltip';
-
-import {GameSessionListener, listenerUrls} from "./notifiers";
-import {GameSessionService} from "./services";
-import {Stage, toOrdinal} from "./utils";
-import {useStore} from "./stores/RootStore";
-
 import {getSnapshot} from "mobx-state-tree";
 
+import '../../common/round.css';
+import './Game.css';
+
+import {listenerUrls} from "../../common/listener";
+import {Stage, toOrdinal} from "../../common/utils";
+import {useStore} from "../../common/RootStore";
+import GameSessionListener from "./listener";
+import {GameSessionService} from "./services";
 
 const gameSessionService = new GameSessionService();
 
