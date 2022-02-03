@@ -11,7 +11,8 @@ from .enums import Stage
 from .exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
 from .events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
     CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, \
-    PlayerIncorrectlyAnsweredEvent, FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent
+    PlayerIncorrectlyAnsweredEvent, FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
+    PlayerInactiveEvent
 
 
 @dataclass
@@ -107,10 +108,10 @@ class GameSession(Entity):
 
         if self.stage == Stage.WAITING:
             self.players.remove(player)
+            self.add_event(PlayerLeftEvent(self, player))
         else:
             player.is_playing = False
-
-        self.add_event(PlayerLeftEvent(self, player))
+            self.add_event(PlayerInactiveEvent(self, player))
 
         print(f'{user.username} has left')
 
