@@ -1,23 +1,25 @@
-import {types} from "mobx-state-tree";
-import {State, toOrdinal} from "../utils";
-
-const Player = types
-    .model({
-        nickname: types.identifier,
-        score: types.integer,
-        isPlaying: types.boolean,
-        answer: types.maybe(types.string)
-    })
-    .actions(self => ({
-        setIsPlaying(isPlaying) {
-            self.isPlaying = isPlaying;
-        }
-    }));
+import {applySnapshot, getSnapshot, types} from "mobx-state-tree";
+import {Stage} from "../utils";
 
 const Answer = types
     .model({
         text: '',
-        isCorrect: false
+        isCorrect: types.maybe(types.boolean)
+    });
+
+const Player = types
+    .model({
+        nickname: types.identifier,
+        score: 0,
+        isPlaying: true,
+        answer: types.maybe(Answer)
+    });
+
+const FinalRound = types
+    .model({
+        text: types.string,
+        value: types.number,
+        answer: types.maybe(types.string)
     });
 
 const Question = types
@@ -53,8 +55,7 @@ const Round = types
 
 const GameSessionStore = types
     .model({
-        id: types.maybe(types.number),
-        state: types.optional(types.enumeration('state', Object.values(State)), State.WAITING),
+        stage: types.optional(types.enumeration('stage', Object.values(Stage)), Stage.WAITING),
         players: types.array(Player),
         currentPlayer: types.maybe(types.reference(Player)),
         currentRound: types.maybe(Round),
@@ -63,146 +64,148 @@ const GameSessionStore = types
             theme: -1,
             question: -1
         }),
-        finalQuestion: types.maybe(Question),
-        currentAnswer: types.maybe(Answer),
-        roundText: ''
-
+        finalRound: types.maybe(FinalRound),
+        answeringPlayer: types.maybe(types.reference(Player)),
+        correctAnswer: types.maybe(types.string)
     })
     .actions(self => ({
-        listener(event, data) {
-            switch (event) {
-                case 'player_joined': {
-                    const player = self.players.find(player => player.nickname === data.nickname);
+        eventHandler(event, data) {
+            console.log("listener", event, getSnapshot(self), data);
 
-                    if (player)
-                        player.setIsPlaying(true);
-                    else
-                        self.players.push({
-                            nickname: data.nickname,
-                            score: data.score,
-                            isPlaying: data.is_playing
-                        });
+            const handlers = {
+                'player_joined': self.onPlayerJoined,
+                'player_left': self.onPlayerLeft,
+                'current_player_chosen': self.onCurrentPlayerChosen,
+                'round_started': self.onRoundStarted,
+                'current_question_chosen': self.onCurrentQuestionChosen,
+                'player_answered': self.onPlayerAnswered,
+                'question_timeout': self.onQuestionTimeout,
+                'final_round_started': self.onFinalRoundStarted,
+                'final_round_timeout': self.onFinalRoundTimeout,
+            };
 
-                    break;
-                }
-                case 'player_left': {
-                    const playerIndex = self.players.findIndex(player => player.nickname === data.nickname);
-
-                    if (self.state === State.WAITING)
-                        self.players.splice(playerIndex, 1);
-                    else
-                        self.players[playerIndex].isPlaying = false;
-
-                    break;
-                }
-                case 'current_player_chosen': {
-                    self.setCurrentPlayer(data);
-
-                    break;
-                }
-                case 'round_started': {
-                    console.log(data);
-                    self.setCurrentRound(data);
-                    self.roundText = toOrdinal(self.currentRound.order + 1) + ' раунд';
-                    self.state = self.currentRound.order > 0 ? State.ROUND_ENDED : State.ROUND_STARTED;
-
-                    break;
-                }
-                case 'current_question_chosen': {
-                    self.setCurrentQuestion(data);
-
-                    self.state = State.ANSWERING;
-
-                    break;
-                }
-                case 'player_answered': {
-                    self.currentAnswer = Answer.create({
-                        text: data.text,
-                        isCorrect: data.is_correct
-                    });
-
-                    const player = self.players.find(player => player.nickname === data.player.nickname);
-
-                    self.currentPlayer = player;
-
-                    player.score = data.player.score;
-
-                    if (self.currentAnswer.isCorrect) {
-                        self.currentRound
-                            .themes[self.currentQuestionIndexes.theme]
-                            .questions[self.currentQuestionIndexes.question]
-                            .isAnswered = true;
-
-
-                        if (self.notAnsweredQuestionsCount !== 1)
-                            self.state = State.CHOOSING_QUESTION;
-                    }
-
-                    break;
-                }
-                case 'question_timeout': {
-                    self.currentQuestion.isAnswered = true;
-                    self.currentAnswer = Answer.create({
-                        text: data.text,
-                        isCorrect: true
-                    });
-                    self.state = State.TIMEOUT;
-
-                    break;
-                }
-                case 'final_round_started': {
-                    self.finalQuestion = Question.create({
-                        id: 'final',
-                        value: data.value,
-                        text: data.text,
-                        isAnswered: false
-                    })
-                    self.currentQuestion = self.finalQuestion;
-
-                    self.state = State.FINAL_ROUND_STARTED;
-
-                    break;
-                }
-                case 'final_round_timeout': {
-                    self.players.forEach(player => {
-                        const playerData = data.players.find(pd => pd.nickname === player.nickname);
-                        player.score = playerData.score;
-                        player.answer = playerData.answer ?? undefined;
-                    })
-                    self.state = State.END_GAME;
-
-                    break;
-                }
-                default:
-                    throw new Error('нет такого события');
-            }
+            handlers[event](data);
         },
-        initializeCreated(data) {
-            self.id = Number(data.id);
-            self.players.push({
-                nickname: data.players[0].nickname,
-                score: data.players[0].score,
-                isPlaying: data.players[0].is_playing
+        onPlayerJoined(data) {
+            const player = self.players.find(player => player.nickname === data.nickname);
+
+            if (player)
+                player.isPlaying = true;
+            else
+                self.players.push({
+                    nickname: data.nickname
+                });
+        },
+        onPlayerLeft(data) {
+            const playerIndex = self.players.findIndex(player => player.nickname === data.nickname);
+
+            if (self.stage === Stage.WAITING)
+                self.players.splice(playerIndex, 1);
+            else
+                self.players[playerIndex].isPlaying = false;
+        },
+        onCurrentPlayerChosen(data) {
+            self.setCurrentPlayer(data.nickname);
+        },
+        onRoundStarted(data) {
+            console.log(data);
+            self.setCurrentRound(data);
+
+            if (self.stage === Stage.WAITING)
+                self.stage = Stage.ROUND_STARTED;
+        },
+        onCurrentQuestionChosen(data) {
+            self.clearAnswers();
+
+            self.setCurrentQuestion(data);
+
+            self.stage = Stage.ANSWERING;
+        },
+        onPlayerAnswered(data) {
+            const player = self.players.find(player => player.nickname === data.nickname);
+
+            self.answeringPlayer = player;
+
+            player.score = data.score;
+            player.answer = Answer.create({
+                text: data.answer.text,
+                isCorrect: data.answer.isCorrect
+            })
+
+            if (player.answer.isCorrect) {
+                self.currentQuestion.isAnswered = true;
+
+                self.currentPlayer = player;
+
+                self.stage = self.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
+            }
+
+            console.log("answered", getSnapshot(self));
+        },
+        onQuestionTimeout(data) {
+            self.currentQuestion.isAnswered = true;
+            self.correctAnswer = data.answer;
+            self.stage = Stage.TIMEOUT;
+        },
+        onFinalRoundStarted(data) {
+            self.finalRound = FinalRound.create({
+                text: data.text,
+                value: data.value
             })
         },
-        initializeJoined(data) {
-            self.state = data.state;
-            data.players.forEach(player =>
-                self.players.push({
-                    nickname: player.nickname,
-                    score: player.score,
-                    isPlaying: player.is_playing
-                })
+        onFinalRoundTimeout(data) {
+            self.players.forEach(player => {
+                const playerData = data.players.find(pd => pd.nickname === player.nickname);
+                player.score = playerData.score;
+                player.answer = Answer.create({
+                    text: playerData.answer.text,
+                    isCorrect: playerData.answer.isCorrect
+                });
+            })
+
+            self.finalRound.answer = data.answer
+
+            self.stage = Stage.END_GAME;
+        },
+        initialize(data) {
+            self.clear();
+
+            console.log("init", data)
+            self.stage = data.stage;
+            data.players.forEach(playerData =>
+                self.addPlayer(playerData)
             );
-            self.setCurrentRound(data.current_round);
-            self.setCurrentPlayer(data.current_player);
-            self.setCurrentQuestion(data.current_question);
+            if (data.currentRound)
+                self.setCurrentRound(data.currentRound);
+            if (data.currentPlayer)
+                self.setCurrentPlayer(data.currentPlayer);
+            if (data.currentQuestion)
+                self.setCurrentQuestion(data.currentQuestion);
+            if (data.finalRound)
+                self.setCurrentQuestion(data.finalRound);
+
+            console.log("inited", getSnapshot(self))
+
         },
-        setState(state) {
-            self.state = state;
+        setStage(stage) {
+            self.stage = stage;
         },
-        setId(id) {
-            self.id = id;
+        addPlayer(data) {
+            console.log(data)
+            const player = Player.create({
+                nickname: data.nickname,
+                score: data.score,
+                isPlaying: data.isPlaying
+            });
+            self.players.push(player);
+            if (data.answer) {
+                player.answer = Answer.create({
+                    text: data.answer.text,
+                    isCorrect: data.answer.isCorrect !== null ? data.answer.isCorrect : undefined
+                });
+            }
+
+
         },
         setCurrentRound(data) {
             self.currentRound = Round.create({
@@ -214,43 +217,55 @@ const GameSessionStore = types
                             Question.create({
                                 id: theme.name + question.value,
                                 value: question.value,
-                                isAnswered: question.is_answered
+                                isAnswered: question.isAnswered
                             })
                         ))
                     })
                 ))
             });
+            console.log("setCurrentRound", getSnapshot(self))
         },
-        setCurrentPlayer(data) {
-            self.currentPlayer = self.players.find(player => player.nickname === data.nickname);
+        setCurrentPlayer(nickname) {
+            console.log(nickname)
+            self.currentPlayer = self.players.find(player => player.nickname === nickname);
         },
         setCurrentQuestion(data) {
-            if (data) {
-                self.currentQuestion = self.currentRound
-                    .themes[data.theme_order]
-                    .questions[data.question_order];
-                self.currentQuestion.setText(data.text);
+            self.currentQuestion = self.currentRound
+                .themes[data.themeIndex]
+                .questions[data.questionIndex];
+            self.currentQuestion.text = data.text;
 
-                self.currentQuestionIndexes.theme = data.theme_order
-                self.currentQuestionIndexes.question = data.question_order
-            }
+            self.currentQuestionIndexes.theme = data.themeIndex
+            self.currentQuestionIndexes.question = data.questionIndex
+
         },
-        clearCurrentAnswer() {
-            self.currentAnswer = undefined;
+        setFinalRound(data) {
+            self.finalRound = FinalRound.create({
+                text: data.text,
+                value: data.value
+            });
+            if (data.answer)
+                self.finalRound.answer = data.answer;
+        },
+        clearAnswers() {
+            self.correctAnswer = undefined;
+            self.answeringPlayer = undefined;
+            self.players.forEach(player => {
+                player.answer = undefined;
+                console.log(`cleared ${player.nickname} answer`)
+            })
+        },
+        clear() {
+            applySnapshot(self, {});
         }
     }))
     .views(self => ({
-        get notAnsweredQuestionsCount() {
-            let notAnswered = 0;
-
-            self.currentRound.themes.forEach(theme => {
-                theme.questions.forEach(question => {
-                    if (!question.isAnswered)
-                        notAnswered++;
-                })
-            })
-
-            return notAnswered;
+        get isNoMoreQuestions() {
+            return self.currentRound.themes.every(theme =>
+                theme.questions.every(question =>
+                    question.isAnswered
+                )
+            )
         }
     }));
 

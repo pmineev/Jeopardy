@@ -7,53 +7,33 @@ const GameSessionDescriptionStore = types
         descriptions: types.map(GameSessionDescription)
     })
     .actions(self => ({
-        listener(event, data) {
-            switch (event) {
-                case 'init': {
-                    self.init(data);
-                    break;
-                }
-                case 'game_session_created': {
-                    self.addDescription(data.id, data.creator, data.game_name, data.max_players, data.current_players);
-                    break;
-                }
-                case 'game_session_deleted': {
-                    self.deleteDescription(data.id);
-                    break;
-                }
-                case 'player_joined': {
-                    self.descriptions.get(data.id).setPlayerJoined();
-                    break;
-                }
-                case 'player_left': {
-                    console.log(self.descriptions)
-                    let descr = self.descriptions.get(data.id);
-                    if (descr) {
-                        self.descriptions.get(data.id).setPlayerLeft();
-                    }
-                    console.log(self.descriptions)
-                    break;
-                }
-                default:
-                    throw new Error('нет такого события')
+        eventHandler(event, data) {
+            console.log("lobby", event, data);
+            const handlers = {
+                'game_session_created': self.onGameSessionCreated,
+                'game_session_deleted': self.onGameSessionDeleted,
+                'player_joined': self.onPlayerJoined,
+                'player_left': self.onPlayerLeft
             }
+
+            handlers[event](data);
+        },
+        onGameSessionCreated(data) {
+            self.descriptions.put(data);
+        },
+        onGameSessionDeleted(data) {
+            self.descriptions.delete(data.creator);
+        },
+        onPlayerJoined(data) {
+            self.descriptions.get(data.creator).setPlayerJoined();
+        },
+        onPlayerLeft(data) {
+            self.descriptions.get(data.creator).setPlayerLeft();
         },
         initialize(data) {
-            data.forEach(descr =>
-                self.addDescription(
-                    descr.id,
-                    descr.creator,
-                    descr.game_name,
-                    descr.max_players,
-                    descr.current_players))
-        },
-        addDescription(id, creator, gameName, maxPlayers, currentPlayers) {
-            self.descriptions.set(id, GameSessionDescription.create({
-                id, creator, gameName, maxPlayers, currentPlayers
-            }))
-        },
-        deleteDescription(id) {
-            self.descriptions.delete(id);
+            data.forEach(descriptionData =>
+                self.descriptions.put(descriptionData)
+            )
         }
     }))
 

@@ -137,46 +137,50 @@ class UserProfileService {
 }
 
 class GameSessionService {
-    create(gameName, max_players) {
+    getGameState() {
+        const url = `game_sessions/current/`;
+        return axios.get(url);
+    }
+
+    create(gameName, maxPlayers) {
         const url = '/game_sessions/';
         console.log('create');
         return axios.post(url, {
-            game_name: gameName,
-            max_players: max_players
+            gameName: gameName,
+            maxPlayers: maxPlayers
         })
     }
 
-    join(game_session_id) {
-        const url = `game_sessions/chosen/${game_session_id}/`;
-        return axios.post(url);
+    join(creator) {
+        const url = `game_sessions/actions/join/`;
+        axios.post(url, {creator: creator});
     }
 
-    leave(game_session_id) {
-        const url = `game_sessions/exited/${game_session_id}/`;
+    leave() {
+        const url = 'game_sessions/current/actions/leave/';
         axios.delete(url);
     }
 
-    choose_question(game_session_id, theme_order, question_order) {
-        const url = `game_sessions/${game_session_id}/question/`;
+    chooseQuestion(themeIndex, questionIndex) {
+        const url = 'game_sessions/current/question/';
         axios.post(url, {
-            theme_order: theme_order,
-            question_order: question_order
+            themeIndex: themeIndex,
+            questionIndex: questionIndex
         })
             .catch(error => console.log(error));
     }
 
-    submit_answer(game_session_id, answer) {
-        const url = `game_sessions/${game_session_id}/answer/`;
+    submitAnswer(answer) {
+        const url = 'game_sessions/current/answer/';
         axios.post(url, {answer: answer});
     }
 
-    get_host_image_url(state) {
+    getHostImageUrl(state) {
         const imageURL = baseStaticURL + '/img/kuleshov/' + state + '.jpg';
-        console.log(imageURL);
         return imageURL;
     }
 
-    get_avatar_url() {
+    getAvatarUrl() {
         const imageURL = baseStaticURL + '/img/avatar.png';
         console.log(imageURL);
         return imageURL;

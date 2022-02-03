@@ -1,4 +1,4 @@
-const State = Object.freeze({
+const Stage = Object.freeze({
     WAITING: 'WAITING',
     ROUND_STARTED: 'ROUND_STARTED',
     CHOOSING_QUESTION: 'CHOOSING_QUESTION',
@@ -28,4 +28,4 @@ function toOrdinal(n) {
 
 const questionValues = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
 
-export {State, toOrdinal, questionValues}
+export {Stage, toOrdinal, questionValues}
