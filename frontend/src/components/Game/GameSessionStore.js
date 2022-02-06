@@ -29,12 +29,7 @@ const Question = types
         value: types.integer,
         text: types.maybe(types.string),
         isAnswered: types.boolean
-    })
-    .actions(self => ({
-        setText(text) {
-            self.text = text;
-        }
-    }));
+    });
 
 const CurrentQuestionIndexes = types
     .model({
