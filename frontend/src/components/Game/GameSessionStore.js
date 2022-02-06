@@ -178,7 +178,7 @@ const GameSessionStore = types
             if (data.currentQuestion)
                 self.setCurrentQuestion(data.currentQuestion);
             if (data.finalRound)
-                self.setCurrentQuestion(data.finalRound);
+                self.setFinalRound(data.finalRound);
 
             console.log("inited", getSnapshot(self))
 
