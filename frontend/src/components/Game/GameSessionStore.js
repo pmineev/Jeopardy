@@ -27,15 +27,26 @@ const Question = types
     .model({
         id: types.identifier,
         value: types.integer,
-        text: types.maybe(types.string),
         isAnswered: types.boolean
     });
 
-const CurrentQuestionIndexes = types
+const CurrentQuestion = types
     .model({
-        theme: types.number,
-        question: types.number
-    });
+        question: types.reference(Question),
+        text: types.string,
+        themeIndex: types.integer,
+        questionIndex: types.integer
+    })
+    .actions(self => ({
+        setIsAnswered() {
+            self.question.isAnswered = true;
+        }
+    }))
+    .views(self => ({
+        get value() {
+            return self.question.value;
+        }
+    }));
 
 const Theme = types
     .model({
@@ -55,11 +66,7 @@ const GameSessionStore = types
         players: types.array(Player),
         currentPlayer: types.maybe(types.reference(Player)),
         currentRound: types.maybe(Round),
-        currentQuestion: types.maybe(types.safeReference(Question)),
-        currentQuestionIndexes: types.optional(CurrentQuestionIndexes, {
-            theme: -1,
-            question: -1
-        }),
+        currentQuestion: types.maybe(CurrentQuestion),
         finalRound: types.maybe(FinalRound),
         answeringPlayer: types.maybe(types.reference(Player)),
         correctAnswer: types.maybe(types.string)
@@ -129,7 +136,7 @@ const GameSessionStore = types
             })
 
             if (player.answer.isCorrect) {
-                self.currentQuestion.isAnswered = true;
+                self.currentQuestion.setIsAnswered();
 
                 self.currentPlayer = player;
 
@@ -139,7 +146,7 @@ const GameSessionStore = types
             console.log("answered", getSnapshot(self));
         },
         onQuestionTimeout(data) {
-            self.currentQuestion.isAnswered = true;
+            self.currentQuestion.setIsAnswered();
             self.correctAnswer = data.answer;
             self.stage = Stage.TIMEOUT;
         },
@@ -226,14 +233,13 @@ const GameSessionStore = types
             self.currentPlayer = self.players.find(player => player.nickname === nickname);
         },
         setCurrentQuestion(data) {
-            self.currentQuestion = self.currentRound
+            const currentQuestion = self.currentRound
                 .themes[data.themeIndex]
                 .questions[data.questionIndex];
-            self.currentQuestion.text = data.text;
-
-            self.currentQuestionIndexes.theme = data.themeIndex
-            self.currentQuestionIndexes.question = data.questionIndex
-
+            self.currentQuestion = CurrentQuestion.create({
+                question: currentQuestion,
+                ...data
+            });
         },
         setFinalRound(data) {
             self.finalRound = FinalRound.create({

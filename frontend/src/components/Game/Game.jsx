@@ -87,7 +87,7 @@ const HostCard = observer(() => {
             break;
         }
         case Stage.ANSWERING: {
-            const themeName = store.currentRound.themes[store.currentQuestionIndexes.theme].name;
+            const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
             const value = store.currentQuestion.value;
             hostText = `${themeName} за ${value}`;
             hostImageURL = getHostImageUrl(Stage.ANSWERING);
