@@ -33,7 +33,7 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
 const Lobby = observer(() => {
     // const [gameDescriptions, dispatch] = useReducer(reducer, []);
     const history = useHistory();
-    const {gameSessionDescriptionStore: store} = useStore();
+    const {lobbyStore: store} = useStore();
 
     useEffect(() => {
         document.title = 'Лобби'

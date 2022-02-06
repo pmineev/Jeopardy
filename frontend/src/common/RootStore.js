@@ -1,7 +1,7 @@
 import {createContext, useContext} from "react";
 import {types} from "mobx-state-tree";
 
-import GameSessionDescriptionStore from "../components/Lobby/GameSessionDescriptionStore";
+import LobbyStore from "../components/Lobby/LobbyStore";
 import GameListStore from "../components/GameList/GameListStore";
 import GameListViewStore from "../components/GameList/GameListViewStore";
 import AddGameStore from "../components/AddGame/AddGameStore";
@@ -10,7 +10,7 @@ import GameSessionStore from "../components/Game/GameSessionStore";
 
 const RootStore = types
     .model({
-        gameSessionDescriptionStore: GameSessionDescriptionStore,
+        lobbyStore: LobbyStore,
         gameListStore: GameListStore,
         gameListViewStore: GameListViewStore,
         addGameStore: AddGameStore,
@@ -19,7 +19,7 @@ const RootStore = types
     });
 
 let rootStore = RootStore.create({
-    gameSessionDescriptionStore: GameSessionDescriptionStore.create(),
+    lobbyStore: LobbyStore.create(),
     gameListStore: GameListStore.create(),
     gameListViewStore: GameListViewStore.create(),
     addGameStore: AddGameStore.create(),

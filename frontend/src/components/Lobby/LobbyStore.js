@@ -1,8 +1,23 @@
 import {types} from "mobx-state-tree";
 
-import GameSessionDescription from "./GameSessionDescription";
+const GameSessionDescription = types
+    .model({
+        creator: types.identifier,
+        gameName: types.string,
+        maxPlayers: types.number,
+        currentPlayers: types.number
 
-const GameSessionDescriptionStore = types
+    })
+    .actions(self => ({
+        setPlayerJoined() {
+            self.currentPlayers += 1;
+        },
+        setPlayerLeft() {
+            self.currentPlayers -= 1;
+        }
+    }))
+
+const LobbyStore = types
     .model({
         descriptions: types.map(GameSessionDescription)
     })
@@ -37,4 +52,4 @@ const GameSessionDescriptionStore = types
         }
     }))
 
-export default GameSessionDescriptionStore;
+export default LobbyStore;
