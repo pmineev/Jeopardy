@@ -5,7 +5,7 @@ import {Stage} from "../../common/utils";
 const Answer = types
     .model({
         text: '',
-        isCorrect: types.maybe(types.boolean)
+        isCorrect: types.maybeNull(types.boolean)
     });
 
 const Player = types
@@ -204,7 +204,7 @@ const GameSessionStore = types
             if (data.answer) {
                 player.answer = Answer.create({
                     text: data.answer.text,
-                    isCorrect: data.answer.isCorrect !== null ? data.answer.isCorrect : undefined
+                    isCorrect: data.answer.isCorrect
                 });
             }
 
