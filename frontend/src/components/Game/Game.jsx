@@ -12,9 +12,7 @@ import {listenerUrls} from "../../common/listener";
 import {Stage, toOrdinal} from "../../common/utils";
 import {useStore} from "../../common/RootStore";
 import GameSessionListener from "./listener";
-import {GameSessionService} from "./services";
-
-const gameSessionService = new GameSessionService();
+import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer} from "./services";
 
 const PlayerControls = () => {
     const history = useHistory();
@@ -27,7 +25,7 @@ const PlayerControls = () => {
                 }}
                 onSubmit={(values, {setSubmitting, resetForm}) => {
                     if (values.answer?.length > 0) {
-                        gameSessionService.submitAnswer(values.answer);
+                        submitAnswer(values.answer);
                         resetForm();
                         setSubmitting(false);
                     }
@@ -41,7 +39,7 @@ const PlayerControls = () => {
 
             <button
                 onClick={() => {
-                    gameSessionService.leave();
+                    leaveGameSession();
                     history.push('/games');
                 }}
             >
@@ -61,13 +59,13 @@ const HostCard = observer(() => {
     switch (store.stage) {
         case Stage.WAITING: {
             hostText = 'ожидаем игроков';
-            hostImageURL = gameSessionService.getHostImageUrl(Stage.WAITING);
+            hostImageURL = getHostImageUrl(Stage.WAITING);
             break;
         }
         case Stage.TIMEOUT: {
             if (store.stage === Stage.TIMEOUT)
                 hostText = `Правильный ответ: ${store.correctAnswer}. `
-            hostImageURL = gameSessionService.getHostImageUrl(Stage.CHOOSING_QUESTION);
+            hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
             break;
         }
         case Stage.ROUND_ENDED:
@@ -78,13 +76,13 @@ const HostCard = observer(() => {
 
             if (store.stage === Stage.ROUND_ENDED) {
                 hostText += 'Раунд закончен.';
-                hostImageURL = gameSessionService.getHostImageUrl(Stage.ROUND_STARTED);
+                hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
             } else if (store.stage === Stage.FINAL_ROUND_STARTED) {
                 hostText += 'Впереди финальный раунд.';
-                hostImageURL = gameSessionService.getHostImageUrl(Stage.ROUND_STARTED);
+                hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
             } else if (!store.isNoMoreQuestions) {
                 hostText += `${store.currentPlayer.nickname}, выбирайте вопрос.`;
-                hostImageURL = gameSessionService.getHostImageUrl(Stage.CHOOSING_QUESTION);
+                hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
             }
             break;
         }
@@ -92,29 +90,29 @@ const HostCard = observer(() => {
             const themeName = store.currentRound.themes[store.currentQuestionIndexes.theme].name;
             const value = store.currentQuestion.value;
             hostText = `${themeName} за ${value}`;
-            hostImageURL = gameSessionService.getHostImageUrl(Stage.ANSWERING);
+            hostImageURL = getHostImageUrl(Stage.ANSWERING);
 
             if (store.answeringPlayer)
                 if (!store.answeringPlayer.answer.isCorrect) {
                     hostText = 'Неверно.';
-                    hostImageURL = gameSessionService.getHostImageUrl('wrong');
+                    hostImageURL = getHostImageUrl('wrong');
                 }
             break;
         }
         case Stage.FINAL_ROUND: {
-            hostImageURL = gameSessionService.getHostImageUrl(Stage.FINAL_ROUND);
+            hostImageURL = getHostImageUrl(Stage.FINAL_ROUND);
             hostText = 'Финальный раунд';
             break;
         }
         case Stage.END_GAME: {
             const winner = store.players.reduce((a, b) => a.score > b.score ? a : b);
             hostText = `Победил ${winner.nickname}!`;
-            hostImageURL = gameSessionService.getHostImageUrl(Stage.END_GAME);
+            hostImageURL = getHostImageUrl(Stage.END_GAME);
             break;
         }
         default: {
             hostText = '';
-            hostImageURL = gameSessionService.getHostImageUrl(Stage.WAITING);
+            hostImageURL = getHostImageUrl(Stage.WAITING);
         }
     }
 
@@ -177,7 +175,7 @@ const QuestionCell = observer(({question, themeIndex, questionIndex}) => {
         <td className={`question-cell ${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
             onClick={() => {
                 setClicked(true);
-                gameSessionService.chooseQuestion(themeIndex, questionIndex);
+                chooseQuestion(themeIndex, questionIndex);
             }}
         >
             {question.value}
@@ -262,7 +260,7 @@ const PlayerCard = observer(({player}) => {
                 ref={ref => tooltipRef = ref}
             >
                 <img
-                    src={gameSessionService.getAvatarUrl()}
+                    src={getAvatarUrl()}
                     alt={player.nickname}
                 />
                 <div>{player.nickname}</div>
@@ -305,7 +303,7 @@ const Game = observer(() => {
 
         let listener;
 
-        gameSessionService.getGameState()
+        getGameState()
             .then(response => {
                 store.initialize(response.data);
                 listener = new GameSessionListener(listenerUrls.gameSession);

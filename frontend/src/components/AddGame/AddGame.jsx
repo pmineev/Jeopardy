@@ -12,9 +12,7 @@ import {toOrdinal} from "../../common/utils";
 import {useStore} from "../../common/RootStore";
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
-import {AddGameService} from "./services";
-
-const addGameService = new AddGameService();
+import {postGame} from "./services";
 
 const AddGameForm = observer(() => {
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
@@ -208,7 +206,7 @@ const AddFinalQuestionForm = observer(({history}) => {
                 if (store.isAllRoundsFilled)
                     if (store.isAllQuestionsFilled) {
                         let storeSnapshot = getSnapshot(store);
-                        addGameService.post({
+                        postGame({
                             name: storeSnapshot.name,
                             rounds: storeSnapshot.rounds.map(round => ({
                                 themes: round.themes.map(theme => ({

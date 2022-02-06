@@ -1,10 +1,8 @@
 import axios from "axios";
 
-class GameListService {
-    getDescriptions() {
+const getGameDescriptions = () => {
         const url = '/games/';
         return axios.get(url);
-    }
-}
+};
 
-export {GameListService};
+export {getGameDescriptions};

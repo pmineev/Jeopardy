@@ -10,11 +10,8 @@ import '../../common/list.css';
 
 import TextInput from "../../common/forms/TextInput";
 import {useStore} from "../../common/RootStore";
-import {GameSessionService} from "../Game/services";
-import {GameListService} from "./services";
-
-const gameListService = new GameListService();
-const gameSessionService = new GameSessionService();
+import {createGameSession} from "../Game/services";
+import {getGameDescriptions} from "./services";
 
 const CreateGameSessionForm = observer(({history}) => {
     const {gameListStore: store, gameListViewStore: viewStore} = useStore();
@@ -31,7 +28,7 @@ const CreateGameSessionForm = observer(({history}) => {
                     .max(10, 'Не более 10 игроков')
             })}
             onSubmit={(values, {setSubmitting}) => {
-                gameSessionService.create(store.chosenGame.name, values.maxPlayers)
+                createGameSession(store.chosenGame.name, values.maxPlayers)
                     .then(() => {
                         history.push('/game')
                     })
@@ -84,7 +81,7 @@ const GameList = observer(() => {
     useEffect(() => {
         document.title = 'Игры';
 
-        gameListService.getDescriptions()
+        getGameDescriptions()
             .then(result => {
                 store.set(result.data);
             });

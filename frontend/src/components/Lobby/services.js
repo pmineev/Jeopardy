@@ -1,10 +1,8 @@
 import axios from "axios";
 
-class LobbyService {
-    getDescriptions() {
+const getGameSessionDescriptions = () => {
         const url = '/game_sessions/';
         return axios.get(url);
-    }
-}
+};
 
-export {LobbyService};
+export {getGameSessionDescriptions};

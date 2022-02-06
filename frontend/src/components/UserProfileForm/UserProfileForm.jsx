@@ -5,9 +5,7 @@ import * as Yup from "yup";
 import {useAuth} from "../../common/auth/auth";
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
-import {UserProfileService} from "./services";
-
-const userProfileService = new UserProfileService()
+import {getUser, saveUser} from "./services";
 
 const UserProfileForm = () => {
     const auth = useAuth();
@@ -16,7 +14,7 @@ const UserProfileForm = () => {
     document.title = 'Профиль пользователя';
 
     useEffect(() => {
-        userProfileService.get(auth.getUsername())
+        getUser(auth.getUsername())
             .then(response =>
                 setCredentials({
                     username: response.data.username,
@@ -45,7 +43,7 @@ const UserProfileForm = () => {
                     if (values.nickname.length === 0 && values.password.length === 0)
                         setErrors({'submitError': 'Заполните хотя бы одно поле'})
                     else
-                        userProfileService.save(credentials.username, values.nickname, values.password)
+                        saveUser(credentials.username, values.nickname, values.password)
                             .then(() =>
                                 setSubmitting(false)
                             );

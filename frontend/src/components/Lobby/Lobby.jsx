@@ -7,10 +7,8 @@ import '../../common/list.css';
 
 import {Listener, listenerUrls} from "../../common/listener";
 import {useStore} from "../../common/RootStore";
-import {GameSessionService} from "../Game/services";
-import {LobbyService} from "./services";
-
-const gameSessionService = new GameSessionService();
+import {joinGameSession} from "../Game/services";
+import {getGameSessionDescriptions} from "./services";
 
 const GameSessionDescriptionView = observer(({descr, history}) => {
     return (
@@ -21,7 +19,7 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
             <td>
                 <button
                     onClick={() => {
-                        gameSessionService.join(descr.creator);
+                        joinGameSession(descr.creator);
                         history.push('/game');
                     }}
                 >
@@ -43,8 +41,7 @@ const Lobby = observer(() => {
         const listener = new Listener(listenerUrls.lobby);
         listener.setHandler(store.eventHandler);
 
-        const lobbyService = new LobbyService();
-        lobbyService.getDescriptions()
+        getGameSessionDescriptions()
             .then(result => {
                 store.initialize(result.data);
             });

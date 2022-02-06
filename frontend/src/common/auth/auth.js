@@ -1,10 +1,9 @@
 import React, {createContext, useContext} from "react";
 import {Redirect, Route} from "react-router-dom";
 
-import {AuthService} from "./services";
+import {loginUser, registerUser} from "./services";
 
 const authContext = createContext({});
-const authService = new AuthService();
 
 function useAuth() {
     return useContext(authContext);
@@ -21,7 +20,7 @@ function useProvideAuth() {
     }
 
     function register(credentials) {
-        return authService.register(credentials)
+        return registerUser(credentials)
             .then(status => {
                 if (status < 400) {
                     setUsername(credentials.username);
@@ -47,7 +46,7 @@ function useProvideAuth() {
     }
 
     function login(credentials) {
-        return authService.login(credentials)
+        return loginUser(credentials)
             .then(status => {
                 if (status < 400) {
                     setUsername(credentials.username);
