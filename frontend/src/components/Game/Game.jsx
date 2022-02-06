@@ -338,8 +338,8 @@ const Game = observer(() => {
                 });
                 break;
             case Stage.TIMEOUT:
+                const nextStage = store.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
                 wait(() => {
-                    const nextStage = store.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
                     store.setStage(nextStage);
                     store.clearAnswers();
                 });
