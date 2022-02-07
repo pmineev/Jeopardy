@@ -303,7 +303,7 @@ const Game = observer(() => {
 
         let listener;
 
-        getGameState()
+        getGameState()  // TODO! race condition
             .then(response => {
                 store.initialize(response.data);
                 listener = new GameSessionListener(listenerUrls.gameSession);

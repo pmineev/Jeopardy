@@ -95,9 +95,7 @@ const GameSessionStore = types
             if (player)
                 player.isPlaying = true;
             else
-                self.players.push({
-                    nickname: data.nickname
-                });
+                self.players.push({...data});
         },
         onPlayerLeft(data) {
             const playerIndex = self.players.findIndex(player => player.nickname === data.nickname);
@@ -130,10 +128,7 @@ const GameSessionStore = types
             self.answeringPlayer = player;
 
             player.score = data.score;
-            player.answer = Answer.create({
-                text: data.answer.text,
-                isCorrect: data.answer.isCorrect
-            })
+            player.answer = Answer.create({...data.answer})
 
             if (player.answer.isCorrect) {
                 self.currentQuestion.setIsAnswered();
@@ -151,19 +146,13 @@ const GameSessionStore = types
             self.stage = Stage.TIMEOUT;
         },
         onFinalRoundStarted(data) {
-            self.finalRound = FinalRound.create({
-                text: data.text,
-                value: data.value
-            })
+            self.finalRound = FinalRound.create({...data})
         },
         onFinalRoundTimeout(data) {
             self.players.forEach(player => {
                 const playerData = data.players.find(pd => pd.nickname === player.nickname);
                 player.score = playerData.score;
-                player.answer = Answer.create({
-                    text: playerData.answer.text,
-                    isCorrect: playerData.answer.isCorrect
-                });
+                player.answer = Answer.create({...playerData.answer});
             })
 
             self.finalRound.answer = data.answer
@@ -195,20 +184,7 @@ const GameSessionStore = types
         },
         addPlayer(data) {
             console.log(data)
-            const player = Player.create({
-                nickname: data.nickname,
-                score: data.score,
-                isPlaying: data.isPlaying
-            });
-            self.players.push(player);
-            if (data.answer) {
-                player.answer = Answer.create({
-                    text: data.answer.text,
-                    isCorrect: data.answer.isCorrect
-                });
-            }
-
-
+            self.players.push(Player.create({...data}));
         },
         setCurrentRound(data) {
             self.currentRound = Round.create({
@@ -242,12 +218,7 @@ const GameSessionStore = types
             });
         },
         setFinalRound(data) {
-            self.finalRound = FinalRound.create({
-                text: data.text,
-                value: data.value
-            });
-            if (data.answer)
-                self.finalRound.answer = data.answer;
+            self.finalRound = FinalRound.create({...data});
         },
         clearAnswers() {
             self.correctAnswer = undefined;
