@@ -31,10 +31,22 @@ const PlayerControls = () => {
                     }
                 }}
             >
-                <Form>
-                    <Field id="answer" as='textarea' name="answer" placeholder="Введите ответ"/>
-                    <button type="submit">Ответить</button>
-                </Form>
+                {({handleSubmit}) => (
+                    <Form>
+                        <Field id="answer"
+                               as='textarea'
+                               name="answer"
+                               placeholder="Введите ответ"
+                               onKeyPress={event => {
+                                   if (event.key === 'Enter') {
+                                       event.preventDefault();
+                                       handleSubmit();
+                                   }
+                               }}
+                        />
+                        <button type="submit">Ответить</button>
+                    </Form>
+                )}
             </Formik>
 
             <button
