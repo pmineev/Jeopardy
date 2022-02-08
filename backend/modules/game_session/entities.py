@@ -34,6 +34,14 @@ class Player(Entity):
         self.is_playing = is_playing
         self.answer = answer
 
+    @property
+    def username(self):
+        return self.user.username
+
+    @property
+    def nickname(self):
+        return self.user.nickname
+
 
 class CurrentQuestion(Entity):
     def __init__(self, question: 'Question', theme_index: int, question_index: int):
@@ -123,7 +131,7 @@ class GameSession(Entity):
         self.add_event(CurrentPlayerChosenEvent(self, self.current_player))  # TODO объединить в одно событие
         self.add_event(RoundStartedEvent(self, self.current_round))
 
-        print(f'gs has started, current player - {self.current_player.user.username}')
+        print(f'gs has started, current player - {self.current_player.username}')
 
     def set_next_round(self):
         self.answered_questions.clear()
@@ -137,7 +145,7 @@ class GameSession(Entity):
             self.add_event(CurrentPlayerChosenEvent(self, self.current_player))
             self.add_event(RoundStartedEvent(self, self.current_round))
 
-            print(f'{self.current_round.order} started, winner: {self.current_player.user.username}')
+            print(f'{self.current_round.order} started, winner: {self.current_player.username}')
         else:
             self._set_final_round()
 

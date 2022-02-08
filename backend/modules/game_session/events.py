@@ -28,7 +28,7 @@ class GameSessionDeletedEvent(Event):
 class PlayerJoinedEvent(Event):
     def __init__(self, game_session: 'GameSession', player: 'Player'):
         self.game_session_id = game_session.id
-        self.player_username = player.user.username
+        self.player_username = player.username
 
         self.creator_nickname_dto = CreatorNicknameDTO(game_session).to_response()
         self.player_nickname_dto = PlayerNicknameDTO(player).to_response()
@@ -37,7 +37,7 @@ class PlayerJoinedEvent(Event):
 class PlayerLeftEvent(Event):
     def __init__(self, game_session: 'GameSession', player: 'Player'):
         self.game_session_id = game_session.id
-        self.player_username = player.user.username
+        self.player_username = player.username
 
         self.creator_nickname_dto = CreatorNicknameDTO(game_session).to_response()
         self.player_nickname_dto = PlayerNicknameDTO(player).to_response()
