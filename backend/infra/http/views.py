@@ -79,6 +79,8 @@ class UserView(APIView):
             UserView.service.update(serializer.validated_data, username)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except UserNotFound:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
