@@ -135,6 +135,7 @@ class GameSession(Entity):
 
     def set_next_round(self):
         self.answered_questions.clear()
+        self._clear_players_answers()
         self.current_question = None
 
         if self.current_round.order < len(self.game.rounds):
@@ -200,11 +201,11 @@ class GameSession(Entity):
 
                 self.add_event(PlayerCorrectlyAnsweredEvent(self, player))
 
-                # TODO очищать ответы игроков, но в player в event ^^^^ должен оставаться старый ответ
-
                 if self.is_no_more_questions():
                     self.set_next_round()
                 else:
+                    self._clear_players_answers()
+
                     self.current_player = player
                     self.stage = Stage.CHOOSING_QUESTION
             else:
@@ -233,6 +234,8 @@ class GameSession(Entity):
         if self.is_no_more_questions():
             self.set_next_round()
         else:
+            self._clear_players_answers()
+
             self.stage = Stage.CHOOSING_QUESTION
 
     def final_round_timeout(self):
@@ -282,3 +285,7 @@ class GameSession(Entity):
     def _set_winner_current_player(self):
         winner = max(self.players, key=lambda player: player.score)
         self.current_player = winner
+
+    def _clear_players_answers(self):
+        for player in self.players:
+            player.answer = None
