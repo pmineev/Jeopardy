@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {observer} from "mobx-react-lite";
 import {useHistory} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
@@ -245,31 +245,28 @@ const GameScreen = observer(() => {
 });
 
 const PlayerCard = observer(({player}) => {
-    const {gameSessionStore: store} = useStore();
-    const [answer, setAnswer] = useState('');
-    let tooltipRef;
+    const [timeoutId, setTimeoutId] = useState(null);
+    const tooltipRef = useRef(null);
 
-    function wait() {
-        setTimeout(ReactTooltip.hide, 3000, tooltipRef);
-    }
 
     useEffect(() => {
-        if (store.answeringPlayer === player ||
-            (store.stage === Stage.END_GAME && player.answer)) {
-            setAnswer(player.answer.text);
-            ReactTooltip.show(tooltipRef);
+        const delayHide = (ms) => {
+            clearTimeout(timeoutId);
+            setTimeoutId(setTimeout(ReactTooltip.hide, ms, tooltipRef.current));
+        };
 
-            wait()
-        }
+        ReactTooltip.show(tooltipRef.current);
+
+        delayHide(3000);
     }, [player.answer])
 
     return (
         <>
             <div
                 className='player-card'
-                data-tip
-                data-for={player.nickname + '_tooltip'}
-                ref={ref => tooltipRef = ref}
+                data-tip=''
+                data-for={player.nickname + '-tooltip'}
+                ref={tooltipRef}
             >
                 <img
                     src={getAvatarUrl()}
@@ -280,12 +277,10 @@ const PlayerCard = observer(({player}) => {
             </div>
             <ReactTooltip
                 className='tooltip'
-                id={player.nickname + '_tooltip'}
+                id={player.nickname + '-tooltip'}
                 effect='solid'
-                delayHide={3000}
-                event='null'
-                getContent={() => answer}
             >
+                {player.answer?.text}
             </ReactTooltip>
         </>
     )
