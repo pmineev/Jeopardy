@@ -75,7 +75,7 @@ class ORMRound(Model):
 
 class ORMGame(Model):
     name = CharField(max_length=50,
-                     primary_key=True)  # TODO уникальное название, добавить ид
+                     unique=True)
     author = ForeignKey(ORMUser,
                         on_delete=CASCADE)
     rounds = ManyToManyField(ORMRound,
