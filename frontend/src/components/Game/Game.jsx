@@ -74,28 +74,29 @@ const HostCard = observer(() => {
             hostImageURL = getHostImageUrl(Stage.WAITING);
             break;
         }
+        case Stage.CORRECT_ANSWER: {
+            hostText = 'Правильно!';
+            hostImageURL = getHostImageUrl(Stage.ANSWERING);
+            break;
+        }
         case Stage.TIMEOUT: {
-            if (store.stage === Stage.TIMEOUT)
-                hostText = `Правильный ответ: ${store.correctAnswer}. `
+            hostText = `Правильный ответ: ${store.correctAnswer}. `
             hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
             break;
         }
-        case Stage.ROUND_ENDED:
-        case Stage.FINAL_ROUND_STARTED:
+        case Stage.ROUND_ENDED: {
+            hostText += `Раунд закончен. Впереди ${toOrdinal(store.currentRound.order)} раунд.`;
+            hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
+            break;
+        }
+        case Stage.FINAL_ROUND_STARTED: {
+            hostText += 'Впереди финальный раунд.';
+            hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
+            break;
+        }
         case Stage.CHOOSING_QUESTION: {
-            if (store.answeringPlayer?.answer.isCorrect)
-                hostText = 'Правильно!\n';
-
-            if (store.stage === Stage.ROUND_ENDED) {
-                hostText += 'Раунд закончен.';
-                hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
-            } else if (store.stage === Stage.FINAL_ROUND_STARTED) {
-                hostText += 'Впереди финальный раунд.';
-                hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
-            } else if (!store.isNoMoreQuestions) {
-                hostText += `${store.currentPlayer.nickname}, выбирайте вопрос.`;
-                hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
-            }
+            hostText += `${store.currentPlayer.nickname}, выбирайте вопрос.`;
+            hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
             break;
         }
         case Stage.ANSWERING: {
@@ -344,6 +345,7 @@ const Game = observer(() => {
                     store.clearAnswers();
                 });
                 break;
+            case Stage.CORRECT_ANSWER:
             case Stage.TIMEOUT:
                 const nextStage = store.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
                 wait(() => {

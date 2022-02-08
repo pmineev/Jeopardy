@@ -135,7 +135,7 @@ const GameSessionStore = types
 
                 self.currentPlayer = player;
 
-                self.stage = self.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
+                self.stage = Stage.CORRECT_ANSWER;
             }
 
             console.log("answered", getSnapshot(self));
