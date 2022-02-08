@@ -11,9 +11,10 @@ from ..modules.user.entities import User
 
 class ORMUser(Model):
     user = OneToOneField(ORMDjangoUser,
-                         primary_key=True,  # TODO уникальное имя
+                         primary_key=True,
                          on_delete=CASCADE)
-    nickname = CharField(max_length=50)  # TODO уникальный ник
+    nickname = CharField(max_length=50,
+                         unique=True)
 
     def to_domain(self):
         return User(id=self.pk,
