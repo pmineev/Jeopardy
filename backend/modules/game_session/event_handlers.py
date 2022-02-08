@@ -89,7 +89,7 @@ def notify_of_player_answered(event: Union['PlayerCorrectlyAnsweredEvent', 'Play
     notify_to_game_session(gs.id, PlayerDTO(player).to_response(), 'player_answered')
 
 
-def notify_of_question_timeout(event: 'AnswerTimeoutEvent'):
+def notify_of_answer_timeout(event: 'AnswerTimeoutEvent'):
     gs = event.game_session
     question = event.question
 
