@@ -35,11 +35,11 @@ class Player(Entity):
         self.answer = answer
 
     @property
-    def username(self):
+    def username(self) -> str:
         return self.user.username
 
     @property
-    def nickname(self):
+    def nickname(self) -> str:
         return self.user.nickname
 
 
@@ -51,15 +51,15 @@ class CurrentQuestion(Entity):
         self.question_index = question_index
 
     @property
-    def text(self):
+    def text(self) -> str:
         return self._question.text
 
     @property
-    def answer(self):
+    def answer(self) -> str:
         return self._question.answer
 
     @property
-    def value(self):
+    def value(self) -> int:
         return self._question.value
 
 
