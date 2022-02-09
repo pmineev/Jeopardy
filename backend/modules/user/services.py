@@ -24,10 +24,14 @@ class UserService:
         if self.repo.is_exists(user_data['username']):
             raise UserAlreadyExists
 
-        if self.repo.is_nickname_exists(user_data['nickname']):  # TODO ошибка, если ник не указан
+        nickname = user_data.get('nickname') or user_data['username']
+
+        if self.repo.is_nickname_exists(nickname):
             raise UserNicknameAlreadyExists
 
-        user = User(**user_data)
+        user = User(username=user_data['username'],
+                    nickname=nickname,
+                    password=user_data['password'])
 
         self.repo.save(user)
 
