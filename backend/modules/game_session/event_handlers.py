@@ -87,7 +87,7 @@ def start_question_timer(event: 'CurrentQuestionChosenEvent'):
                  args=(event.game_session_id,))
 
 
-def stop_question_timer(event: 'PlayerCorrectlyAnsweredEvent'):
+def stop_question_timer(event: Union['PlayerCorrectlyAnsweredEvent', 'GameSessionDeletedEvent']):
     Timers.stop(event.game_session_id)
 
 

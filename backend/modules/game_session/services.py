@@ -75,7 +75,7 @@ class GameSessionService:
 
             print('gs deleted')
 
-            self.repo.delete(game_session)  # TODO останавливать все таймеры
+            self.repo.delete(game_session)
         else:
             self.repo.save(game_session)
 

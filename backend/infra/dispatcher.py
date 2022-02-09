@@ -16,7 +16,7 @@ from ..modules.game_session.event_handlers import notify_of_game_session_created
 
 EVENT_HANDLERS = {
     GameSessionCreatedEvent: [add_creator_to_notifier, notify_of_game_session_created],
-    GameSessionDeletedEvent: [remove_group_from_notifier, notify_of_game_session_deleted],
+    GameSessionDeletedEvent: [remove_group_from_notifier, stop_question_timer, notify_of_game_session_deleted],
     PlayerJoinedEvent: [add_player_to_notifier, notify_of_player_joined],
     PlayerLeftEvent: [remove_player_from_notifier, notify_of_player_left],
     PlayerInactiveEvent: [notify_of_player_inactive],
