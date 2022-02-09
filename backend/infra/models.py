@@ -26,6 +26,9 @@ class ORMPlayer(Model):
     user = OneToOneField(ORMUser,
                          primary_key=True,
                          on_delete=CASCADE)
+    game_session = ForeignKey('ORMGameSession',
+                              on_delete=CASCADE,
+                              related_name='players')
     is_playing = BooleanField(default=True)
     score = IntegerField(default=0)
     answer = TextField(null=True)
@@ -98,8 +101,6 @@ class ORMGameSession(Model):
     game = ForeignKey(ORMGame,
                       on_delete=PROTECT)
     max_players = IntegerField()
-    players = ManyToManyField(ORMPlayer,
-                              related_name='players')  # TODO заменить на foreignkey и изменить удаление сессии
     current_round = OneToOneField(ORMRound,
                                   on_delete=PROTECT,
                                   null=True)

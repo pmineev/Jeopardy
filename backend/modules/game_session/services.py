@@ -60,8 +60,6 @@ class GameSessionService:
 
         game_session = self.repo.get_by_creator(creator_nickname)
 
-        # TODO добавить в бд ограничение: пользователь может быть игроком только в одной игре
-
         game_session.join(user)
 
         self.repo.save(game_session)
@@ -77,7 +75,7 @@ class GameSessionService:
 
             print('gs deleted')
 
-            self.repo.delete(game_session)
+            self.repo.delete(game_session)  # TODO останавливать все таймеры
         else:
             self.repo.save(game_session)
 

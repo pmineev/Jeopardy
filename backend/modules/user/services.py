@@ -24,7 +24,7 @@ class UserService:
         if self.repo.is_exists(user_data['username']):
             raise UserAlreadyExists
 
-        if self.repo.is_nickname_exists(user_data['nickname']):
+        if self.repo.is_nickname_exists(user_data['nickname']):  # TODO ошибка, если ник не указан
             raise UserNicknameAlreadyExists
 
         user = User(**user_data)
