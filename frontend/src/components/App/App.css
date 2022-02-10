@@ -150,6 +150,7 @@ button:active {
 table {
     width: 100%;
     border-spacing: 0;
+    table-layout: fixed;
 }
 
 tbody tr {
