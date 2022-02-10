@@ -193,7 +193,7 @@ const QuestionCell = observer(({question, themeIndex, questionIndex}) => {
                 chooseQuestion(themeIndex, questionIndex);
             }}
         >
-            {question.value}
+            {question.isAnswered ? undefined : question.value}
         </td>
     )
 });
