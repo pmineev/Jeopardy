@@ -7,9 +7,9 @@ import {useHistory} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
 import ReactTooltip from 'react-tooltip';
 
-import {GameSessionNotifier, notifierUrls} from "./notifiers";
+import {GameSessionListener, listenerUrls} from "./notifiers";
 import {GameSessionService} from "./services";
-import {Stage} from "./utils";
+import {Stage, toOrdinal} from "./utils";
 import {useStore} from "./stores/RootStore";
 
 import {getSnapshot} from "mobx-state-tree";
@@ -138,9 +138,12 @@ const QuestionScreen = observer(() => {
 
     useEffect(() => {
         switch (store.stage) {
-            case Stage.ROUND_STARTED:
+            case Stage.ROUND_STARTED: {
+                setScreenText(toOrdinal(store.currentRound.order) + ' раунд');
+                break;
+            }
             case Stage.FINAL_ROUND_STARTED: {
-                setScreenText(store.roundText);
+                setScreenText('Финальный раунд');
                 break;
             }
             case Stage.ROUND_ENDED: {
@@ -301,20 +304,20 @@ const Game = observer(() => {
     useEffect(() => {
         document.title = 'Игра';
 
-        let notifier;
+        let listener;
 
         gameSessionService.getGameState()
             .then(response => {
                 store.initialize(response.data);
-                notifier = new GameSessionNotifier(notifierUrls.gameSession);
-                notifier.setListener(store.listener);
+                listener = new GameSessionListener(listenerUrls.gameSession);
+                listener.setHandler(store.eventHandler);
             })
             .catch(() => {
                 history.push('/games');
             })
 
         return () => {
-            notifier?.close();
+            listener?.close();
             store.clear();
         }
     }, [store]);

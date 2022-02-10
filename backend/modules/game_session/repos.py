@@ -23,12 +23,13 @@ class GameSessionRepo(Repository):
             raise GameNotFound
 
         orm_user = ORMUser.objects.get(user__username=game_session.creator.username)
-        orm_player = ORMPlayer.objects.create(user=orm_user)
 
         orm_game_session = ORMGameSession.objects.create(creator=orm_user,
                                                          game=orm_game,
                                                          max_players=game_session.max_players)
-        orm_game_session.players.add(orm_player)
+
+        ORMPlayer.objects.create(user=orm_user,
+                                 game_session=orm_game_session)
 
     @staticmethod
     def get(game_session_id) -> 'GameSession':
@@ -73,7 +74,7 @@ class GameSessionRepo(Repository):
         deleted_players_qs.delete()
         for player in game_session.players:
             orm_player, created = orm_game_session.players \
-                .update_or_create(user_id=player.user.id,
+                .update_or_create(pk=player.user.id,
                                   defaults=dict(
                                       is_playing=player.is_playing,
                                       score=player.score,
@@ -113,8 +114,5 @@ class GameSessionRepo(Repository):
             orm_game_session = ORMGameSession.objects.get(pk=game_session.id)
         except ORMGameSession.DoesNotExist:
             raise GameSessionNotFound
-
-        for orm_player in orm_game_session.players.all():
-            orm_player.delete()
 
         orm_game_session.delete()
