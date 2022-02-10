@@ -88,7 +88,7 @@ const HostCard = observer(() => {
             break;
         }
         case Stage.ROUND_ENDED: {
-            hostText += `Раунд закончен. Впереди ${toOrdinal(store.currentRound.order)} раунд.`;
+            hostText += 'Раунд закончен.';
             hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
             break;
         }
