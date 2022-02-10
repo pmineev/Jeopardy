@@ -11,9 +11,10 @@ from ..modules.user.entities import User
 
 class ORMUser(Model):
     user = OneToOneField(ORMDjangoUser,
-                         primary_key=True,  # TODO уникальное имя
+                         primary_key=True,
                          on_delete=CASCADE)
-    nickname = CharField(max_length=50)  # TODO уникальный ник
+    nickname = CharField(max_length=50,
+                         unique=True)
 
     def to_domain(self):
         return User(id=self.pk,
@@ -25,6 +26,9 @@ class ORMPlayer(Model):
     user = OneToOneField(ORMUser,
                          primary_key=True,
                          on_delete=CASCADE)
+    game_session = ForeignKey('ORMGameSession',
+                              on_delete=CASCADE,
+                              related_name='players')
     is_playing = BooleanField(default=True)
     score = IntegerField(default=0)
     answer = TextField(null=True)
@@ -74,7 +78,7 @@ class ORMRound(Model):
 
 class ORMGame(Model):
     name = CharField(max_length=50,
-                     primary_key=True)  # TODO уникальное название, добавить ид
+                     unique=True)
     author = ForeignKey(ORMUser,
                         on_delete=CASCADE)
     rounds = ManyToManyField(ORMRound,
@@ -97,8 +101,6 @@ class ORMGameSession(Model):
     game = ForeignKey(ORMGame,
                       on_delete=PROTECT)
     max_players = IntegerField()
-    players = ManyToManyField(ORMPlayer,
-                              related_name='players')  # TODO заменить на foreignkey и изменить удаление сессии
     current_round = OneToOneField(ORMRound,
                                   on_delete=PROTECT,
                                   null=True)

@@ -12,7 +12,7 @@ from ..factories import UserFactory, GameFactory, GameSessionFactory
 from ...modules.game.exceptions import GameAlreadyExists, GameNotFound
 from ...modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
     WrongQuestionRequest, AlreadyPlaying, WrongStage
-from ...modules.user.exceptions import UserAlreadyExists, UserNotFound
+from ...modules.user.exceptions import UserAlreadyExists, UserNotFound, UserNicknameAlreadyExists
 
 
 class UserListView(APIView):
@@ -29,7 +29,7 @@ class UserListView(APIView):
             session_dto = UserListView.service.authenticate(serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except UserAlreadyExists:
+        except (UserAlreadyExists, UserNicknameAlreadyExists):
             return Response(status=status.HTTP_409_CONFLICT)
 
         return Response(status=status.HTTP_201_CREATED, data=session_dto.to_response())
@@ -79,6 +79,10 @@ class UserView(APIView):
             UserView.service.update(serializer.validated_data, username)
         except ValidationError:
             return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        except UserNotFound:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        except UserNicknameAlreadyExists:
+            return Response(status=status.HTTP_409_CONFLICT)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
