@@ -19,6 +19,10 @@ class UserRepo(Repository):
         return ORMUser.objects.filter(user__username=username).exists()
 
     @staticmethod
+    def is_nickname_exists(nickname: str) -> bool:
+        return ORMUser.objects.filter(nickname=nickname).exists()
+
+    @staticmethod
     def get(username: str) -> 'User':
         try:
             orm_user = ORMUser.objects.get(user__username=username)

@@ -33,7 +33,7 @@ class AnswerDTO(DTO):
 
 class PlayerDTO(DTO):
     def __init__(self, player: 'Player'):
-        self.nickname = player.user.nickname
+        self.nickname = player.nickname
         self.score = player.score
         self.is_playing = player.is_playing
         self.answer = AnswerDTO(player.answer) if player.answer else None
@@ -123,7 +123,7 @@ class GameStateDTO(DTO):
         self.players = [PlayerDTO(player) for player in gs.players]
         self.current_round = CurrentRoundDTO(gs.current_round, gs.answered_questions) \
             if gs.current_round else None
-        self.current_player = gs.current_player.user.nickname if gs.current_player else None
+        self.current_player = gs.current_player.nickname if gs.current_player else None
         self.current_question = CurrentQuestionDTO(gs.current_question) if gs.current_question else None
 
         if gs.stage in (Stage.FINAL_ROUND, Stage.END_GAME):
@@ -167,7 +167,7 @@ class GameSessionDescriptionDTO(DTO):
 
 class PlayerNicknameDTO(DTO):
     def __init__(self, player: 'Player'):
-        self.nickname = player.user.nickname
+        self.nickname = player.nickname
 
     def to_response(self):
         return dict(nickname=self.nickname)

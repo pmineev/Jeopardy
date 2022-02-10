@@ -11,7 +11,8 @@ from .enums import Stage
 from .exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
 from .events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
     CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, \
-    PlayerIncorrectlyAnsweredEvent, FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent
+    PlayerIncorrectlyAnsweredEvent, FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
+    PlayerInactiveEvent
 
 
 @dataclass
@@ -33,6 +34,14 @@ class Player(Entity):
         self.is_playing = is_playing
         self.answer = answer
 
+    @property
+    def username(self) -> str:
+        return self.user.username
+
+    @property
+    def nickname(self) -> str:
+        return self.user.nickname
+
 
 class CurrentQuestion(Entity):
     def __init__(self, question: 'Question', theme_index: int, question_index: int):
@@ -42,15 +51,15 @@ class CurrentQuestion(Entity):
         self.question_index = question_index
 
     @property
-    def text(self):
+    def text(self) -> str:
         return self._question.text
 
     @property
-    def answer(self):
+    def answer(self) -> str:
         return self._question.answer
 
     @property
-    def value(self):
+    def value(self) -> int:
         return self._question.value
 
 
@@ -107,10 +116,10 @@ class GameSession(Entity):
 
         if self.stage == Stage.WAITING:
             self.players.remove(player)
+            self.add_event(PlayerLeftEvent(self, player))
         else:
             player.is_playing = False
-
-        self.add_event(PlayerLeftEvent(self, player))
+            self.add_event(PlayerInactiveEvent(self, player))
 
         print(f'{user.username} has left')
 
@@ -122,10 +131,11 @@ class GameSession(Entity):
         self.add_event(CurrentPlayerChosenEvent(self, self.current_player))  # TODO объединить в одно событие
         self.add_event(RoundStartedEvent(self, self.current_round))
 
-        print(f'gs has started, current player - {self.current_player.user.username}')
+        print(f'gs has started, current player - {self.current_player.username}')
 
     def set_next_round(self):
         self.answered_questions.clear()
+        self._clear_players_answers()
         self.current_question = None
 
         if self.current_round.order < len(self.game.rounds):
@@ -136,7 +146,7 @@ class GameSession(Entity):
             self.add_event(CurrentPlayerChosenEvent(self, self.current_player))
             self.add_event(RoundStartedEvent(self, self.current_round))
 
-            print(f'{self.current_round.order} started, winner: {self.current_player.user.username}')
+            print(f'{self.current_round.order} started, winner: {self.current_player.username}')
         else:
             self._set_final_round()
 
@@ -191,11 +201,11 @@ class GameSession(Entity):
 
                 self.add_event(PlayerCorrectlyAnsweredEvent(self, player))
 
-                # TODO очищать ответы игроков, но в player в event ^^^^ должен оставаться старый ответ
-
                 if self.is_no_more_questions():
                     self.set_next_round()
                 else:
+                    self._clear_players_answers()
+
                     self.current_player = player
                     self.stage = Stage.CHOOSING_QUESTION
             else:
@@ -224,6 +234,8 @@ class GameSession(Entity):
         if self.is_no_more_questions():
             self.set_next_round()
         else:
+            self._clear_players_answers()
+
             self.stage = Stage.CHOOSING_QUESTION
 
     def final_round_timeout(self):
@@ -273,3 +285,7 @@ class GameSession(Entity):
     def _set_winner_current_player(self):
         winner = max(self.players, key=lambda player: player.score)
         self.current_player = winner
+
+    def _clear_players_answers(self):
+        for player in self.players:
+            player.answer = None

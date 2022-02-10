@@ -17,5 +17,6 @@ class Timers:
 
     @staticmethod
     def stop(key):
-        timer = Timers._timers.pop(key)
-        timer.cancel()
+        timer = Timers._timers.pop(key, None)
+        if timer:
+            timer.cancel()

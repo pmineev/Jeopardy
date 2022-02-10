@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from .repos import UserRepo
 
 from .dtos import UserDTO, SessionDTO
-from .exceptions import UserAlreadyExists, UserNotFound
+from .exceptions import UserAlreadyExists, UserNotFound, UserNicknameAlreadyExists
 from .entities import User
 
 
@@ -24,7 +24,14 @@ class UserService:
         if self.repo.is_exists(user_data['username']):
             raise UserAlreadyExists
 
-        user = User(**user_data)
+        nickname = user_data.get('nickname') or user_data['username']
+
+        if self.repo.is_nickname_exists(nickname):
+            raise UserNicknameAlreadyExists
+
+        user = User(username=user_data['username'],
+                    nickname=nickname,
+                    password=user_data['password'])
 
         self.repo.save(user)
 
@@ -35,6 +42,9 @@ class UserService:
         user = self.repo.get(username)
 
         if 'nickname' in user_data:
+            if self.repo.is_nickname_exists(user_data['nickname']):
+                raise UserNicknameAlreadyExists
+
             user.nickname = user_data['nickname']
 
         if 'password' in user_data:

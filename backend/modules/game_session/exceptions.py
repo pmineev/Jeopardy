@@ -1,22 +1,22 @@
 class GameSessionNotFound(Exception):
-    pass
+    error = 'game_session_not_found'
 
 
 class TooManyPlayers(Exception):
-    pass
+    error = 'too_many_players'
 
 
 class NotCurrentPlayer(Exception):
-    pass
+    error = 'not_current_player'
 
 
 class WrongQuestionRequest(Exception):
-    pass
+    error = 'wrong_question_request'
 
 
 class AlreadyPlaying(Exception):
-    pass
+    error = 'already_playing'
 
 
 class WrongStage(Exception):
-    pass
+    error = 'wrong_stage'
