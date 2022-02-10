@@ -1,0 +1,164 @@
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../../common/fonts/Montserrat.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Oswald';
+    src: url('../../common/fonts/Oswald.woff2') format('woff2');
+}
+
+html {
+    --background-color: #2F45A0;
+    --primary-color: #0000BB;
+    --accent-color: #FFCC00;
+    --text-color: #FFDD77;
+    --empty-text-color: #958248;
+    --error-color: #C10000;
+
+}
+
+html, body, #root {
+    height: 100%;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    margin: 0;
+}
+
+*:focus {
+    outline: none;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+body, input, textarea {
+    background-color: var(--background-color);
+    font-family: 'Montserrat', serif;
+    font-size: 18px;
+    color: var(--text-color);
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+header {
+    font-size: 24px;
+    font-family: 'Montserrat', serif;
+    color: var(--text-color);
+}
+
+div.form {
+    position: absolute;
+    top: 30%;
+    right: 0;
+    left: 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+form:focus {
+    outline: 1px solid var(--accent-color);;
+}
+
+form header {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 10px;
+}
+
+form a {
+    margin: 0 0 10px;
+}
+
+label {
+    color: var(--text-color);
+}
+
+input, textarea {
+    border: 2px solid var(--primary-color);
+}
+
+input:focus, textarea:focus {
+    border: 2px solid var(--accent-color);
+}
+
+.error {
+    color: orangered;
+    font-size: 12px;
+}
+
+button {
+    padding: 5px 10px 5px 10px;
+    margin: 0;
+    background-color: var(--primary-color);
+    font-family: 'Montserrat', serif;
+    font-size: 18px;
+    color: var(--text-color);
+    border: 2px solid var(--primary-color);
+}
+
+button:hover {
+    border: 2px solid var(--accent-color);
+}
+
+button:active {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    border: 2px solid var(--accent-color);
+}
+
+.games, .lobby, .add-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 120px;
+}
+
+.games > header, .lobby > header, .add-game > header {
+    margin-bottom: 10px;
+}
+
+table {
+    width: 100%;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+tbody tr {
+    background-color: var(--primary-color);
+}
+
+td {
+    padding-right: 0;
+    padding-top: 0;
+}
+
