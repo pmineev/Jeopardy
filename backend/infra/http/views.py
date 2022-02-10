@@ -28,9 +28,9 @@ class UserListView(APIView):
             UserListView.service.create(serializer.validated_data)
             session_dto = UserListView.service.authenticate(serializer.validated_data)
         except ValidationError:
-            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except (UserAlreadyExists, UserNicknameAlreadyExists):
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={'error': 'invalid_request'})
+        except (UserAlreadyExists, UserNicknameAlreadyExists) as e:
+            return Response(status=status.HTTP_409_CONFLICT, data={'error': e.error})
 
         return Response(status=status.HTTP_201_CREATED, data=session_dto.to_response())
 
@@ -47,9 +47,9 @@ class SessionView(APIView):
             serializer.is_valid(raise_exception=True)
             session_dto = SessionView.service.authenticate(serializer.validated_data)
         except ValidationError:
-            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except UserNotFound:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={'error': 'invalid_request'})
+        except UserNotFound as e:
+            return Response(status=status.HTTP_401_UNAUTHORIZED, data={'error': e.error})
 
         return Response(session_dto.to_response())
 
@@ -59,18 +59,18 @@ class UserView(APIView):
 
     def get(self, request, username):
         if username != request.user.username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'error': 'forbidden'})
 
         try:
             user_dto = UserView.service.get(username)
-        except UserNotFound:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        except UserNotFound as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'error': e.error})
 
         return Response(data=user_dto.to_response())
 
     def patch(self, request, username):
         if username != request.user.username:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'error': 'forbidden'})
 
         serializer = ChangeUserCredentialsSerializer(data=request.data)
 
@@ -78,11 +78,11 @@ class UserView(APIView):
             serializer.is_valid(raise_exception=True)
             UserView.service.update(serializer.validated_data, username)
         except ValidationError:
-            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except UserNotFound:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        except UserNicknameAlreadyExists:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={'error': 'invalid_request'})
+        except UserNotFound as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'error': e.error})
+        except UserNicknameAlreadyExists as e:
+            return Response(status=status.HTTP_409_CONFLICT, data={'error': e.error})
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -97,9 +97,9 @@ class GameListView(APIView):
             serializer.is_valid(raise_exception=True)
             GameListView.service.create(serializer.validated_data, request.user.username)
         except ValidationError:
-            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except GameAlreadyExists:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={'error': 'invalid_request'})
+        except GameAlreadyExists as e:
+            return Response(status=status.HTTP_409_CONFLICT, data={'error': e.error})
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -119,12 +119,12 @@ class GameSessionListView(APIView):
             serializer.is_valid(raise_exception=True)
             GameSessionListView.interactor.create(serializer.validated_data,
                                                   request.user.username)
-        except GameNotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND)
         except ValidationError:
-            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except AlreadyPlaying:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={'error': 'invalid_request'})
+        except GameNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'error': e.error})
+        except AlreadyPlaying as e:
+            return Response(status=status.HTTP_409_CONFLICT, data={'error': e.error})
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -140,8 +140,8 @@ class GameSessionViewSet(ViewSet):
     def get_state(self, request):
         try:
             game_state_dto = GameSessionViewSet.service.get_game_state(request.user.username)
-        except GameSessionNotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'error': e.error})
 
         return Response(data=game_state_dto.to_response())
 
@@ -153,19 +153,19 @@ class GameSessionViewSet(ViewSet):
             GameSessionViewSet.service.join(request.user.username, serializer.validated_data)
 
         except ValidationError:
-            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except GameSessionNotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        except (TooManyPlayers, AlreadyPlaying):
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={'error': 'invalid_request'})
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'error': e.error})
+        except (TooManyPlayers, AlreadyPlaying) as e:
+            return Response(status=status.HTTP_409_CONFLICT, data={'error': e.error})
 
         return Response(status=status.HTTP_201_CREATED)
 
     def leave(self, request):
         try:
             GameSessionViewSet.service.leave(request.user.username)
-        except GameSessionNotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'error': e.error})
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -175,12 +175,14 @@ class GameSessionViewSet(ViewSet):
         try:
             serializer.is_valid(raise_exception=True)
             GameSessionViewSet.service.choose_question(request.user.username, serializer.validated_data)
-        except (ValidationError, WrongQuestionRequest):
-            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except GameSessionNotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        except (NotCurrentPlayer, WrongStage):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+        except ValidationError:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={'error': 'invalid_request'})
+        except WrongQuestionRequest as e:
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={'error': e.error})
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'error': e.error})
+        except (NotCurrentPlayer, WrongStage) as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'error': e.error})
 
         return Response(status=status.HTTP_201_CREATED)
 
@@ -191,10 +193,10 @@ class GameSessionViewSet(ViewSet):
             serializer.is_valid(raise_exception=True)
             GameSessionViewSet.service.submit_answer(request.user.username, serializer.validated_data)
         except ValidationError:
-            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        except GameSessionNotFound:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        except WrongStage:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY, data={'error': 'invalid_request'})
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'error': e.error})
+        except WrongStage as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'error': e.error})
 
         return Response(status=status.HTTP_201_CREATED)
