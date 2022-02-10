@@ -4,6 +4,7 @@ import {useHistory} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
 import ReactTooltip from 'react-tooltip';
 import {getSnapshot} from "mobx-state-tree";
+import {toast} from "react-toastify";
 
 import '../../common/round.css';
 import './Game.css';
@@ -320,6 +321,7 @@ const Game = observer(() => {
                 listener.setHandler(store.eventHandler);
             })
             .catch(() => {
+                toast("Вы не играете");
                 history.push('/games');
             })
 
