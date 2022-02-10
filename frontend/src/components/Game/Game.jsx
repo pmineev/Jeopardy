@@ -14,7 +14,8 @@ import {useStore} from "../../common/RootStore";
 import GameSessionListener from "./listener";
 import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer} from "./services";
 
-const PlayerControls = () => {
+const PlayerControls = observer(() => {
+    const {gameSessionStore: store} = useStore();
     const history = useHistory();
 
     return (
@@ -51,7 +52,8 @@ const PlayerControls = () => {
 
             <button
                 onClick={() => {
-                    leaveGameSession();
+                    if (store.stage !== Stage.END_GAME)
+                        leaveGameSession();
                     history.push('/games');
                 }}
             >
@@ -59,7 +61,7 @@ const PlayerControls = () => {
             </button>
         </div>
     )
-};
+});
 
 const HostCard = observer(() => {
     const {gameSessionStore: store} = useStore();
