@@ -5,6 +5,7 @@ import {Field, Form, Formik} from "formik";
 import ReactTooltip from 'react-tooltip';
 import {getSnapshot} from "mobx-state-tree";
 import {toast} from "react-toastify";
+import {CSSTransition, SwitchTransition} from "react-transition-group";
 
 import '../../common/round.css';
 import './Game.css';
@@ -159,10 +160,6 @@ const QuestionScreen = observer(() => {
                 setScreenText('Финальный раунд');
                 break;
             }
-            case Stage.ROUND_ENDED: {
-                setScreenText('');
-                break;
-            }
             case Stage.ANSWERING: {
                 setScreenText(store.currentQuestion.text);
                 break;
@@ -236,15 +233,49 @@ const RoundTable = ({themes}) => {
 
 const GameScreen = observer(() => {
     const {gameSessionStore: store} = useStore();
+    const [state, setState] = useState('empty')
+
+    useEffect(() => {
+        switch (store.stage) {
+            case Stage.CHOOSING_QUESTION: {
+                setState('roundTable');
+                break;
+            }
+            case Stage.WAITING:
+            case Stage.ROUND_ENDED: {
+                setState('empty');
+                break;
+            }
+            default:
+                setState('text');
+        }
+    }, [store.stage])
+
+    const getChild = () => {
+        switch (state) {
+            case 'roundTable':
+                return <RoundTable
+                    themes={store.currentRound.themes}
+                />
+            case 'empty':
+                return <></>
+            default:
+                return <QuestionScreen/>
+        }
+    }
+
     return (
-        store.stage === Stage.CHOOSING_QUESTION
-            ? <RoundTable
-                key='table'
-                themes={store.currentRound.themes}
-            />
-            : <QuestionScreen
-                key='question'
-            />
+        <div className='game-screen'>
+            <SwitchTransition className='game-screen'>
+                <CSSTransition
+                    key={state}
+                    timeout={1000}
+                    classNames="game-screen"
+                >
+                    {getChild()}
+                </CSSTransition>
+            </SwitchTransition>
+        </div>
     )
 });
 

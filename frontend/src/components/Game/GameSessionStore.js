@@ -95,7 +95,7 @@ const GameSessionStore = types
             if (player)
                 player.isPlaying = true;
             else
-                self.players.push({...data});
+                self.players.push({...data});  // TODO добавлять в алфавитном порядке
         },
         onPlayerLeft(data) {
             const playerIndex = self.players.findIndex(player => player.nickname === data.nickname);
