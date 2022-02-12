@@ -20,3 +20,4 @@ class User(Entity):
 class Session:
     access: str
     refresh: str
+    nickname: str
