@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
+import {toast} from "react-toastify";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
@@ -43,9 +44,14 @@ const UserProfileForm = () => {
                         setErrors({'submitError': 'Заполните хотя бы одно поле'})
                     else
                         saveUser(credentials.username, values.nickname, values.password)
-                            .then(() =>
-                                setSubmitting(false)
-                            );
+                            .then(() => {
+                                    setSubmitting(false);
+                                    toast('Данные сохранены');
+                                }
+                            )
+                            .catch(error => {
+                                setErrors({'submitError': error});
+                            })
                 }}
             >
                 <Form>

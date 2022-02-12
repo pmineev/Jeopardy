@@ -14,7 +14,23 @@ const saveUser = (username, nickname, password) => {
     if (password && password.length > 0)
         data.password = password
 
-    return axios.patch(url, data);
+    return axios.patch(url, data)
+        .catch(({response}) => {
+                let errorText;
+                if (response?.status < 500) {
+                    switch (response.data.error) {
+                        case 'nickname_already_exists':
+                            errorText = 'Ник занят';
+                            break;
+                        default:
+                            errorText = 'Ошибка';
+                    }
+                } else
+                    errorText = 'Ошибка сервера';
+
+                return Promise.reject(errorText);
+            }
+        );
 };
 
 export {getUser, saveUser};
