@@ -7,7 +7,7 @@ from ...core.entities import Entity
 class User(Entity):
     def __init__(self,
                  username: str,
-                 nickname: str,
+                 nickname: Optional[str] = None,
                  password: Optional[str] = None,
                  id: Optional[int] = None):
         super().__init__(id)
