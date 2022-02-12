@@ -54,11 +54,14 @@ class UserRepo(Repository):
 
     @staticmethod
     def authenticate(user: 'User') -> 'Session':
-        orm_user = authenticate(username=user.username,
-                                password=user.password)
-        if not orm_user:
+        orm_django_user = authenticate(username=user.username,
+                                       password=user.password)
+        if not orm_django_user:
             raise UserNotFound
 
-        tokens = RefreshToken.for_user(orm_user)
+        orm_user = ORMUser.objects.get(user=orm_django_user)
+
+        tokens = RefreshToken.for_user(orm_django_user)
         return Session(refresh=str(tokens),
-                       access=str(tokens.access_token))
+                       access=str(tokens.access_token),
+                       nickname=orm_user.nickname)

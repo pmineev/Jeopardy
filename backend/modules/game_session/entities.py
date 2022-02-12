@@ -163,11 +163,11 @@ class GameSession(Entity):
     def choose_question(self, user: 'User', theme_index, question_index):
         player = self._get_player(user)
 
-        if player != self.current_player:
-            raise NotCurrentPlayer
-
         if not self.stage == Stage.CHOOSING_QUESTION:
             raise WrongStage
+
+        if player != self.current_player:
+            raise NotCurrentPlayer
 
         try:
             question = self.current_round.themes[theme_index].questions[question_index]
