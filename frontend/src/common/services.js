@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {toast} from "react-toastify";
 
 const baseURL = 'http://127.0.0.1:8000/api';
 const baseStaticURL = 'http://127.0.0.1:8000/static';
@@ -21,6 +22,11 @@ axios.interceptors.response.use(
         return response;
     },
     error => {
+        if (error.response.status === 400) {
+            toast.error('Ошибка в формате запроса');
+            return Promise.reject(error);
+        }
+
         if (error.response.status !== 401
             || error.config.url === '/sessions/') {
             console.log(error);
