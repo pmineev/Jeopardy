@@ -27,6 +27,12 @@ paths:
       responses:
         '201':
           description: Пользователь успешно зарегистрирован
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '409':
           description: |
             Регистрация пользователя отклонена.
@@ -38,8 +44,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/requestRejectReason'
-        '422':
-          description: Некорректные данные
       security: []
       tags:
       - users
@@ -63,6 +67,10 @@ paths:
                 $ref: '#/components/schemas/user'
         '403':
           description: Доступ запрещен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
       tags:
       - users
 
@@ -86,12 +94,26 @@ paths:
       responses:
         '204':
           description: Информация изменена
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '403':
           description: Доступ запрещен
-        '422':
-          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
+        '409':
+          description: Пользователь с указанным ником уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
 
-  /sessions:
+  /sessions/:
     post:
       tags:
       - sessions
@@ -110,10 +132,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/session'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '401':
           description: Неверные учетные данные
-        '422':
-          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
       security: []
 
   /sessions/new_token/:
@@ -180,10 +210,18 @@ paths:
       responses:
         '201':
           description: Игра успешно сохранена
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '409':
           description: Игра с таким именем уже существует
-        '422':
-          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
 
   /game_sessions/:
     get:
@@ -215,12 +253,24 @@ paths:
       responses:
         '201':
           description: Игровая сессия создана
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '404':
           description: Игра не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '409':
           description: Пользователь уже играет
-        '422':
-          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
 
   /game_sessions/current/:
     get:
@@ -236,6 +286,10 @@ paths:
                 $ref: '#/components/schemas/gameState'
         '404':
           description: Пользователь не играет
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
 
   /game_sessions/actions/join/:
     post:
@@ -258,8 +312,18 @@ paths:
       responses:
         '201':
           description: Пользователь успешно присоединился к игре
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '404':
           description: Игровая сессия не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '409':
           description: |
             Пользователь не присоединен к игре.
@@ -282,6 +346,10 @@ paths:
           description: Пользователь успешно вышел из игры
         '404':
           description: Пользователь не играет
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
 
   /game_sessions/current/current_question/:
     post:
@@ -298,6 +366,12 @@ paths:
       responses:
         '201':
           description: Текущий вопрос выбран
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '403':
           description: |
             Выбор вопроса отклонен.
@@ -311,8 +385,16 @@ paths:
                 $ref: '#/components/schemas/requestRejectReason'
         '404':
           description: Пользователь не играет
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '422':
-          description: Некорректные данные
+          description: Некорректные параметры вопроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
 
   /game_sessions/current/answer/:
     post:
@@ -328,16 +410,24 @@ paths:
       responses:
         '201':
           description: OK
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
         '403':
           description: Отправка ответа отклонена, текущая стадия игры не предполагает ответа на вопрос.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/requestRejectReason'
-        '422':
-          description: Некорректные данные
         '404':
           description: Пользователь не играет
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestRejectReason'
 
 components:
   securitySchemes:
@@ -721,8 +811,23 @@ components:
       description: Причина отклонения запроса
       type: object
       required:
-      - reason
+      - error
       properties:
-        reason:
+        error:
+          description: Код причины
           type: string
+          enum:
+          - invalid_request
+          - forbidden
+          - user_elready_exists
+          - nickname_anready_exists
+          - user_not_found
+          - game_already_exists
+          - game_not_found
+          - game_session_not_found
+          - too_many_players
+          - not_current_player
+          - wrong_question_request
+          - already_playing
+          - wrong_stage
 

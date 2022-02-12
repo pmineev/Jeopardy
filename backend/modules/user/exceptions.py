@@ -1,10 +1,10 @@
 class UserAlreadyExists(Exception):
-    pass
+    error = 'user_elready_exists'
 
 
 class UserNicknameAlreadyExists(Exception):
-    pass
+    error = 'nickname_anready_exists'
 
 
 class UserNotFound(Exception):
-    pass
+    error = 'user_not_found'
