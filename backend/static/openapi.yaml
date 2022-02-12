@@ -444,12 +444,16 @@ components:
       required:
       - access
       - refresh
+      - nickname
       properties:
         refreshToken:
           description: refresh-токен
           type: string
         accessToken:
           description: access-токен
+          type: string
+        nickname:
+          description: nickname
           type: string
 
     gameDescription:
