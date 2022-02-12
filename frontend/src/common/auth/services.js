@@ -10,10 +10,26 @@ const registerUser = (credentials) => {
         .then(response => {
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
-            return response.status;
+            setUsername(credentials.username);
+            setNickname(credentials.nickname);
         })
-        .catch(error => {
-            return error.response.status;
+        .catch(({response}) => {
+            let errorText;
+            if (response?.status < 500) {
+                switch (response.data.error) {
+                    case 'user_already_exists':
+                        errorText = 'Имя пользователя занято';
+                        break;
+                    case 'nickname_already_exists':
+                        errorText = 'Ник занят';
+                        break;
+                    default:
+                        errorText = 'Ошибка';
+                }
+            } else
+                errorText = 'Ошибка сервера';
+
+            return Promise.reject(errorText);
         });
 };
 
