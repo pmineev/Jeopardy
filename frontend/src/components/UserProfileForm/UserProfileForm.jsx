@@ -2,19 +2,18 @@ import {useEffect, useState} from 'react';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 
-import {useAuth} from "../../common/auth/auth";
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
+import {getUsername} from "../../common/auth/services";
 import {getUser, saveUser} from "./services";
 
 const UserProfileForm = () => {
-    const auth = useAuth();
     const [credentials, setCredentials] = useState({nickname: '', password: ''});
 
     document.title = 'Профиль пользователя';
 
     useEffect(() => {
-        getUser(auth.getUsername())
+        getUser(getUsername())
             .then(response =>
                 setCredentials({
                     username: response.data.username,
@@ -22,7 +21,7 @@ const UserProfileForm = () => {
                     password: ''
                 })
             )
-    }, [auth])
+    }, [])
 
     return (
         <div className='form'>

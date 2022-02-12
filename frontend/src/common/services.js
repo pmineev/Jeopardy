@@ -6,7 +6,8 @@ axios.defaults.baseURL = baseURL;
 
 axios.interceptors.request.use(
     config => {
-        if (!(config.url === '/sessions/')) {
+        if (!(config.url === '/sessions/'
+            || (config.method === 'post' && config.url === '/users/'))) {
             const access_token = localStorage.getItem('access_token');
             config.headers['Authorization'] = `Bearer ${access_token}`;
         }

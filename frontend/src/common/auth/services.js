@@ -34,4 +34,24 @@ const loginUser = (credentials) => {
         });
 };
 
-export {registerUser, loginUser};
+const isAuthenticated = () => {
+    return localStorage.getItem('access_token') !== null;
+}
+
+const setUsername = (username) => {
+    localStorage.setItem('username', username);
+};
+
+const getUsername = () => {
+    return localStorage.getItem('username');
+};
+
+const setNickname = (nickname) => {
+    localStorage.setItem('nickname', nickname);
+};
+
+const getNickname = () => {
+    return localStorage.getItem('nickname');
+};
+
+export {registerUser, loginUser, setUsername, getUsername, setNickname, getNickname, isAuthenticated};

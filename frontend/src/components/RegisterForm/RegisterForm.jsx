@@ -4,10 +4,9 @@ import {Link, useHistory} from "react-router-dom";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
-import {useAuth} from "../../common/auth/auth";
+import {registerUser} from "../../common/auth/services";
 
 const RegisterForm = () => {
-    const auth = useAuth();
     const history = useHistory();
 
     document.title = 'Регистрация'
@@ -34,7 +33,7 @@ const RegisterForm = () => {
                         .required('Обязательное поле')
                 })}
                 onSubmit={(values, {setSubmitting, setErrors}) => {
-                    auth.register(values)
+                    registerUser(values)
                         .then(() => {
                             console.log('зареган');
                             setSubmitting(false);

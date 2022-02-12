@@ -4,10 +4,9 @@ import {Link, useHistory} from "react-router-dom";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
-import {useAuth} from "../../common/auth/auth";
+import {loginUser} from "../../common/auth/services";
 
 const LoginForm = () => {
-    const auth = useAuth();
     const history = useHistory();
 
     document.title = 'Вход';
@@ -26,7 +25,7 @@ const LoginForm = () => {
                         .required('Обязательное поле')
                 })}
                 onSubmit={(values, {setSubmitting, setErrors}) => {
-                    auth.login(values)
+                    loginUser(values)
                         .then(() => {
                             setSubmitting(false);
                             history.push('/games');
