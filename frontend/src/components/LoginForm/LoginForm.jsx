@@ -31,7 +31,7 @@ const LoginForm = () => {
                             history.push('/games');
                         })
                         .catch(error => {
-                            setErrors({'submitError': error.message});
+                            setErrors({'submitError': error});
                         })
                 }}
             >

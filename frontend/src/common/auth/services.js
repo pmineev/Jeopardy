@@ -43,10 +43,23 @@ const loginUser = (credentials) => {
         .then(response => {
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
-            return response.status;
+            setNickname(response.data.nickname);
+            setUsername(credentials.username);
         })
-        .catch(error => {
-            return error.response.status;
+        .catch(({response}) => {
+            let errorText;
+            if (response?.status < 500) {
+                switch (response.data.error) {
+                    case 'user_not_found':
+                        errorText = 'Неверные данные';
+                        break;
+                    default:
+                        errorText = 'Ошибка';
+                }
+            } else
+                errorText = 'Ошибка сервера';
+
+            return Promise.reject(errorText);
         });
 };
 
