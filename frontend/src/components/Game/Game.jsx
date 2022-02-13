@@ -28,9 +28,14 @@ const PlayerControls = observer(() => {
                 }}
                 onSubmit={(values, {setSubmitting, resetForm}) => {
                     if (values.answer?.length > 0) {
-                        submitAnswer(values.answer);
-                        resetForm();
-                        setSubmitting(false);
+                        submitAnswer(values.answer)
+                            .then(() => {
+                                resetForm();
+                                setSubmitting(false);
+                            })
+                            .catch(error => {
+                                toast(error);
+                            });
                     }
                 }}
             >
@@ -55,8 +60,13 @@ const PlayerControls = observer(() => {
             <button
                 onClick={() => {
                     if (store.stage !== Stage.END_GAME)
-                        leaveGameSession();
-                    history.push('/games');
+                        leaveGameSession()
+                            .then(() => {
+                                history.push('/games');
+                            })
+                            .catch(error => {
+                                toast(error);
+                            });
                 }}
             >
                 Выйти из игры
@@ -188,7 +198,10 @@ const QuestionCell = observer(({question, themeIndex, questionIndex}) => {
         <td className={`question-cell ${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
             onClick={() => {
                 setClicked(true);
-                chooseQuestion(themeIndex, questionIndex);
+                chooseQuestion(themeIndex, questionIndex)
+                    .catch(error => {
+                        toast(error);
+                    });
             }}
         >
             {question.isAnswered ? undefined : question.value}

@@ -61,21 +61,77 @@ const joinGameSession = (creator) => {
 
 const leaveGameSession = () => {
     const url = 'game_sessions/current/actions/leave/';
-    axios.delete(url);
+    return axios.delete(url)
+        .catch(({response}) => {
+            let errorText;
+            if (response?.status < 500) {
+                switch (response.data.error) {
+                    case 'game_session_not_found':
+                        errorText = 'Игра не найдена';
+                        break;
+                    default:
+                        errorText = 'Ошибка';
+                }
+            } else
+                errorText = 'Ошибка сервера';
+
+            return Promise.reject(errorText);
+        });
 };
 
 const chooseQuestion = (themeIndex, questionIndex) => {
     const url = 'game_sessions/current/question/';
-    axios.post(url, {
+    return axios.post(url, {
         themeIndex: themeIndex,
         questionIndex: questionIndex
     })
-        .catch(error => console.log(error));
+        .catch(({response}) => {
+            let errorText;
+            if (response?.status < 500) {
+                switch (response.data.error) {
+                    case 'game_session_not_found':
+                        errorText = 'Игра не найдена';
+                        break;
+                    case 'wrong_question_request':
+                        errorText = 'Некорректный запрос';
+                        break;
+                    case 'not_current_player':
+                        errorText = 'Сейчас выбираете не вы';
+                        break;
+                    case 'wrong_stage':
+                        errorText = 'Сейчас нельзя выбирать вопрос';
+                        break;
+                    default:
+                        errorText = 'Ошибка';
+                }
+            } else
+                errorText = 'Ошибка сервера';
+
+            return Promise.reject(errorText);
+        });
 };
 
 const submitAnswer = (answer) => {
     const url = 'game_sessions/current/answer/';
-    axios.post(url, {answer: answer});
+    return axios.post(url, {answer: answer})
+        .catch(({response}) => {
+            let errorText;
+            if (response?.status < 500) {
+                switch (response.data.error) {
+                    case 'game_session_not_found':
+                        errorText = 'Игра не найдена';
+                        break;
+                    case 'wrong_stage':
+                        errorText = 'Сейчас нельзя отправлять ответ';
+                        break;
+                    default:
+                        errorText = 'Ошибка';
+                }
+            } else
+                errorText = 'Ошибка сервера';
+
+            return Promise.reject(errorText);
+        });
 };
 
 const getHostImageUrl = (state) => {
