@@ -86,6 +86,9 @@ const GameList = observer(() => {
         getGameDescriptions()
             .then(result => {
                 store.set(result.data);
+            })
+            .catch(error => {
+                console.log(error);
             });
     }, [store])
 

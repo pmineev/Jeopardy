@@ -50,6 +50,9 @@ const Lobby = observer(() => {
         getGameSessionDescriptions()
             .then(result => {
                 store.initialize(result.data);
+            })
+            .catch(error => {
+                console.log(error);
             });
 
         return () => listener.close()

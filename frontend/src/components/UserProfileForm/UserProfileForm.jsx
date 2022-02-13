@@ -22,6 +22,9 @@ const UserProfileForm = () => {
                     password: ''
                 })
             )
+            .catch(error => {
+                console.log(error);
+            })
     }, [])
 
     return (

@@ -22,6 +22,11 @@ axios.interceptors.response.use(
         return response;
     },
     error => {
+        if (!error.response) {
+            toast.error('Сервер недоступен');
+            return Promise.reject('server_down')
+        }
+
         if (error.response.status === 400) {
             toast.error('Ошибка в формате запроса');
             return Promise.reject(error);
