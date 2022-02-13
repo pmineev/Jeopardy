@@ -14,20 +14,19 @@ const registerUser = (credentials) => {
             setNickname(credentials.nickname);
         })
         .catch(({response}) => {
+            const errorCode = response?.data.error;
             let errorText;
-            if (response?.status < 500) {
-                switch (response.data.error) {
-                    case 'user_already_exists':
-                        errorText = 'Имя пользователя занято';
-                        break;
-                    case 'nickname_already_exists':
-                        errorText = 'Ник занят';
-                        break;
-                    default:
-                        errorText = 'Ошибка';
-                }
-            } else
-                errorText = 'Ошибка сервера';
+
+            switch (errorCode) {
+                case 'user_already_exists':
+                    errorText = 'Имя пользователя занято';
+                    break;
+                case 'nickname_already_exists':
+                    errorText = 'Ник занят';
+                    break;
+                default:
+                    errorText = 'Ошибка';
+            }
 
             return Promise.reject(errorText);
         });
@@ -47,17 +46,16 @@ const loginUser = (credentials) => {
             setUsername(credentials.username);
         })
         .catch(({response}) => {
+            const errorCode = response?.data.error;
             let errorText;
-            if (response?.status < 500) {
-                switch (response.data.error) {
-                    case 'user_not_found':
-                        errorText = 'Неверные данные';
-                        break;
-                    default:
-                        errorText = 'Ошибка';
-                }
-            } else
-                errorText = 'Ошибка сервера';
+
+            switch (errorCode) {
+                case 'user_not_found':
+                    errorText = 'Неверные данные';
+                    break;
+                default:
+                    errorText = 'Ошибка';
+            }
 
             return Promise.reject(errorText);
         });

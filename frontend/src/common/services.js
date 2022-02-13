@@ -27,6 +27,11 @@ axios.interceptors.response.use(
             return Promise.reject('server_down')
         }
 
+        if (error.response.status >= 500) {
+            toast.error('Ошибка сервера');
+            return Promise.reject('server_error')
+        }
+
         if (error.response.status === 400) {
             toast.error('Ошибка в формате запроса');
             return Promise.reject(error);

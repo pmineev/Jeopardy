@@ -14,20 +14,19 @@ const createGameSession = (gameName, maxPlayers) => {
         maxPlayers: maxPlayers
     })
         .catch(({response}) => {
+            const errorCode = response?.data.error;
             let errorText;
-            if (response?.status < 500) {
-                switch (response.data.error) {
-                    case 'game_not_found':
-                        errorText = 'Игра не найдена';
-                        break;
-                    case 'already_playing':
-                        errorText = 'Вы уже играете';
-                        break;
-                    default:
-                        errorText = 'Ошибка';
-                }
-            } else
-                errorText = 'Ошибка сервера';
+
+            switch (errorCode) {
+                case 'game_not_found':
+                    errorText = 'Игра не найдена';
+                    break;
+                case 'already_playing':
+                    errorText = 'Вы уже играете';
+                    break;
+                default:
+                    errorText = 'Ошибка';
+            }
 
             return Promise.reject(errorText);
         });
@@ -37,23 +36,22 @@ const joinGameSession = (creator) => {
     const url = `game_sessions/actions/join/`;
     return axios.post(url, {creator: creator})
         .catch(({response}) => {
+            const errorCode = response?.data.error;
             let errorText;
-            if (response?.status < 500) {
-                switch (response.data.error) {
-                    case 'game_session_not_found':
-                        errorText = 'Игра не найдена';
-                        break;
-                    case 'already_playing':
-                        errorText = 'Вы уже играете';
-                        break;
-                    case 'too_many_players':
-                        errorText = 'Эта игра уже началась';
-                        break;
-                    default:
-                        errorText = 'Ошибка';
-                }
-            } else
-                errorText = 'Ошибка сервера';
+
+            switch (errorCode) {
+                case 'game_session_not_found':
+                    errorText = 'Игра не найдена';
+                    break;
+                case 'already_playing':
+                    errorText = 'Вы уже играете';
+                    break;
+                case 'too_many_players':
+                    errorText = 'Эта игра уже началась';
+                    break;
+                default:
+                    errorText = 'Ошибка';
+            }
 
             return Promise.reject(errorText);
         });
@@ -63,17 +61,16 @@ const leaveGameSession = () => {
     const url = 'game_sessions/current/actions/leave/';
     return axios.delete(url)
         .catch(({response}) => {
+            const errorCode = response?.data.error;
             let errorText;
-            if (response?.status < 500) {
-                switch (response.data.error) {
-                    case 'game_session_not_found':
-                        errorText = 'Игра не найдена';
-                        break;
-                    default:
-                        errorText = 'Ошибка';
-                }
-            } else
-                errorText = 'Ошибка сервера';
+
+            switch (errorCode) {
+                case 'game_session_not_found':
+                    errorText = 'Игра не найдена';
+                    break;
+                default:
+                    errorText = 'Ошибка';
+            }
 
             return Promise.reject(errorText);
         });
@@ -86,26 +83,25 @@ const chooseQuestion = (themeIndex, questionIndex) => {
         questionIndex: questionIndex
     })
         .catch(({response}) => {
+            const errorCode = response?.data.error;
             let errorText;
-            if (response?.status < 500) {
-                switch (response.data.error) {
-                    case 'game_session_not_found':
-                        errorText = 'Игра не найдена';
-                        break;
-                    case 'wrong_question_request':
-                        errorText = 'Некорректный запрос';
-                        break;
-                    case 'not_current_player':
-                        errorText = 'Сейчас выбираете не вы';
-                        break;
-                    case 'wrong_stage':
-                        errorText = 'Сейчас нельзя выбирать вопрос';
-                        break;
-                    default:
-                        errorText = 'Ошибка';
-                }
-            } else
-                errorText = 'Ошибка сервера';
+
+            switch (errorCode) {
+                case 'game_session_not_found':
+                    errorText = 'Игра не найдена';
+                    break;
+                case 'wrong_question_request':
+                    errorText = 'Некорректный запрос';
+                    break;
+                case 'not_current_player':
+                    errorText = 'Сейчас выбираете не вы';
+                    break;
+                case 'wrong_stage':
+                    errorText = 'Сейчас нельзя выбирать вопрос';
+                    break;
+                default:
+                    errorText = 'Ошибка';
+            }
 
             return Promise.reject(errorText);
         });
@@ -115,20 +111,19 @@ const submitAnswer = (answer) => {
     const url = 'game_sessions/current/answer/';
     return axios.post(url, {answer: answer})
         .catch(({response}) => {
+            const errorCode = response?.data.error;
             let errorText;
-            if (response?.status < 500) {
-                switch (response.data.error) {
-                    case 'game_session_not_found':
-                        errorText = 'Игра не найдена';
-                        break;
-                    case 'wrong_stage':
-                        errorText = 'Сейчас нельзя отправлять ответ';
-                        break;
-                    default:
-                        errorText = 'Ошибка';
-                }
-            } else
-                errorText = 'Ошибка сервера';
+
+            switch (errorCode) {
+                case 'game_session_not_found':
+                    errorText = 'Игра не найдена';
+                    break;
+                case 'wrong_stage':
+                    errorText = 'Сейчас нельзя отправлять ответ';
+                    break;
+                default:
+                    errorText = 'Ошибка';
+            }
 
             return Promise.reject(errorText);
         });
