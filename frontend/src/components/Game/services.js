@@ -13,6 +13,24 @@ const createGameSession = (gameName, maxPlayers) => {
         gameName: gameName,
         maxPlayers: maxPlayers
     })
+        .catch(({response}) => {
+            let errorText;
+            if (response?.status < 500) {
+                switch (response.data.error) {
+                    case 'game_not_found':
+                        errorText = 'Игра не найдена';
+                        break;
+                    case 'already_playing':
+                        errorText = 'Вы уже играете';
+                        break;
+                    default:
+                        errorText = 'Ошибка';
+                }
+            } else
+                errorText = 'Ошибка сервера';
+
+            return Promise.reject(errorText);
+        });
 };
 
 const joinGameSession = (creator) => {
