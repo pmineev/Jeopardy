@@ -60,7 +60,7 @@ const Round = types
         themes: types.array(Theme)
     });
 
-const GameSessionStore = types
+const GameStore = types
     .model({
         stage: types.optional(types.enumeration('stage', Object.values(Stage)), Stage.WAITING),
         players: types.array(Player),
@@ -242,4 +242,4 @@ const GameSessionStore = types
         }
     }));
 
-export default GameSessionStore;
+export default GameStore;

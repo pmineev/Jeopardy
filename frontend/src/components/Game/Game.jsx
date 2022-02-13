@@ -17,7 +17,7 @@ import GameSessionListener from "./listener";
 import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer} from "./services";
 
 const PlayerControls = observer(() => {
-    const {gameSessionStore: store} = useStore();
+    const {gameStore: store} = useStore();
     const history = useHistory();
 
     return (
@@ -66,7 +66,7 @@ const PlayerControls = observer(() => {
 });
 
 const HostCard = observer(() => {
-    const {gameSessionStore: store} = useStore();
+    const {gameStore: store} = useStore();
     let hostText = '';
     let hostImageURL;
 
@@ -147,7 +147,7 @@ const HostCard = observer(() => {
 });
 
 const QuestionScreen = observer(() => {
-    const {gameSessionStore: store} = useStore();
+    const {gameStore: store} = useStore();
     const [screenText, setScreenText] = useState('')
 
     useEffect(() => {
@@ -232,7 +232,7 @@ const RoundTable = ({themes}) => {
 }
 
 const GameScreen = observer(() => {
-    const {gameSessionStore: store} = useStore();
+    const {gameStore: store} = useStore();
     const [state, setState] = useState('empty')
 
     useEffect(() => {
@@ -322,7 +322,7 @@ const PlayerCard = observer(({player}) => {
 });
 
 const Players = observer(() => {
-    const {gameSessionStore: store} = useStore();
+    const {gameStore: store} = useStore();
 
     return (
         <div className='players'>
@@ -337,7 +337,7 @@ const Players = observer(() => {
 });
 
 const Game = observer(() => {
-    const {gameSessionStore: store} = useStore();
+    const {gameStore: store} = useStore();
     const history = useHistory();
 
     useEffect(() => {
