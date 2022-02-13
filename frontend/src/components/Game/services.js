@@ -35,7 +35,28 @@ const createGameSession = (gameName, maxPlayers) => {
 
 const joinGameSession = (creator) => {
     const url = `game_sessions/actions/join/`;
-    axios.post(url, {creator: creator});
+    return axios.post(url, {creator: creator})
+        .catch(({response}) => {
+            let errorText;
+            if (response?.status < 500) {
+                switch (response.data.error) {
+                    case 'game_session_not_found':
+                        errorText = 'Игра не найдена';
+                        break;
+                    case 'already_playing':
+                        errorText = 'Вы уже играете';
+                        break;
+                    case 'too_many_players':
+                        errorText = 'Эта игра уже началась';
+                        break;
+                    default:
+                        errorText = 'Ошибка';
+                }
+            } else
+                errorText = 'Ошибка сервера';
+
+            return Promise.reject(errorText);
+        });
 };
 
 const leaveGameSession = () => {

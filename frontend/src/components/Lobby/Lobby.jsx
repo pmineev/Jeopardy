@@ -2,6 +2,7 @@ import {useEffect} from 'react';
 import {useHistory} from "react-router-dom";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
+import {toast} from "react-toastify";
 
 import '../../common/list.css';
 
@@ -19,8 +20,13 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
             <td>
                 <button
                     onClick={() => {
-                        joinGameSession(descr.creator);
-                        history.push('/game');
+                        joinGameSession(descr.creator)
+                            .then(() => {
+                                history.push('/game');
+                            })
+                            .catch(error => {
+                                toast(error);
+                            });
                     }}
                 >
                     Играть
