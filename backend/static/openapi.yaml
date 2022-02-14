@@ -834,4 +834,5 @@ components:
           - wrong_question_request
           - already_playing
           - wrong_stage
+          - invalid_refresh_token
 
