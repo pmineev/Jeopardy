@@ -1,6 +1,6 @@
 class GameAlreadyExists(Exception):
-    error = 'game_already_exists'
+    code = 'game_already_exists'
 
 
 class GameNotFound(Exception):
-    error = 'game_not_found'
+    code = 'game_not_found'
