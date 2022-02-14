@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from .serializers import RegisterUserCredentialsSerializer, LoginUserCredentialsSerializer, \
     ChangeUserCredentialsSerializer, GameSerializer, CreateGameSessionSerializer, \
@@ -35,12 +37,12 @@ class UserListView(APIView):
         return Response(status=status.HTTP_201_CREATED, data=session_dto.to_response())
 
 
-class SessionView(APIView):
+class SessionView(ViewSet):
     permission_classes = [AllowAny]
 
     service = UserFactory.get()
 
-    def post(self, request):
+    def authenticate(self, request):
         serializer = LoginUserCredentialsSerializer(data=request.data)
 
         try:
@@ -52,6 +54,18 @@ class SessionView(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED, data={'code': e.code})
 
         return Response(session_dto.to_response())
+
+    def get_access_token(self, request):
+        serializer = TokenRefreshSerializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
+        except TokenError:
+            return Response(status=status.HTTP_401_UNAUTHORIZED, data={'code': 'invalid_refresh_token'})
+
+        return Response(serializer.validated_data)
 
 
 class UserView(APIView):

@@ -16,7 +16,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path
 from django.views.generic import TemplateView
-from rest_framework_simplejwt.views import TokenRefreshView
 
 from backend.infra.http.views import UserListView, UserView, SessionView, GameListView, GameSessionListView, \
     GameSessionViewSet
@@ -25,8 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', UserListView.as_view()),
     path('api/users/<str:username>/', UserView.as_view()),
-    path('api/sessions/', SessionView.as_view()),
-    path('api/sessions/new_token/', TokenRefreshView.as_view()),
+    path('api/sessions/', SessionView.as_view({'post': 'authenticate'})),
+    path('api/sessions/new_token/', SessionView.as_view({'post': 'get_access_token'})),
     path('api/games/', GameListView.as_view()),
     path('api/game_sessions/', GameSessionListView.as_view()),
     path('api/game_sessions/current/', GameSessionViewSet.as_view({'get': 'get_state'})),
