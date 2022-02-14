@@ -34,7 +34,7 @@ axios.interceptors.response.use(
 
         if (error.response.status === 400) {
             toast.error('Ошибка в формате запроса');
-            return Promise.reject(error);
+            return Promise.reject(error.data.code);
         }
 
         if (error.response.status !== 401

@@ -14,7 +14,7 @@ const registerUser = (credentials) => {
             setNickname(credentials.nickname);
         })
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });
@@ -34,7 +34,7 @@ const loginUser = (credentials) => {
             setUsername(credentials.username);
         })
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });

@@ -5,7 +5,7 @@ const getGameState = () => {
     const url = `game_sessions/current/`;
     return axios.get(url)
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });
@@ -19,7 +19,7 @@ const createGameSession = (gameName, maxPlayers) => {
         maxPlayers: maxPlayers
     })
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });
@@ -29,7 +29,7 @@ const joinGameSession = (creator) => {
     const url = `game_sessions/actions/join/`;
     return axios.post(url, {creator: creator})
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });
@@ -39,7 +39,7 @@ const leaveGameSession = () => {
     const url = 'game_sessions/current/actions/leave/';
     return axios.delete(url)
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });
@@ -52,7 +52,7 @@ const chooseQuestion = (themeIndex, questionIndex) => {
         questionIndex: questionIndex
     })
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });
@@ -62,7 +62,7 @@ const submitAnswer = (answer) => {
     const url = 'game_sessions/current/answer/';
     return axios.post(url, {answer: answer})
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });

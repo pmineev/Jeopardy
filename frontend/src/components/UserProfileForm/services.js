@@ -4,7 +4,7 @@ const getUser = (username) => {
     const url = `/users/${username}/`;
     return axios.get(url)
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });
@@ -21,7 +21,7 @@ const saveUser = (username, nickname, password) => {
 
     return axios.patch(url, data)
         .catch(({response}) => {
-            const errorCode = response?.data.error;
+            const errorCode = response?.data.code;
 
             return Promise.reject(errorCode ?? response);
         });
