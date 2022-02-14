@@ -2,12 +2,7 @@ import axios from "axios";
 
 const getUser = (username) => {
     const url = `/users/${username}/`;
-    return axios.get(url)
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
-        });
+    return axios.get(url);
 };
 
 const saveUser = (username, nickname, password) => {
@@ -19,12 +14,7 @@ const saveUser = (username, nickname, password) => {
     if (password && password.length > 0)
         data.password = password
 
-    return axios.patch(url, data)
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
-        });
+    return axios.patch(url, data);
 };
 
 export {getUser, saveUser};

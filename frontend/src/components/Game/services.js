@@ -3,12 +3,7 @@ import {baseStaticURL} from "../../common/services";
 
 const getGameState = () => {
     const url = `game_sessions/current/`;
-    return axios.get(url)
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
-        });
+    return axios.get(url);
 };
 
 const createGameSession = (gameName, maxPlayers) => {
@@ -17,32 +12,17 @@ const createGameSession = (gameName, maxPlayers) => {
     return axios.post(url, {
         gameName: gameName,
         maxPlayers: maxPlayers
-    })
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
-        });
+    });
 };
 
 const joinGameSession = (creator) => {
     const url = `game_sessions/actions/join/`;
-    return axios.post(url, {creator: creator})
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
-        });
+    return axios.post(url, {creator: creator});
 };
 
 const leaveGameSession = () => {
     const url = 'game_sessions/current/actions/leave/';
-    return axios.delete(url)
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
-        });
+    return axios.delete(url);
 };
 
 const chooseQuestion = (themeIndex, questionIndex) => {
@@ -50,22 +30,12 @@ const chooseQuestion = (themeIndex, questionIndex) => {
     return axios.post(url, {
         themeIndex: themeIndex,
         questionIndex: questionIndex
-    })
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
-        });
+    });
 };
 
 const submitAnswer = (answer) => {
     const url = 'game_sessions/current/answer/';
-    return axios.post(url, {answer: answer})
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
-        });
+    return axios.post(url, {answer: answer});
 };
 
 const getHostImageUrl = (state) => {

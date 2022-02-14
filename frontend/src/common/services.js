@@ -58,7 +58,7 @@ axios.interceptors.response.use(
             return Promise.reject('logout');
         }
 
-        return Promise.reject(error);
+        return Promise.reject(error.response?.data?.code ?? 'error');
     }
 );
 

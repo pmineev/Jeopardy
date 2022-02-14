@@ -12,11 +12,6 @@ const registerUser = (credentials) => {
             localStorage.setItem('refresh_token', response.data.refresh);
             setUsername(credentials.username);
             setNickname(credentials.nickname);
-        })
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
         });
 };
 
@@ -32,11 +27,6 @@ const loginUser = (credentials) => {
             localStorage.setItem('refresh_token', response.data.refresh);
             setNickname(response.data.nickname);
             setUsername(credentials.username);
-        })
-        .catch(({response}) => {
-            const errorCode = response?.data.code;
-
-            return Promise.reject(errorCode ?? response);
         });
 };
 
