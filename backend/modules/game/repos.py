@@ -14,7 +14,7 @@ class GameRepo(Repository):
         return ORMGame.objects.filter(name=game_name).exists()
 
     @staticmethod
-    def _create(game: 'Game'):
+    def _create(game: 'Game') -> 'Game':
         orm_final_round = ORMQuestion.objects.create(text=game.final_round.text,
                                                      answer=game.final_round.answer,
                                                      value=game.final_round.value)
@@ -42,8 +42,12 @@ class GameRepo(Repository):
 
             orm_game.rounds.add(orm_round)
 
+        game.id = orm_game.pk
+
+        return game
+
     @staticmethod
-    def _update(game: 'Game'):
+    def _update(game: 'Game') -> 'Game':
         raise NotImplementedError
 
     @staticmethod

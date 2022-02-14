@@ -32,14 +32,18 @@ class UserRepo(Repository):
         return orm_user.to_domain()
 
     @staticmethod
-    def _create(user: 'User'):
-        orm_user = ORMDjangoUser.objects.create_user(username=user.username,
-                                                     password=user.password)
-        ORMUser.objects.create(user=orm_user,
-                               nickname=user.nickname)
+    def _create(user: 'User') -> 'User':
+        orm_django_user = ORMDjangoUser.objects.create_user(username=user.username,
+                                                            password=user.password)
+        orm_user = ORMUser.objects.create(user=orm_django_user,
+                                          nickname=user.nickname)
+
+        user, id = orm_user.pk
+
+        return user
 
     @staticmethod
-    def _update(user: 'User'):
+    def _update(user: 'User') -> 'User':
         orm_user = ORMUser.objects.get(user__username=user.username)
 
         orm_user.nickname = user.nickname
@@ -47,6 +51,8 @@ class UserRepo(Repository):
 
         if user.password:
             orm_user.user.set_password(user.password)
+
+        return user
 
     @staticmethod
     def _delete(user: 'User'):

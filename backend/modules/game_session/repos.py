@@ -16,7 +16,7 @@ class GameSessionRepo(Repository):
         return ORMGameSession.objects.filter(players__user__user=user.id).exists()
 
     @staticmethod
-    def _create(game_session: 'GameSession'):
+    def _create(game_session: 'GameSession') -> 'GameSession':
         try:
             orm_game = ORMGame.objects.get(name=game_session.game.name)
         except ORMGame.DoesNotExist:
@@ -30,6 +30,10 @@ class GameSessionRepo(Repository):
 
         ORMPlayer.objects.create(user=orm_user,
                                  game_session=orm_game_session)
+
+        game_session.id = orm_game_session.pk
+
+        return game_session
 
     @staticmethod
     def get(game_session_id) -> 'GameSession':
@@ -63,7 +67,7 @@ class GameSessionRepo(Repository):
         return [orm_gs.to_domain() for orm_gs in ORMGameSession.objects.all().order_by('pk')]
 
     @staticmethod
-    def _update(game_session: 'GameSession'):
+    def _update(game_session: 'GameSession') -> 'GameSession':
         try:
             orm_game_session = ORMGameSession.objects.get(pk=game_session.id)
         except ORMGameSession.DoesNotExist:
@@ -107,6 +111,8 @@ class GameSessionRepo(Repository):
         orm_game_session.answered_questions.set(orm_questions_qs)
 
         orm_game_session.save()
+
+        return game_session
 
     @staticmethod
     def _delete(game_session: 'GameSession'):
