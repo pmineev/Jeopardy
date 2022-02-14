@@ -815,9 +815,9 @@ components:
       description: Причина отклонения запроса
       type: object
       required:
-      - error
+      - code
       properties:
-        error:
+        code:
           description: Код причины
           type: string
           enum:
