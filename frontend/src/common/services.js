@@ -8,6 +8,7 @@ axios.defaults.baseURL = baseURL;
 axios.interceptors.request.use(
     config => {
         if (!(config.url === '/sessions/'
+            || config.url === '/sessions/new_token/'
             || (config.method === 'post' && config.url === '/users/'))) {
             const access_token = localStorage.getItem('access_token');
             config.headers['Authorization'] = `Bearer ${access_token}`;
@@ -37,35 +38,27 @@ axios.interceptors.response.use(
             return Promise.reject(error.data.code);
         }
 
-        if (error.response.status !== 401
-            || error.config.url === '/sessions/') {
-            console.log(error);
-            return Promise.reject(error);
-        }
+        if (error.response.data.code === 'token_not_valid') {
+            const refreshToken = localStorage.getItem('refresh_token');
 
-        if (error.response.data.messages?.[0].token_type !== 'access') {
-            localStorage.clear();
-            return Promise.reject(error);
-        } else {
-            const refresh_token = localStorage.getItem('refresh_token');
-            if (refresh_token) {
-                axios.post('/sessions/new_token/', {
-                    refresh: refresh_token
+            if (refreshToken) {
+                return axios.post('/sessions/new_token/', {
+                    refresh: refreshToken
                 })
-                    .then(response => {
-                        localStorage.setItem('access_token', response.data.access)
-                    })
-                    .catch(error => {
-                        console.log(error)
+                    .then(r => {
+                        localStorage.setItem('access_token', r.data.access);
+                        return axios.request(error.config);
                     });
-                return axios.request(error.config);
-            } else {
-
             }
         }
 
-        console.log(error.response);
+        if (error.response.data.code === 'invalid_refresh_token') {
+            localStorage.clear();
+            toast('Вам необходимо войти');
+            return Promise.reject('logout');
+        }
 
+        return Promise.reject(error);
     }
 );
 
