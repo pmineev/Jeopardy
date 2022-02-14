@@ -2,7 +2,12 @@ import axios from "axios";
 
 const getUser = (username) => {
     const url = `/users/${username}/`;
-    return axios.get(url);
+    return axios.get(url)
+        .catch(({response}) => {
+            const errorCode = response?.data.error;
+
+            return Promise.reject(errorCode ?? response);
+        });
 };
 
 const saveUser = (username, nickname, password) => {
@@ -17,17 +22,8 @@ const saveUser = (username, nickname, password) => {
     return axios.patch(url, data)
         .catch(({response}) => {
             const errorCode = response?.data.error;
-            let errorText;
 
-            switch (errorCode) {
-                case 'nickname_already_exists':
-                    errorText = 'Ник занят';
-                    break;
-                default:
-                    errorText = 'Ошибка';
-            }
-
-            return Promise.reject(errorText);
+            return Promise.reject(errorCode ?? response);
         });
 };
 

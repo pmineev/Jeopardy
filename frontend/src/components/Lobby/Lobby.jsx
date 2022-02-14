@@ -24,8 +24,20 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
                             .then(() => {
                                 history.push('/game');
                             })
-                            .catch(error => {
-                                toast(error);
+                            .catch(errorCode => {
+                                switch (errorCode) {
+                                    case 'already_playing':
+                                        toast('Вы уже играете');
+                                        break;
+                                    case 'too_many_players':
+                                        toast('Эта игра уже началась');
+                                        break;
+                                    case 'game_session_not_found':
+                                        toast.error('Игра не найдена');
+                                        break;
+                                    default:
+                                        console.log(errorCode);
+                                }
                             });
                     }}
                 >

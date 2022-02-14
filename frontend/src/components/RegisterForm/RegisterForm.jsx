@@ -39,8 +39,22 @@ const RegisterForm = () => {
                             setSubmitting(false);
                             history.push('/games');
                         })
-                        .catch(error => {
-                            setErrors({'submitError': error});
+                        .catch(errorCode => {
+                            let errorText;
+
+                            switch (errorCode) {
+                                case 'user_already_exists':
+                                    errorText = 'Имя пользователя занято';
+                                    break;
+                                case 'nickname_already_exists':
+                                    errorText = 'Ник занят';
+                                    break;
+                                default:
+                                    errorText = 'Ошибка';
+                                    console.log(errorCode);
+                            }
+
+                            setErrors({'submitError': errorText});
                         })
                 }}
             >

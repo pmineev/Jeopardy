@@ -34,8 +34,17 @@ const CreateGameSessionForm = observer(({history}) => {
                         setSubmitting(false);
                         history.push('/game');
                     })
-                    .catch(error => {
-                        toast(error);
+                    .catch(errorCode => {
+                        switch (errorCode) {
+                            case 'already_playing':
+                                toast('Вы уже играете');
+                                break;
+                            case 'game_not_found':
+                                toast.error('Игра не найдена');
+                                break;
+                            default:
+                                console.log(errorCode);
+                        }
                     })
                 viewStore.toggleCreateGameSessionFormOpen();
             }}

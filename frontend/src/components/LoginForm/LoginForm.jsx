@@ -30,8 +30,19 @@ const LoginForm = () => {
                             setSubmitting(false);
                             history.push('/games');
                         })
-                        .catch(error => {
-                            setErrors({'submitError': error});
+                        .catch(errorCode => {
+                            let errorText;
+
+                            switch (errorCode) {
+                                case 'user_not_found':
+                                    errorText = 'Неверные данные';
+                                    break;
+                                default:
+                                    errorText = 'Ошибка';
+                                    console.log(errorCode);
+                            }
+
+                            setErrors({'submitError': errorText});
                         })
                 }}
             >

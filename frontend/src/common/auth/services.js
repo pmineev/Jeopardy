@@ -15,20 +15,8 @@ const registerUser = (credentials) => {
         })
         .catch(({response}) => {
             const errorCode = response?.data.error;
-            let errorText;
 
-            switch (errorCode) {
-                case 'user_already_exists':
-                    errorText = 'Имя пользователя занято';
-                    break;
-                case 'nickname_already_exists':
-                    errorText = 'Ник занят';
-                    break;
-                default:
-                    errorText = 'Ошибка';
-            }
-
-            return Promise.reject(errorText);
+            return Promise.reject(errorCode ?? response);
         });
 };
 
@@ -47,17 +35,8 @@ const loginUser = (credentials) => {
         })
         .catch(({response}) => {
             const errorCode = response?.data.error;
-            let errorText;
 
-            switch (errorCode) {
-                case 'user_not_found':
-                    errorText = 'Неверные данные';
-                    break;
-                default:
-                    errorText = 'Ошибка';
-            }
-
-            return Promise.reject(errorText);
+            return Promise.reject(errorCode ?? response);
         });
 };
 

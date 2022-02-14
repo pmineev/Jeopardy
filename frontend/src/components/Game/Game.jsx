@@ -33,8 +33,17 @@ const PlayerControls = observer(() => {
                                 resetForm();
                                 setSubmitting(false);
                             })
-                            .catch(error => {
-                                toast(error);
+                            .catch(errorCode => {
+                                switch (errorCode) {
+                                    case 'wrong_stage':
+                                        toast('Сейчас нельзя отправлять ответ');
+                                        break;
+                                    case 'game_session_not_found':
+                                        toast.error('Игра не найдена');
+                                        break;
+                                    default:
+                                        console.log(errorCode);
+                                }
                             });
                     }
                 }}
@@ -64,8 +73,14 @@ const PlayerControls = observer(() => {
                             .then(() => {
                                 history.push('/games');
                             })
-                            .catch(error => {
-                                toast(error);
+                            .catch(errorCode => {
+                                switch (errorCode) {
+                                    case 'game_session_not_found':
+                                        toast.error('Игра не найдена');
+                                        break;
+                                    default:
+                                        console.log(errorCode);
+                                }
                             });
                 }}
             >
@@ -199,8 +214,23 @@ const QuestionCell = observer(({question, themeIndex, questionIndex}) => {
             onClick={() => {
                 setClicked(true);
                 chooseQuestion(themeIndex, questionIndex)
-                    .catch(error => {
-                        toast(error);
+                    .catch(errorCode => {
+                        switch (errorCode) {
+                            case 'not_current_player':
+                                toast('Сейчас выбираете не вы');
+                                break;
+                            case 'wrong_stage':
+                                toast('Сейчас нельзя выбирать вопрос');
+                                break;
+                            case 'game_session_not_found':
+                                toast.error('Игра не найдена');
+                                break;
+                            case 'wrong_question_request':
+                                toast.error('Некорректный запрос');
+                                break;
+                            default:
+                                console.log(errorCode);
+                        }
                     });
             }}
         >
@@ -364,10 +394,16 @@ const Game = observer(() => {
                 listener = new GameSessionListener(listenerUrls.gameSession);
                 listener.setHandler(store.eventHandler);
             })
-            .catch(() => {
-                toast("Вы не играете");
+            .catch(errorCode => {
+                switch (errorCode) {
+                    case 'game_session_not_found':
+                        toast("Вы не играете");
+                        break;
+                    default:
+                        console.log(errorCode);
+                }
                 history.push('/games');
-            })
+            });
 
         return () => {
             listener?.close();

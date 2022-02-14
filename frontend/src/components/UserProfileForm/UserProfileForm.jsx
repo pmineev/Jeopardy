@@ -22,9 +22,16 @@ const UserProfileForm = () => {
                     password: ''
                 })
             )
-            .catch(error => {
-                console.log(error);
-            })
+            .catch(errorCode => {
+                switch (errorCode) {
+                    case 'forbidden':
+                    case 'user_not_found':
+                        toast.error('Доступ запрещен');
+                        break;
+                    default:
+                        console.log(errorCode);
+                }
+            });
     }, [])
 
     return (
@@ -52,8 +59,22 @@ const UserProfileForm = () => {
                                     toast('Данные сохранены');
                                 }
                             )
-                            .catch(error => {
-                                setErrors({'submitError': error});
+                            .catch(errorCode => {
+                                let errorText;
+
+                                switch (errorCode) {
+                                    case 'nickname_already_exists':
+                                        errorText = 'Ник занят';
+                                        break;
+                                    case 'forbidden':
+                                    case 'user_not_found':
+                                        errorText = 'Доступ запрещен';
+                                        break;
+                                    default:
+                                        errorText = 'Ошибка';
+                                }
+
+                                setErrors({'submitError': errorText});
                             })
                 }}
             >
