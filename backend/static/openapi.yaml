@@ -253,6 +253,10 @@ paths:
       responses:
         '201':
           description: Игровая сессия создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameState'
         '400':
           description: Некорректные данные
           content:
@@ -312,6 +316,10 @@ paths:
       responses:
         '201':
           description: Пользователь успешно присоединился к игре
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameState'
         '400':
           description: Некорректные данные
           content:
