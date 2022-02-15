@@ -35,9 +35,7 @@ class GameSessionService:
                                    game=game,
                                    max_players=game_session_data['max_players'])
 
-        self.repo.save(game_session)
-
-        game_session = self.repo.get_by_user(user)  # для присвоения id
+        game_session = self.repo.save(game_session)  # для присвоения id
 
         game_session.add_event(GameSessionCreatedEvent(game_session))
 
