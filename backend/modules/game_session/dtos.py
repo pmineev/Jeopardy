@@ -1,9 +1,9 @@
 from typing import List, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from ..user.entities import User
     from ..game.entities import Round, Theme, Question
-    from ..game_session.entities import CurrentQuestion
-    from .entities import GameSession, Player, Answer
+    from .entities import GameSession, Player, Answer, CurrentQuestion
 
 from ...core.dtos import DTO
 from .enums import Stage
@@ -182,7 +182,9 @@ class PlayerNicknameDTO(DTO):
         self.nickname = player.nickname
 
     def to_response(self):
-        return dict(nickname=self.nickname)
+        return dict(
+            nickname=self.nickname
+        )
 
 
 class ChosenQuestionDTO(DTO):
@@ -212,8 +214,10 @@ class FinalRoundTimeoutDTO(DTO):
 
 
 class CreatorNicknameDTO(DTO):
-    def __init__(self, gs: 'GameSession'):
-        self.nickname = gs.creator.nickname
+    def __init__(self, user: 'User'):
+        self.nickname = user.nickname
 
     def to_response(self):
-        return dict(creator=self.nickname)
+        return dict(
+            creator=self.nickname
+        )
