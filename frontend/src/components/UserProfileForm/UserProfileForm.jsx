@@ -1,20 +1,20 @@
 import {useEffect, useState} from 'react';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
+import {toast} from "react-toastify";
 
-import {useAuth} from "../../common/auth/auth";
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
+import {getUsername} from "../../common/auth/services";
 import {getUser, saveUser} from "./services";
 
 const UserProfileForm = () => {
-    const auth = useAuth();
     const [credentials, setCredentials] = useState({nickname: '', password: ''});
 
     document.title = 'Профиль пользователя';
 
     useEffect(() => {
-        getUser(auth.getUsername())
+        getUser(getUsername())
             .then(response =>
                 setCredentials({
                     username: response.data.username,
@@ -22,7 +22,17 @@ const UserProfileForm = () => {
                     password: ''
                 })
             )
-    }, [auth])
+            .catch(errorCode => {
+                switch (errorCode) {
+                    case 'forbidden':
+                    case 'user_not_found':
+                        toast.error('Доступ запрещен');
+                        break;
+                    default:
+                        console.log(errorCode);
+                }
+            });
+    }, [])
 
     return (
         <div className='form'>
@@ -44,9 +54,28 @@ const UserProfileForm = () => {
                         setErrors({'submitError': 'Заполните хотя бы одно поле'})
                     else
                         saveUser(credentials.username, values.nickname, values.password)
-                            .then(() =>
-                                setSubmitting(false)
-                            );
+                            .then(() => {
+                                    setSubmitting(false);
+                                    toast('Данные сохранены');
+                                }
+                            )
+                            .catch(errorCode => {
+                                let errorText;
+
+                                switch (errorCode) {
+                                    case 'nickname_already_exists':
+                                        errorText = 'Ник занят';
+                                        break;
+                                    case 'forbidden':
+                                    case 'user_not_found':
+                                        errorText = 'Доступ запрещен';
+                                        break;
+                                    default:
+                                        errorText = 'Ошибка';
+                                }
+
+                                setErrors({'submitError': errorText});
+                            })
                 }}
             >
                 <Form>

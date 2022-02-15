@@ -12,31 +12,30 @@ const createGameSession = (gameName, maxPlayers) => {
     return axios.post(url, {
         gameName: gameName,
         maxPlayers: maxPlayers
-    })
+    });
 };
 
 const joinGameSession = (creator) => {
     const url = `game_sessions/actions/join/`;
-    axios.post(url, {creator: creator});
+    return axios.post(url, {creator: creator});
 };
 
 const leaveGameSession = () => {
     const url = 'game_sessions/current/actions/leave/';
-    axios.delete(url);
+    return axios.delete(url);
 };
 
 const chooseQuestion = (themeIndex, questionIndex) => {
     const url = 'game_sessions/current/question/';
-    axios.post(url, {
+    return axios.post(url, {
         themeIndex: themeIndex,
         questionIndex: questionIndex
-    })
-        .catch(error => console.log(error));
+    });
 };
 
 const submitAnswer = (answer) => {
     const url = 'game_sessions/current/answer/';
-    axios.post(url, {answer: answer});
+    return axios.post(url, {answer: answer});
 };
 
 const getHostImageUrl = (state) => {

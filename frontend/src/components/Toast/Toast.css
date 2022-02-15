@@ -1,3 +1,7 @@
+:root {
+    --toastify-icon-color-error: var(--error-color);
+}
+
 .Toastify__toast {
     border-radius: 0;
     background-color: var(--background-color);
@@ -5,6 +9,10 @@
     font-size: 18px;
     color: var(--text-color);
     outline: 2px solid var(--accent-color);
+}
+
+.Toastify__toast--error {
+    outline: 2px solid var(--error-color);
 }
 
 .Toastify__close-button {

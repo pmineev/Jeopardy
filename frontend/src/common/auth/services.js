@@ -10,10 +10,8 @@ const registerUser = (credentials) => {
         .then(response => {
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
-            return response.status;
-        })
-        .catch(error => {
-            return error.response.status;
+            setUsername(credentials.username);
+            setNickname(credentials.nickname);
         });
 };
 
@@ -27,11 +25,29 @@ const loginUser = (credentials) => {
         .then(response => {
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
-            return response.status;
-        })
-        .catch(error => {
-            return error.response.status;
+            setNickname(response.data.nickname);
+            setUsername(credentials.username);
         });
 };
 
-export {registerUser, loginUser};
+const isAuthenticated = () => {
+    return localStorage.getItem('access_token') !== null;
+}
+
+const setUsername = (username) => {
+    localStorage.setItem('username', username);
+};
+
+const getUsername = () => {
+    return localStorage.getItem('username');
+};
+
+const setNickname = (nickname) => {
+    localStorage.setItem('nickname', nickname);
+};
+
+const getNickname = () => {
+    return localStorage.getItem('nickname');
+};
+
+export {registerUser, loginUser, setUsername, getUsername, setNickname, getNickname, isAuthenticated};

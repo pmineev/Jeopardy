@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import Modal from "react-modal";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
+import {toast} from "react-toastify";
 
 import '../../common/list.css';
 
@@ -30,10 +31,20 @@ const CreateGameSessionForm = observer(({history}) => {
             onSubmit={(values, {setSubmitting}) => {
                 createGameSession(store.chosenGame.name, values.maxPlayers)
                     .then(() => {
-                        history.push('/game')
+                        setSubmitting(false);
+                        history.push('/game');
                     })
-                    .catch(error => {
-                        console.log(error.response);
+                    .catch(errorCode => {
+                        switch (errorCode) {
+                            case 'already_playing':
+                                toast('Вы уже играете');
+                                break;
+                            case 'game_not_found':
+                                toast.error('Игра не найдена');
+                                break;
+                            default:
+                                console.log(errorCode);
+                        }
                     })
                 viewStore.toggleCreateGameSessionFormOpen();
             }}
@@ -84,6 +95,9 @@ const GameList = observer(() => {
         getGameDescriptions()
             .then(result => {
                 store.set(result.data);
+            })
+            .catch(error => {
+                console.log(error);
             });
     }, [store])
 
