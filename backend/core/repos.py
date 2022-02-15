@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from backend.core.entities import Entity
-from backend.infra.dispatcher import dispatch_events
+from backend.infra.dispatcher import EventDispatcher
 
 
 class Repository(ABC):
@@ -12,7 +12,7 @@ class Repository(ABC):
         else:
             entity = cls._create(entity)
 
-        dispatch_events(entity)
+        EventDispatcher.dispatch_events(entity)
         entity.clear_events()
 
         return entity
@@ -29,7 +29,7 @@ class Repository(ABC):
 
     @classmethod
     def delete(cls, entity: Entity):
-        dispatch_events(entity)
+        EventDispatcher.dispatch_events(entity)
         cls._delete(entity)
 
     @staticmethod
