@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .repos import UserRepo
 
-from .dtos import UserDTO, SessionDTO
-from .exceptions import UserAlreadyExists, UserNotFound, UserNicknameAlreadyExists
-from .entities import User
+from backend.modules.user.dtos import UserDTO, SessionDTO
+from backend.modules.user.exceptions import UserAlreadyExists, UserNotFound, UserNicknameAlreadyExists
+from backend.modules.user.entities import User
 
 
 class UserService:

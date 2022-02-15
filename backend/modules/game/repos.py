@@ -3,9 +3,9 @@ from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from .entities import Game
 
-from ...core.repos import Repository
-from ...infra.models import ORMUser, ORMGame, ORMQuestion, ORMRound, ORMTheme
-from .exceptions import GameNotFound
+from backend.core.repos import Repository
+from backend.infra.models import ORMUser, ORMGame, ORMQuestion, ORMRound, ORMTheme
+from backend.modules.game.exceptions import GameNotFound
 
 
 class GameRepo(Repository):

@@ -5,10 +5,10 @@ if TYPE_CHECKING:
     from ..game.repos import GameRepo
     from .repos import GameSessionRepo
 
-from .dtos import GameStateDTO, GameSessionDescriptionDTO
-from .events import GameSessionCreatedEvent, GameSessionDeletedEvent
-from .exceptions import AlreadyPlaying
-from .entities import GameSession
+from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO
+from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent
+from backend.modules.game_session.exceptions import AlreadyPlaying
+from backend.modules.game_session.entities import GameSession
 
 
 class GameSessionService:

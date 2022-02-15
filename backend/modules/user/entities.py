@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from ...core.entities import Entity
+from backend.core.entities import Entity
 
 
 class User(Entity):

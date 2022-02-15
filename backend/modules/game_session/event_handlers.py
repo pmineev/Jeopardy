@@ -6,10 +6,10 @@ if TYPE_CHECKING:
         PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
         PlayerInactiveEvent
 
-from ...infra import factories
-from ...infra.consumers import GameSessionConsumer
-from ...infra.notifiers import notify_to_lobby, notify_to_game_session
-from ...infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND_INTERVAL
+from backend.infra import factories
+from backend.infra.consumers import GameSessionConsumer
+from backend.infra.notifiers import notify_to_lobby, notify_to_game_session
+from backend.infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND_INTERVAL
 
 
 def notify_of_game_session_created(event: 'GameSessionCreatedEvent'):

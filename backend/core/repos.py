@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from .entities import Entity
-from ..infra.dispatcher import dispatch_events
+from backend.core.entities import Entity
+from backend.infra.dispatcher import dispatch_events
 
 
 class Repository(ABC):

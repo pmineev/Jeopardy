@@ -7,10 +7,10 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User as ORMDjangoUser
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from ...core.repos import Repository
-from ...infra.models import ORMUser
-from .exceptions import UserNotFound
-from .entities import Session
+from backend.core.repos import Repository
+from backend.infra.models import ORMUser
+from backend.modules.user.exceptions import UserNotFound
+from backend.modules.user.entities import Session
 
 
 class UserRepo(Repository):

@@ -5,8 +5,8 @@ if TYPE_CHECKING:
     from ..game.entities import Round, Theme, Question
     from .entities import GameSession, Player, Answer, CurrentQuestion
 
-from ...core.dtos import DTO
-from .enums import Stage
+from backend.core.dtos import DTO
+from backend.modules.game_session.enums import Stage
 
 
 class CorrectAnswerDTO(DTO):

@@ -7,14 +7,14 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-from .serializers import RegisterUserCredentialsSerializer, LoginUserCredentialsSerializer, \
+from backend.infra.factories import UserFactory, GameFactory, GameSessionFactory
+from backend.infra.http.serializers import RegisterUserCredentialsSerializer, LoginUserCredentialsSerializer, \
     ChangeUserCredentialsSerializer, GameSerializer, CreateGameSessionSerializer, \
     QuestionChoiceSerializer, AnswerRequestSerializer, CreatorNicknameSerializer
-from ..factories import UserFactory, GameFactory, GameSessionFactory
-from ...modules.game.exceptions import GameAlreadyExists, GameNotFound
-from ...modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
+from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
+from backend.modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
     WrongQuestionRequest, AlreadyPlaying, WrongStage
-from ...modules.user.exceptions import UserAlreadyExists, UserNotFound, UserNicknameAlreadyExists
+from backend.modules.user.exceptions import UserAlreadyExists, UserNotFound, UserNicknameAlreadyExists
 
 
 class UserListView(APIView):

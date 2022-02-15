@@ -4,10 +4,10 @@ if TYPE_CHECKING:
     from ..user.repos import UserRepo
     from ..game.repos import GameRepo
 
-from ..user.exceptions import UserNotFound
-from .exceptions import GameAlreadyExists
-from .dtos import GameDescriptionDTO
-from .entities import Question, Theme, Round, Game
+from backend.modules.user.exceptions import UserNotFound
+from backend.modules.game.exceptions import GameAlreadyExists
+from backend.modules.game.dtos import GameDescriptionDTO
+from backend.modules.game.entities import Question, Theme, Round, Game
 
 
 class GameService:

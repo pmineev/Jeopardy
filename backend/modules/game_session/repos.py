@@ -3,11 +3,11 @@ from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..user.entities import User
 
-from ...core.repos import Repository
-from ...infra.models import ORMUser, ORMGameSession, ORMGame, ORMPlayer, ORMRound, ORMQuestion
-from ..game.exceptions import GameNotFound
-from .exceptions import GameSessionNotFound
-from .entities import GameSession
+from backend.core.repos import Repository
+from backend.infra.models import ORMUser, ORMGameSession, ORMGame, ORMPlayer, ORMRound, ORMQuestion
+from backend.modules.game.exceptions import GameNotFound
+from backend.modules.game_session.exceptions import GameSessionNotFound
+from backend.modules.game_session.entities import GameSession
 
 
 class GameSessionRepo(Repository):

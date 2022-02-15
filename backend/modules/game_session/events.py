@@ -5,9 +5,9 @@ if TYPE_CHECKING:
     from ..game_session.entities import CurrentQuestion
     from .entities import GameSession, Player
 
-from ...core.events import Event
-from .dtos import GameSessionDescriptionDTO, CreatorNicknameDTO, PlayerNicknameDTO, CurrentQuestionDTO, \
-    PlayerDTO, FinalRoundQuestionDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO, RoundStartedDTO
+from backend.core.events import Event
+from backend.modules.game_session.dtos import GameSessionDescriptionDTO, CreatorNicknameDTO, PlayerNicknameDTO, \
+    CurrentQuestionDTO, PlayerDTO, FinalRoundQuestionDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO, RoundStartedDTO
 
 
 class GameSessionCreatedEvent(Event):
