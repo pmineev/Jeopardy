@@ -122,3 +122,6 @@ class GameSessionRepo(Repository):
             raise GameSessionNotFound
 
         orm_game_session.delete()
+
+
+game_session_repo = GameSessionRepo()

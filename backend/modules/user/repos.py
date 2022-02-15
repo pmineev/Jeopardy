@@ -71,3 +71,6 @@ class UserRepo(Repository):
         return Session(refresh=str(tokens),
                        access=str(tokens.access_token),
                        nickname=orm_user.nickname)
+
+
+user_repo = UserRepo()

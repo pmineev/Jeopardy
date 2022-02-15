@@ -1,15 +1,14 @@
 from typing import Union
 
-from backend.infra import factories
 from backend.infra.consumers import GameSessionConsumer
 from backend.infra.dispatcher import EventDispatcher
 from backend.infra.notifiers import notify_to_lobby, notify_to_game_session
 from backend.infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND_INTERVAL
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent, PlayerJoinedEvent, \
-    PlayerLeftEvent, \
-    RoundStartedEvent, FinalRoundStartedEvent, CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, \
+    PlayerLeftEvent, RoundStartedEvent, FinalRoundStartedEvent, CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, \
     PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
     PlayerInactiveEvent
+from backend.modules.game_session.services import GameSessionService
 
 
 def notify_of_game_session_created(event: GameSessionCreatedEvent):
@@ -79,7 +78,7 @@ def remove_group_from_notifier(event: GameSessionDeletedEvent):
 
 
 def start_question_timer(event: CurrentQuestionChosenEvent):
-    service = factories.GameSessionFactory.get()
+    service = GameSessionService()
 
     Timers.start(key=event.game_session_id,
                  interval=CHOOSING_QUESTION_INTERVAL,
@@ -92,7 +91,7 @@ def stop_question_timer(event: Union[PlayerCorrectlyAnsweredEvent, GameSessionDe
 
 
 def restart_question_timer(event: PlayerIncorrectlyAnsweredEvent):
-    service = factories.GameSessionFactory.get()
+    service = GameSessionService()
 
     Timers.stop(event.game_session_id)
     Timers.start(key=event.game_session_id,
@@ -102,7 +101,7 @@ def restart_question_timer(event: PlayerIncorrectlyAnsweredEvent):
 
 
 def start_final_round_timer(event: FinalRoundStartedEvent):
-    service = factories.GameSessionFactory.get()
+    service = GameSessionService()
 
     Timers.start(key=event.game_session_id,
                  interval=FINAL_ROUND_INTERVAL,

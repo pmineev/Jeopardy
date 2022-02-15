@@ -1,21 +1,18 @@
-from typing import List, TYPE_CHECKING
+from typing import List
 
-if TYPE_CHECKING:
-    from ..user.repos import UserRepo
-    from ..game.repos import GameRepo
-    from .repos import GameSessionRepo
-
+from backend.modules.game.repos import game_repo
 from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO
+from backend.modules.game_session.entities import GameSession
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent
 from backend.modules.game_session.exceptions import AlreadyPlaying
-from backend.modules.game_session.entities import GameSession
+from backend.modules.game_session.repos import game_session_repo
+from backend.modules.user.repos import user_repo
 
 
 class GameSessionService:
-    def __init__(self, repo: 'GameSessionRepo', game_repo: 'GameRepo', user_repo: 'UserRepo'):
-        self.repo = repo
-        self.game_repo = game_repo
-        self.user_repo = user_repo
+    repo = game_session_repo
+    game_repo = game_repo
+    user_repo = user_repo
 
     def get_game_state(self, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)

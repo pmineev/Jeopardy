@@ -7,28 +7,30 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-from backend.infra.factories import UserFactory, GameFactory, GameSessionFactory
 from backend.infra.http.serializers import RegisterUserCredentialsSerializer, LoginUserCredentialsSerializer, \
     ChangeUserCredentialsSerializer, GameSerializer, CreateGameSessionSerializer, \
     QuestionChoiceSerializer, AnswerRequestSerializer, CreatorNicknameSerializer
 from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
+from backend.modules.game.services import GameService
 from backend.modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
     WrongQuestionRequest, AlreadyPlaying, WrongStage
+from backend.modules.game_session.services import GameSessionService
 from backend.modules.user.exceptions import UserAlreadyExists, UserNotFound, UserNicknameAlreadyExists
+from backend.modules.user.services import UserService
 
 
 class UserListView(APIView):
     permission_classes = [AllowAny]
 
-    service = UserFactory.get()
+    service = UserService()
 
     def post(self, request):
         serializer = RegisterUserCredentialsSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
-            UserListView.service.create(serializer.validated_data)
-            session_dto = UserListView.service.authenticate(serializer.validated_data)
+            self.service.create(serializer.validated_data)
+            session_dto = self.service.authenticate(serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except (UserAlreadyExists, UserNicknameAlreadyExists) as e:
@@ -40,14 +42,14 @@ class UserListView(APIView):
 class SessionView(ViewSet):
     permission_classes = [AllowAny]
 
-    service = UserFactory.get()
+    service = UserService()
 
     def authenticate(self, request):
         serializer = LoginUserCredentialsSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
-            session_dto = SessionView.service.authenticate(serializer.validated_data)
+            session_dto = self.service.authenticate(serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except UserNotFound as e:
@@ -69,14 +71,14 @@ class SessionView(ViewSet):
 
 
 class UserView(APIView):
-    service = UserFactory.get()
+    service = UserService()
 
     def get(self, request, username):
         if username != request.user.username:
             return Response(status=status.HTTP_403_FORBIDDEN, data={'code': 'forbidden'})
 
         try:
-            user_dto = UserView.service.get(username)
+            user_dto = self.service.get(username)
         except UserNotFound as e:
             return Response(status=status.HTTP_403_FORBIDDEN, data={'code': e.code})
 
@@ -90,7 +92,7 @@ class UserView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            UserView.service.update(serializer.validated_data, username)
+            self.service.update(serializer.validated_data, username)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except UserNotFound as e:
@@ -102,14 +104,14 @@ class UserView(APIView):
 
 
 class GameListView(APIView):
-    service = GameFactory.get()
+    service = GameService()
 
     def post(self, request):
         serializer = GameSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
-            GameListView.service.create(serializer.validated_data, request.user.username)
+            self.service.create(serializer.validated_data, request.user.username)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameAlreadyExists as e:
@@ -118,21 +120,21 @@ class GameListView(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
     def get(self, request):
-        game_description_dtos = GameListView.service.get_all_descriptions()
+        game_description_dtos = self.service.get_all_descriptions()
 
         return Response(data=[dto.to_response() for dto in game_description_dtos])
 
 
 class GameSessionListView(APIView):
-    interactor = GameSessionFactory.get()
+    service = GameSessionService()
 
     def post(self, request):
         serializer = CreateGameSessionSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
-            game_state_dto = GameSessionListView.interactor.create(serializer.validated_data,
-                                                                   request.user.username)
+            game_state_dto = self.service.create(serializer.validated_data,
+                                                 request.user.username)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameNotFound as e:
@@ -143,17 +145,17 @@ class GameSessionListView(APIView):
         return Response(status=status.HTTP_201_CREATED, data=game_state_dto.to_response())
 
     def get(self, request):
-        game_session_description_dtos = GameSessionListView.interactor.get_all_descriptions()
+        game_session_description_dtos = self.service.get_all_descriptions()
 
         return Response(data=[dto.to_response() for dto in game_session_description_dtos])
 
 
 class GameSessionViewSet(ViewSet):
-    service = GameSessionFactory.get()
+    service = GameSessionService()
 
     def get_state(self, request):
         try:
-            game_state_dto = GameSessionViewSet.service.get_game_state(request.user.username)
+            game_state_dto = self.service.get_game_state(request.user.username)
         except GameSessionNotFound as e:
             return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
 
@@ -164,7 +166,7 @@ class GameSessionViewSet(ViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-            game_state_dto = GameSessionViewSet.service.join(request.user.username, serializer.validated_data)
+            game_state_dto = self.service.join(request.user.username, serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameSessionNotFound as e:
@@ -176,7 +178,7 @@ class GameSessionViewSet(ViewSet):
 
     def leave(self, request):
         try:
-            GameSessionViewSet.service.leave(request.user.username)
+            self.service.leave(request.user.username)
         except GameSessionNotFound as e:
             return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
 
@@ -187,7 +189,7 @@ class GameSessionViewSet(ViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-            GameSessionViewSet.service.choose_question(request.user.username, serializer.validated_data)
+            self.service.choose_question(request.user.username, serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except WrongQuestionRequest as e:
@@ -204,7 +206,7 @@ class GameSessionViewSet(ViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-            GameSessionViewSet.service.submit_answer(request.user.username, serializer.validated_data)
+            self.service.submit_answer(request.user.username, serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameSessionNotFound as e:

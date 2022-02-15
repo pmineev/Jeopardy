@@ -66,3 +66,6 @@ class GameRepo(Repository):
     @staticmethod
     def _delete(game: 'Game'):
         raise NotImplementedError
+
+
+game_repo = GameRepo()
