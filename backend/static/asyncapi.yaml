@@ -195,7 +195,20 @@ components:
           type: string
           const: roundStarted
         data:
-          $ref: '#/components/schemas/gameStateCurrentRound'
+          type: object
+          required:
+          - round
+          - currentPlayer
+          properties:
+            round:
+              $ref: '#/components/schemas/gameStateCurrentRound'
+            currentPlayer:
+              type: object
+              required:
+              - nickname
+              properties:
+                nickname:
+                  $ref: '#/components/schemas/playerNickname'
 
     currentPlayerChosenEvent:
       description: Выбран текущий игрок
