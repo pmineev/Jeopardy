@@ -131,8 +131,8 @@ class GameSessionListView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            GameSessionListView.interactor.create(serializer.validated_data,
-                                                  request.user.username)
+            game_state_dto = GameSessionListView.interactor.create(serializer.validated_data,
+                                                                   request.user.username)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameNotFound as e:
@@ -140,7 +140,7 @@ class GameSessionListView(APIView):
         except AlreadyPlaying as e:
             return Response(status=status.HTTP_409_CONFLICT, data={'code': e.code})
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED, data=game_state_dto.to_response())
 
     def get(self, request):
         game_session_description_dtos = GameSessionListView.interactor.get_all_descriptions()
@@ -164,8 +164,7 @@ class GameSessionViewSet(ViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-            GameSessionViewSet.service.join(request.user.username, serializer.validated_data)
-
+            game_state_dto = GameSessionViewSet.service.join(request.user.username, serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameSessionNotFound as e:
@@ -173,7 +172,7 @@ class GameSessionViewSet(ViewSet):
         except (TooManyPlayers, AlreadyPlaying) as e:
             return Response(status=status.HTTP_409_CONFLICT, data={'code': e.code})
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED, data=game_state_dto.to_response())
 
     def leave(self, request):
         try:
