@@ -2,6 +2,7 @@ import {useEffect} from 'react';
 import {useHistory} from "react-router-dom";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
+import {toast} from "react-toastify";
 
 import '../../common/list.css';
 
@@ -19,8 +20,25 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
             <td>
                 <button
                     onClick={() => {
-                        joinGameSession(descr.creator);
-                        history.push('/game');
+                        joinGameSession(descr.creator)
+                            .then(() => {
+                                history.push('/game');
+                            })
+                            .catch(errorCode => {
+                                switch (errorCode) {
+                                    case 'already_playing':
+                                        toast('Вы уже играете');
+                                        break;
+                                    case 'too_many_players':
+                                        toast('Эта игра уже началась');
+                                        break;
+                                    case 'game_session_not_found':
+                                        toast.error('Игра не найдена');
+                                        break;
+                                    default:
+                                        console.log(errorCode);
+                                }
+                            });
                     }}
                 >
                     Играть
@@ -44,6 +62,9 @@ const Lobby = observer(() => {
         getGameSessionDescriptions()
             .then(result => {
                 store.initialize(result.data);
+            })
+            .catch(error => {
+                console.log(error);
             });
 
         return () => listener.close()

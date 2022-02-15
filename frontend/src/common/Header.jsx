@@ -2,11 +2,10 @@ import {Link, NavLink} from "react-router-dom";
 
 import './Header.css';
 
-import {useAuth} from "./auth/auth";
+import {getUsername} from "./auth/services";
 
 function Header() {
-    const auth = useAuth();
-    const username = auth.getUsername();
+    const username = getUsername();
 
     return (
         <header className="nav">

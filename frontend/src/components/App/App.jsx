@@ -3,7 +3,8 @@ import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom
 
 import './App.css'
 
-import {PrivateRoute, useAuth} from "../../common/auth/auth";
+import PrivateRoute from "../../common/auth/PrivateRoute";
+import {isAuthenticated} from "../../common/auth/services";
 import Header from "../../common/Header";
 import RegisterForm from "../RegisterForm/RegisterForm";
 import LoginForm from "../LoginForm/LoginForm";
@@ -15,14 +16,12 @@ import Game from "../Game/Game";
 import Toast from "../Toast/Toast";
 
 function App() {
-    const auth = useAuth();
-
     return (
         <>
             <Router>
                 <Switch>
                     <Route exact path="/">
-                        {auth.isAuthenticated ? <Redirect to="/games"/> : <Redirect to="/login"/>}
+                        {isAuthenticated() ? <Redirect to="/games"/> : <Redirect to="/login"/>}
                     </Route>
                     <Route path="/register">
                         <RegisterForm/>

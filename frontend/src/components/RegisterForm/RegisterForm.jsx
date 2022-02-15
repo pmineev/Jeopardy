@@ -4,10 +4,9 @@ import {Link, useHistory} from "react-router-dom";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
-import {useAuth} from "../../common/auth/auth";
+import {registerUser} from "../../common/auth/services";
 
 const RegisterForm = () => {
-    const auth = useAuth();
     const history = useHistory();
 
     document.title = 'Регистрация'
@@ -34,14 +33,28 @@ const RegisterForm = () => {
                         .required('Обязательное поле')
                 })}
                 onSubmit={(values, {setSubmitting, setErrors}) => {
-                    auth.register(values)
+                    registerUser(values)
                         .then(() => {
                             console.log('зареган');
                             setSubmitting(false);
                             history.push('/games');
                         })
-                        .catch(error => {
-                            setErrors({'submitError': error.message});
+                        .catch(errorCode => {
+                            let errorText;
+
+                            switch (errorCode) {
+                                case 'user_already_exists':
+                                    errorText = 'Имя пользователя занято';
+                                    break;
+                                case 'nickname_already_exists':
+                                    errorText = 'Ник занят';
+                                    break;
+                                default:
+                                    errorText = 'Ошибка';
+                                    console.log(errorCode);
+                            }
+
+                            setErrors({'submitError': errorText});
                         })
                 }}
             >
