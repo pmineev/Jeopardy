@@ -117,6 +117,18 @@ class CurrentRoundDTO(DTO):
         )
 
 
+class RoundStartedDTO(DTO):
+    def __init__(self, current_round: 'Round', current_player: 'Player'):
+        self.round = CurrentRoundDTO(current_round, [])
+        self.current_player = PlayerNicknameDTO(current_player)
+
+    def to_response(self):
+        return dict(
+            round=self.round.to_response(),
+            currentPlayer=self.current_player.to_response()
+        )
+
+
 class GameStateDTO(DTO):
     def __init__(self, gs: 'GameSession'):
         self.stage = gs.stage

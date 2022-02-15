@@ -35,7 +35,7 @@ def notify_of_player_inactive(event: 'PlayerInactiveEvent'):
 
 
 def notify_of_round_started(event: 'RoundStartedEvent'):
-    notify_to_game_session(event.game_session_id, event.current_round_dto, 'round_started')
+    notify_to_game_session(event.game_session_id, event.round_started_dto, 'round_started')
 
 
 def notify_of_final_round_started(event: 'FinalRoundStartedEvent'):

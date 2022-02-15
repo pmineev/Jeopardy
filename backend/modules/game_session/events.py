@@ -6,8 +6,8 @@ if TYPE_CHECKING:
     from .entities import GameSession, Player
 
 from ...core.events import Event
-from .dtos import GameSessionDescriptionDTO, CreatorNicknameDTO, PlayerNicknameDTO, CurrentRoundDTO, CurrentQuestionDTO, \
-    PlayerDTO, FinalRoundQuestionDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO
+from .dtos import GameSessionDescriptionDTO, CreatorNicknameDTO, PlayerNicknameDTO, CurrentQuestionDTO, \
+    PlayerDTO, FinalRoundQuestionDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO, RoundStartedDTO
 
 
 class GameSessionCreatedEvent(Event):
@@ -51,10 +51,10 @@ class PlayerInactiveEvent(Event):
 
 
 class RoundStartedEvent(Event):
-    def __init__(self, game_session: 'GameSession', round: 'Round'):
+    def __init__(self, game_session: 'GameSession', round: 'Round', current_player: 'Player'):
         self.game_session_id = game_session.id
 
-        self.current_round_dto = CurrentRoundDTO(round, []).to_response()
+        self.round_started_dto = RoundStartedDTO(round, current_player).to_response()
 
 
 class CurrentPlayerChosenEvent(Event):

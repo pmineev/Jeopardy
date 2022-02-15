@@ -6,13 +6,12 @@ if TYPE_CHECKING:
     from ..user.entities import User
     from ..game.entities import Question, Round, Game
 
-from ...core.entities import Entity
-from .enums import Stage
-from .exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
-from .events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
-    CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, \
-    PlayerIncorrectlyAnsweredEvent, FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
-    PlayerInactiveEvent
+from backend.core.entities import Entity
+from backend.modules.game_session.enums import Stage
+from backend.modules.game_session.exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
+from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
+    CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
+    FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent
 
 
 @dataclass
@@ -128,8 +127,7 @@ class GameSession(Entity):
         self.current_player = random.choice(self.players)
         self.stage = Stage.CHOOSING_QUESTION
 
-        self.add_event(CurrentPlayerChosenEvent(self, self.current_player))  # TODO объединить в одно событие
-        self.add_event(RoundStartedEvent(self, self.current_round))
+        self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
 
         print(f'gs has started, current player - {self.current_player.username}')
 
@@ -143,8 +141,7 @@ class GameSession(Entity):
             self._set_winner_current_player()
             self.stage = Stage.CHOOSING_QUESTION
 
-            self.add_event(CurrentPlayerChosenEvent(self, self.current_player))
-            self.add_event(RoundStartedEvent(self, self.current_round))
+            self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
 
             print(f'{self.current_round.order} started, winner: {self.current_player.username}')
         else:
