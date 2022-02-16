@@ -3,9 +3,9 @@ from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from .entities import Game
 
-from ...core.repos import Repository
-from ...infra.models import ORMUser, ORMGame, ORMQuestion, ORMRound, ORMTheme
-from .exceptions import GameNotFound
+from backend.core.repos import Repository
+from backend.infra.models import ORMUser, ORMGame, ORMQuestion, ORMRound, ORMTheme
+from backend.modules.game.exceptions import GameNotFound
 
 
 class GameRepo(Repository):
@@ -14,7 +14,7 @@ class GameRepo(Repository):
         return ORMGame.objects.filter(name=game_name).exists()
 
     @staticmethod
-    def _create(game: 'Game'):
+    def _create(game: 'Game') -> 'Game':
         orm_final_round = ORMQuestion.objects.create(text=game.final_round.text,
                                                      answer=game.final_round.answer,
                                                      value=game.final_round.value)
@@ -42,8 +42,12 @@ class GameRepo(Repository):
 
             orm_game.rounds.add(orm_round)
 
+        game.id = orm_game.pk
+
+        return game
+
     @staticmethod
-    def _update(game: 'Game'):
+    def _update(game: 'Game') -> 'Game':
         raise NotImplementedError
 
     @staticmethod
@@ -62,3 +66,6 @@ class GameRepo(Repository):
     @staticmethod
     def _delete(game: 'Game'):
         raise NotImplementedError
+
+
+game_repo = GameRepo()

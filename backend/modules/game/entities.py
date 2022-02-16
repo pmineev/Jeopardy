@@ -3,7 +3,7 @@ from typing import Optional, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..user.entities import User
 
-from ...core.entities import Entity
+from backend.core.entities import Entity
 
 
 class Question(Entity):

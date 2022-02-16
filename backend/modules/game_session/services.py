@@ -1,21 +1,18 @@
-from typing import List, TYPE_CHECKING
+from typing import List
 
-if TYPE_CHECKING:
-    from ..user.repos import UserRepo
-    from ..game.repos import GameRepo
-    from .repos import GameSessionRepo
-
-from .dtos import GameStateDTO, GameSessionDescriptionDTO
-from .events import GameSessionCreatedEvent, GameSessionDeletedEvent
-from .exceptions import AlreadyPlaying
-from .entities import GameSession
+from backend.modules.game.repos import game_repo
+from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO
+from backend.modules.game_session.entities import GameSession
+from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent
+from backend.modules.game_session.exceptions import AlreadyPlaying
+from backend.modules.game_session.repos import game_session_repo
+from backend.modules.user.repos import user_repo
 
 
 class GameSessionService:
-    def __init__(self, repo: 'GameSessionRepo', game_repo: 'GameRepo', user_repo: 'UserRepo'):
-        self.repo = repo
-        self.game_repo = game_repo
-        self.user_repo = user_repo
+    repo = game_session_repo
+    game_repo = game_repo
+    user_repo = user_repo
 
     def get_game_state(self, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)
@@ -23,7 +20,7 @@ class GameSessionService:
 
         return GameStateDTO(game_session)
 
-    def create(self, game_session_data, username: str):
+    def create(self, game_session_data, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)
 
         if self.repo.is_exists(user):
@@ -35,15 +32,15 @@ class GameSessionService:
                                    game=game,
                                    max_players=game_session_data['max_players'])
 
-        self.repo.save(game_session)
-
-        game_session = self.repo.get_by_user(user)  # для присвоения id
+        game_session = self.repo.save(game_session)  # для присвоения id
 
         game_session.add_event(GameSessionCreatedEvent(game_session))
 
         print(f'{username} has created gs')
 
-        self.repo.save(game_session)
+        game_session = self.repo.save(game_session)
+
+        return GameStateDTO(game_session)
 
     def get_all_descriptions(self) -> List[GameSessionDescriptionDTO]:
         game_sessions = self.repo.get_all()
@@ -62,7 +59,9 @@ class GameSessionService:
 
         game_session.join(user)
 
-        self.repo.save(game_session)
+        game_session = self.repo.save(game_session)
+
+        return GameStateDTO(game_session)
 
     def leave(self, username: str):
         user = self.user_repo.get(username)

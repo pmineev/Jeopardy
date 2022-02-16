@@ -16,7 +16,6 @@ class LobbyConsumer(WebsocketConsumer):
 
 class GameSessionConsumer(WebsocketConsumer):
     group_names: Dict[str, str] = dict()
-    # TODO при перезапуске сервера group_names опустошается
 
     @classmethod
     def add_user(cls, username: str, game_session_id: int):
