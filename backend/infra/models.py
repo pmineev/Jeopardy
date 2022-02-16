@@ -3,10 +3,10 @@ from django.db.models import Model, CharField, TextField, IntegerField, \
     ForeignKey, ManyToManyField, OneToOneField, BooleanField, CASCADE, PROTECT
 from django_enum_choices.fields import EnumChoiceField
 
-from ..modules.game.entities import Question, Theme, Round, Game
-from ..modules.game_session.entities import Answer, Player, GameSession, CurrentQuestion
-from ..modules.game_session.enums import Stage
-from ..modules.user.entities import User
+from backend.modules.game.entities import Question, Theme, Round, Game
+from backend.modules.game_session.entities import Answer, Player, GameSession, CurrentQuestion
+from backend.modules.game_session.enums import Stage
+from backend.modules.user.entities import User
 
 
 class ORMUser(Model):

@@ -3,11 +3,11 @@ from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..user.entities import User
 
-from ...core.repos import Repository
-from ...infra.models import ORMUser, ORMGameSession, ORMGame, ORMPlayer, ORMRound, ORMQuestion
-from ..game.exceptions import GameNotFound
-from .exceptions import GameSessionNotFound
-from .entities import GameSession
+from backend.core.repos import Repository
+from backend.infra.models import ORMUser, ORMGameSession, ORMGame, ORMPlayer, ORMRound, ORMQuestion
+from backend.modules.game.exceptions import GameNotFound
+from backend.modules.game_session.exceptions import GameSessionNotFound
+from backend.modules.game_session.entities import GameSession
 
 
 class GameSessionRepo(Repository):
@@ -16,7 +16,7 @@ class GameSessionRepo(Repository):
         return ORMGameSession.objects.filter(players__user__user=user.id).exists()
 
     @staticmethod
-    def _create(game_session: 'GameSession'):
+    def _create(game_session: 'GameSession') -> 'GameSession':
         try:
             orm_game = ORMGame.objects.get(name=game_session.game.name)
         except ORMGame.DoesNotExist:
@@ -30,6 +30,10 @@ class GameSessionRepo(Repository):
 
         ORMPlayer.objects.create(user=orm_user,
                                  game_session=orm_game_session)
+
+        game_session.id = orm_game_session.pk
+
+        return game_session
 
     @staticmethod
     def get(game_session_id) -> 'GameSession':
@@ -63,7 +67,7 @@ class GameSessionRepo(Repository):
         return [orm_gs.to_domain() for orm_gs in ORMGameSession.objects.all().order_by('pk')]
 
     @staticmethod
-    def _update(game_session: 'GameSession'):
+    def _update(game_session: 'GameSession') -> 'GameSession':
         try:
             orm_game_session = ORMGameSession.objects.get(pk=game_session.id)
         except ORMGameSession.DoesNotExist:
@@ -108,6 +112,8 @@ class GameSessionRepo(Repository):
 
         orm_game_session.save()
 
+        return game_session
+
     @staticmethod
     def _delete(game_session: 'GameSession'):
         try:
@@ -116,3 +122,6 @@ class GameSessionRepo(Repository):
             raise GameSessionNotFound
 
         orm_game_session.delete()
+
+
+game_session_repo = GameSessionRepo()

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .entities import Game
 
-from ...core.dtos import DTO
+from backend.core.dtos import DTO
 
 
 class GameDescriptionDTO(DTO):
