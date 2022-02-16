@@ -1,5 +1,5 @@
 import {useEffect} from "react";
-import {useHistory} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import Modal from "react-modal";
@@ -184,7 +184,7 @@ const AddQuestionForm = observer(() => {
     );
 });
 
-const AddFinalQuestionForm = observer(({history}) => {
+const AddFinalQuestionForm = observer(({navigate}) => {
     const {addGameStore: store} = useStore();
 
     return (
@@ -222,7 +222,7 @@ const AddFinalQuestionForm = observer(({history}) => {
                         })
                             .then(() => {
                                 setSubmitting(false);
-                                history.push('/games');
+                                navigate('/games');
                             })
                             .catch(error =>
                                 setErrors({'submitError': error.message})
@@ -297,7 +297,7 @@ const Round = observer(({round}) => {
 });
 
 const RoundsView = observer(() => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
     return (
@@ -333,7 +333,7 @@ const RoundsView = observer(() => {
                 ariaHideApp={false}
             >
                 <AddFinalQuestionForm
-                    history={history}
+                    navigate={navigate}
                 />
             </Modal>
         </>

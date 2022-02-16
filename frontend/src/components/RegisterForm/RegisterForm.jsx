@@ -1,13 +1,13 @@
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import {Link, useHistory} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
 import {registerUser} from "../../common/auth/services";
 
 const RegisterForm = () => {
-    const history = useHistory();
+    const navigate = useNavigate();
 
     document.title = 'Регистрация'
 
@@ -37,7 +37,7 @@ const RegisterForm = () => {
                         .then(() => {
                             console.log('зареган');
                             setSubmitting(false);
-                            history.push('/games');
+                            navigate('/games');
                         })
                         .catch(errorCode => {
                             let errorText;

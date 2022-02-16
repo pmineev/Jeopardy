@@ -1,5 +1,5 @@
 import {useEffect} from 'react';
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
@@ -11,7 +11,7 @@ import {useStore} from "../../common/RootStore";
 import {joinGameSession} from "../Game/services";
 import {getGameSessionDescriptions} from "./services";
 
-const GameSessionDescriptionView = observer(({descr, history}) => {
+const GameSessionDescriptionView = observer(({descr, navigate}) => {
     return (
         <tr>
             <td>{descr.creator}</td>
@@ -22,7 +22,7 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
                     onClick={() => {
                         joinGameSession(descr.creator)
                             .then(() => {
-                                history.push('/game');
+                                navigate('/game');
                             })
                             .catch(errorCode => {
                                 switch (errorCode) {
@@ -49,8 +49,7 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
 });
 
 const Lobby = observer(() => {
-    // const [gameDescriptions, dispatch] = useReducer(reducer, []);
-    const history = useHistory();
+    const navigate = useNavigate();
     const {lobbyStore: store} = useStore();
 
     useEffect(() => {
@@ -87,7 +86,7 @@ const Lobby = observer(() => {
                     <GameSessionDescriptionView
                         key={descr.creator}
                         descr={descr}
-                        history={history}
+                        navigate={navigate}
                     />
                 )}
                 </tbody>

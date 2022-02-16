@@ -1,5 +1,5 @@
 import {useEffect} from 'react'
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import Modal from "react-modal";
@@ -14,7 +14,7 @@ import {useStore} from "../../common/RootStore";
 import {createGameSession} from "../Game/services";
 import {getGameDescriptions} from "./services";
 
-const CreateGameSessionForm = observer(({history}) => {
+const CreateGameSessionForm = observer(({navigate}) => {
     const {gameListStore: store, gameListViewStore: viewStore} = useStore();
 
     return (
@@ -32,7 +32,7 @@ const CreateGameSessionForm = observer(({history}) => {
                 createGameSession(store.chosenGame.name, values.maxPlayers)
                     .then(() => {
                         setSubmitting(false);
-                        history.push('/game');
+                        navigate('/game');
                     })
                     .catch(errorCode => {
                         switch (errorCode) {
@@ -86,7 +86,7 @@ const GameDescription = observer((props) => {
 });
 
 const GameList = observer(() => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const {gameListStore: store, gameListViewStore: viewStore} = useStore();
 
     useEffect(() => {
@@ -123,7 +123,7 @@ const GameList = observer(() => {
                 </tbody>
             </table>
 
-            <button onClick={() => history.push('/games/new')}>Создать новую игру</button>
+            <button onClick={() => navigate('/games/new')}>Создать новую игру</button>
 
 
             <Modal
@@ -134,7 +134,7 @@ const GameList = observer(() => {
                 ariaHideApp={false}
             >
                 <CreateGameSessionForm
-                    history={history}
+                    navigate={navigate}
                 />
             </Modal>
         </div>

@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
 import ReactTooltip from 'react-tooltip';
 import {getSnapshot} from "mobx-state-tree";
@@ -18,7 +18,7 @@ import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSe
 
 const PlayerControls = observer(() => {
     const {gameStore: store} = useStore();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     return (
         <div className='player-controls'>
@@ -69,11 +69,11 @@ const PlayerControls = observer(() => {
             <button
                 onClick={() => {
                     if (store.stage === Stage.END_GAME)
-                        history.push('/games');
+                        navigate('/games');
                     else
                         leaveGameSession()
                             .then(() => {
-                                history.push('/games');
+                                navigate('/games');
                             })
                             .catch(errorCode => {
                                 switch (errorCode) {
@@ -383,7 +383,7 @@ const Players = observer(() => {
 
 const Game = observer(() => {
     const {gameStore: store} = useStore();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = 'Игра';
@@ -404,7 +404,7 @@ const Game = observer(() => {
                     default:
                         console.log(errorCode);
                 }
-                history.push('/games');
+                navigate('/games');
             });
 
         return () => {

@@ -1,5 +1,5 @@
-import React, {Fragment} from "react";
-import {BrowserRouter as Router, Redirect, Route, Switch} from "react-router-dom";
+import React from "react";
+import {BrowserRouter, Navigate, Outlet, Route, Routes} from "react-router-dom";
 
 import './App.css'
 
@@ -18,40 +18,82 @@ import Toast from "../Toast/Toast";
 function App() {
     return (
         <>
-            <Router>
-                <Switch>
-                    <Route exact path="/">
-                        {isAuthenticated() ? <Redirect to="/games"/> : <Redirect to="/login"/>}
+            <BrowserRouter>
+                <Routes>
+                    <Route
+                        path="/"
+                        element={
+                            isAuthenticated()
+                                ? <Navigate to="games"/>
+                                : <Navigate to="login"/>
+                        }
+                    />
+                    <Route
+                        path="/register"
+                        element={<RegisterForm/>}
+                    />
+                    <Route
+                        path="/login"
+                        element={<LoginForm/>}
+                    />
+                    <Route
+                        element={<AppWrapper/>}
+                    >
+                        <Route
+                            path="/user"
+                            element={
+                                <PrivateRoute>
+                                    <UserProfileForm/>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/games"
+                            element={
+                                <PrivateRoute>
+                                    <GameList/>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/games/new"
+                            element={
+                                <PrivateRoute>
+                                    <AddGame/>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/lobby"
+                            element={
+                                <PrivateRoute>
+                                    <Lobby/>
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/game"
+                            element={
+                                <PrivateRoute>
+                                    <Game/>
+                                </PrivateRoute>
+                            }
+                        />
                     </Route>
-                    <Route path="/register">
-                        <RegisterForm/>
-                    </Route>
-                    <Route path="/login">
-                        <LoginForm/>
-                    </Route>
-                    <Fragment>
-                        <Header/>
-                        <PrivateRoute exact path="/user">
-                            <UserProfileForm/>
-                        </PrivateRoute>
-                        <PrivateRoute exact path="/games">
-                            <GameList/>
-                        </PrivateRoute>
-                        <PrivateRoute exact path="/games/new">
-                            <AddGame/>
-                        </PrivateRoute>
-                        <PrivateRoute path="/lobby">
-                            <Lobby/>
-                        </PrivateRoute>
-                        <PrivateRoute path="/game">
-                            <Game/>
-                        </PrivateRoute>
-                    </Fragment>
-                </Switch>
-            </Router>
+                </Routes>
+            </BrowserRouter>
             <Toast/>
         </>
+    );
+}
 
+
+const AppWrapper = () => {
+    return (
+        <>
+            <Header/>
+            <Outlet/>
+        </>
     );
 }
 

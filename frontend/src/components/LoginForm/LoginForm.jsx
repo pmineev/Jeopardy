@@ -1,13 +1,13 @@
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import {Link, useHistory} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
 import {loginUser} from "../../common/auth/services";
 
 const LoginForm = () => {
-    const history = useHistory();
+    const navigate = useNavigate();
 
     document.title = 'Вход';
 
@@ -28,7 +28,7 @@ const LoginForm = () => {
                     loginUser(values)
                         .then(() => {
                             setSubmitting(false);
-                            history.push('/games');
+                            navigate('/games');
                         })
                         .catch(errorCode => {
                             let errorText;
