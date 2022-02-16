@@ -14,7 +14,3 @@
 .Toastify__toast--error {
     outline: 2px solid var(--error-color);
 }
-
-.Toastify__close-button {
-    display: none
-}
