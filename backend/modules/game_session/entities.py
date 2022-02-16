@@ -125,7 +125,7 @@ class GameSession(Entity):
     def start_game(self):
         self.current_round = self.game.rounds[0]
         self.current_player = random.choice(self.players)
-        self.stage = Stage.CHOOSING_QUESTION
+        self.stage = Stage.ROUND_STARTED
 
         self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
 
@@ -139,7 +139,7 @@ class GameSession(Entity):
         if self.current_round.order < len(self.game.rounds):
             self.current_round = self.game.rounds[self.current_round.order]
             self._set_winner_current_player()
-            self.stage = Stage.CHOOSING_QUESTION
+            self.stage = Stage.ROUND_STARTED
 
             self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
 
@@ -160,7 +160,7 @@ class GameSession(Entity):
     def choose_question(self, user: 'User', theme_index, question_index):
         player = self._get_player(user)
 
-        if not self.stage == Stage.CHOOSING_QUESTION:
+        if self.stage not in [Stage.CHOOSING_QUESTION, Stage.ROUND_STARTED]:
             raise WrongStage
 
         if player != self.current_player:
