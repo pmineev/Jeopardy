@@ -57,13 +57,6 @@ class RoundStartedEvent(Event):
         self.round_started_dto = RoundStartedDTO(round, current_player).to_response()
 
 
-class CurrentPlayerChosenEvent(Event):
-    def __init__(self, game_session: 'GameSession', player: 'Player'):
-        self.game_session_id = game_session.id
-
-        self.player_nickname_dto = PlayerNicknameDTO(player).to_response()
-
-
 class CurrentQuestionChosenEvent(Event):
     def __init__(self, game_session: 'GameSession', question: 'CurrentQuestion'):
         self.game_session_id = game_session.id

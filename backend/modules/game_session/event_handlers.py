@@ -5,7 +5,7 @@ from backend.infra.dispatcher import EventDispatcher
 from backend.infra.notifiers import notify_to_lobby, notify_to_game_session
 from backend.infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND_INTERVAL
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent, PlayerJoinedEvent, \
-    PlayerLeftEvent, RoundStartedEvent, FinalRoundStartedEvent, CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, \
+    PlayerLeftEvent, RoundStartedEvent, FinalRoundStartedEvent, CurrentQuestionChosenEvent, \
     PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
     PlayerInactiveEvent
 from backend.modules.game_session.services import GameSessionService
@@ -39,10 +39,6 @@ def notify_of_round_started(event: RoundStartedEvent):
 
 def notify_of_final_round_started(event: FinalRoundStartedEvent):
     notify_to_game_session(event.game_session_id, event.final_round_dto, 'final_round_started')
-
-
-def notify_of_current_player_chosen(event: CurrentPlayerChosenEvent):
-    notify_to_game_session(event.game_session_id, event.player_nickname_dto, 'current_player_chosen')
 
 
 def notify_of_current_question_chosen(event: CurrentQuestionChosenEvent):
@@ -117,7 +113,6 @@ def register_handlers():
     EventDispatcher.register_handler(notify_of_player_inactive, PlayerInactiveEvent)
     EventDispatcher.register_handler(notify_of_round_started, RoundStartedEvent)
     EventDispatcher.register_handler(notify_of_final_round_started, FinalRoundStartedEvent)
-    EventDispatcher.register_handler(notify_of_current_player_chosen, CurrentPlayerChosenEvent)
     EventDispatcher.register_handler(notify_of_current_question_chosen, CurrentQuestionChosenEvent)
     EventDispatcher.register_handler(notify_of_player_answered, PlayerCorrectlyAnsweredEvent)
     EventDispatcher.register_handler(notify_of_player_answered, PlayerIncorrectlyAnsweredEvent)
