@@ -68,7 +68,9 @@ const PlayerControls = observer(() => {
 
             <button
                 onClick={() => {
-                    if (store.stage !== Stage.END_GAME)
+                    if (store.stage === Stage.END_GAME)
+                        history.push('/games');
+                    else
                         leaveGameSession()
                             .then(() => {
                                 history.push('/games');
