@@ -110,7 +110,8 @@ const GameStore = types
         },
         onRoundStarted(data) {
             console.log(data);
-            self.setCurrentRound(data);
+            self.setCurrentRound(data.round);
+            self.setCurrentPlayer(data.currentPlayer.nickname);
 
             if (self.stage === Stage.WAITING)
                 self.stage = Stage.ROUND_STARTED;
