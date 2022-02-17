@@ -11,7 +11,7 @@ import {useStore} from "../../common/RootStore";
 import {joinGameSession} from "../Game/services";
 import {getGameSessionDescriptions} from "./services";
 
-const GameSessionDescriptionView = observer(({descr, navigate}) => {
+const GameSessionDescription = observer(({descr, navigate}) => {
     return (
         <tr>
             <td>{descr.creator}</td>
@@ -83,7 +83,7 @@ const Lobby = observer(() => {
                 </thead>
                 <tbody>
                 {store.descriptions.size > 0 && values(store.descriptions).map(descr =>
-                    <GameSessionDescriptionView
+                    <GameSessionDescription
                         key={descr.creator}
                         descr={descr}
                         navigate={navigate}
