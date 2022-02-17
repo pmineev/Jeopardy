@@ -1,12 +1,12 @@
 import {createContext, useContext} from "react";
 import {types} from "mobx-state-tree";
 
-import LobbyStore from "../components/Lobby/LobbyStore";
-import GameListStore from "../components/GameList/GameListStore";
-import GameListViewStore from "../components/GameList/GameListViewStore";
-import AddGameStore from "../components/AddGame/AddGameStore";
-import AddGameViewStore from "../components/AddGame/AddGameViewStore";
-import GameStore from "../components/Game/GameStore";
+import LobbyStore from "../screens/Lobby/LobbyStore";
+import GameListStore from "../screens/GameList/GameListStore";
+import GameListViewStore from "../screens/GameList/GameListViewStore";
+import AddGameStore from "../screens/AddGame/AddGameStore";
+import AddGameViewStore from "../screens/AddGame/AddGameViewStore";
+import GameStore from "../screens/Game/GameStore";
 
 const RootStore = types
     .model({
