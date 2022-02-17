@@ -12,7 +12,7 @@ import Games from "../Games/Games";
 import AddGame from "../AddGame/AddGame";
 import Lobby from "../Lobby/Lobby";
 import Game from "../Game/Game";
-import Toast from "../Toast/Toast";
+import Toast from "./Toast";
 import HeaderWrapper from "./HeaderWrapper";
 
 function App() {
