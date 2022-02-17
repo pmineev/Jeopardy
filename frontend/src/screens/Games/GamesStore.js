@@ -8,7 +8,7 @@ const GameDescription = types
         roundsCount: types.number
     })
 
-const GameListStore = types
+const GamesStore = types
     .model({
         descriptions: types.map(GameDescription),
         chosenGame: types.maybe(types.reference(GameDescription))
@@ -33,4 +33,4 @@ const GameListStore = types
         }
     }))
 
-export default GameListStore;
+export default GamesStore;

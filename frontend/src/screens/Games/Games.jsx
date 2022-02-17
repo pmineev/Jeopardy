@@ -15,7 +15,7 @@ import {createGameSession} from "../Game/services";
 import {getGameDescriptions} from "./services";
 
 const CreateGameSessionForm = observer(({navigate}) => {
-    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
+    const {gamesStore: store, gamesViewStore: viewStore} = useStore();
 
     return (
         <Formik
@@ -64,7 +64,7 @@ const CreateGameSessionForm = observer(({navigate}) => {
 });
 
 const GameDescription = observer((props) => {
-    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
+    const {gamesStore: store, gamesViewStore: viewStore} = useStore();
 
     return (
         <tr>
@@ -85,9 +85,9 @@ const GameDescription = observer((props) => {
     );
 });
 
-const GameList = observer(() => {
+const Games = observer(() => {
     const navigate = useNavigate();
-    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
+    const {gamesStore: store, gamesViewStore: viewStore} = useStore();
 
     useEffect(() => {
         document.title = 'Игры';
@@ -141,4 +141,4 @@ const GameList = observer(() => {
     );
 });
 
-export default GameList;
+export default Games;

@@ -8,7 +8,7 @@ import {isAuthenticated} from "../../common/auth/services";
 import Register from "../Register/Register";
 import Login from "../Login/Login";
 import UserProfile from "../UserProfile/UserProfile";
-import GameList from "../GameList/GameList";
+import Games from "../Games/Games";
 import AddGame from "../AddGame/AddGame";
 import Lobby from "../Lobby/Lobby";
 import Game from "../Game/Game";
@@ -51,7 +51,7 @@ function App() {
                             path="/games"
                             element={
                                 <PrivateRoute>
-                                    <GameList/>
+                                    <Games/>
                                 </PrivateRoute>
                             }
                         />
