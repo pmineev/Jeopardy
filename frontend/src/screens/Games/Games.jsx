@@ -63,19 +63,19 @@ const CreateGameSessionForm = observer(({navigate}) => {
     );
 });
 
-const GameDescription = observer((props) => {
+const GameDescription = observer(({description}) => {
     const {gamesStore: store, gamesViewStore: viewStore} = useStore();
 
     return (
         <tr>
-            <td>{props.descr.author}</td>
-            <td>{props.descr.name}</td>
-            <td>{props.descr.roundsCount}</td>
+            <td>{description.author}</td>
+            <td>{description.name}</td>
+            <td>{description.roundsCount}</td>
             <td>
                 <button
                     onClick={() => {
                         viewStore.toggleCreateGameSessionFormOpen();
-                        store.setChosenGame(props.descr);
+                        store.setChosenGame(description);
                     }}
                 >
                     Играть
@@ -85,13 +85,10 @@ const GameDescription = observer((props) => {
     );
 });
 
-const Games = observer(() => {
-    const navigate = useNavigate();
-    const {gamesStore: store, gamesViewStore: viewStore} = useStore();
+const GamesTable = observer(() => {
+    const {gamesStore: store} = useStore();
 
     useEffect(() => {
-        document.title = 'Игры';
-
         getGameDescriptions()
             .then(result => {
                 store.set(result.data);
@@ -99,29 +96,40 @@ const Games = observer(() => {
             .catch(error => {
                 console.log(error);
             });
-    }, [store])
+    }, []);
+
+    return (
+        <table className="list games-table">
+            <thead key="games-table-head">
+            <tr>
+                <th>Автор</th>
+                <th>Название</th>
+                <th>Раунды</th>
+            </tr>
+            </thead>
+            <tbody>
+            {store.descriptions.size > 0 && values(store.descriptions).map(description =>
+                <GameDescription
+                    key={description.id}
+                    description={description}
+                />
+            )}
+            </tbody>
+        </table>
+    )
+});
+
+const Games = observer(() => {
+    const navigate = useNavigate();
+    const {gamesViewStore: viewStore} = useStore();
+
+    document.title = 'Игры';
 
     return (
         <div className='games'>
             <header>Игры</header>
 
-            <table className="list games-table">
-                <thead key="games-table-head">
-                <tr>
-                    <th>Автор</th>
-                    <th>Название</th>
-                    <th>Раунды</th>
-                </tr>
-                </thead>
-                <tbody>
-                {values(store.descriptions).map(descr =>
-                    <GameDescription
-                        key={descr.id}
-                        descr={descr}
-                    />
-                )}
-                </tbody>
-            </table>
+            <GamesTable/>
 
             <button onClick={() => navigate('/games/new')}>Создать новую игру</button>
 
