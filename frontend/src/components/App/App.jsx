@@ -1,11 +1,10 @@
 import React from "react";
-import {BrowserRouter, Navigate, Outlet, Route, Routes} from "react-router-dom";
+import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
 
 import './App.css'
 
 import PrivateRoute from "../../common/auth/PrivateRoute";
 import {isAuthenticated} from "../../common/auth/services";
-import Header from "../../common/Header";
 import RegisterForm from "../RegisterForm/RegisterForm";
 import LoginForm from "../LoginForm/LoginForm";
 import UserProfileForm from "../UserProfileForm/UserProfileForm";
@@ -14,6 +13,7 @@ import AddGame from "../AddGame/AddGame";
 import Lobby from "../Lobby/Lobby";
 import Game from "../Game/Game";
 import Toast from "../Toast/Toast";
+import HeaderWrapper from "./HeaderWrapper";
 
 function App() {
     return (
@@ -37,7 +37,7 @@ function App() {
                         element={<LoginForm/>}
                     />
                     <Route
-                        element={<AppWrapper/>}
+                        element={<HeaderWrapper/>}
                     >
                         <Route
                             path="/user"
@@ -83,16 +83,6 @@ function App() {
                 </Routes>
             </BrowserRouter>
             <Toast/>
-        </>
-    );
-}
-
-
-const AppWrapper = () => {
-    return (
-        <>
-            <Header/>
-            <Outlet/>
         </>
     );
 }

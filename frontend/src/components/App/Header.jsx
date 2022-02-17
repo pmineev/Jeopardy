@@ -2,7 +2,7 @@ import {Link, NavLink} from "react-router-dom";
 
 import './Header.css';
 
-import {getUsername} from "./auth/services";
+import {getUsername} from "../../common/auth/services";
 
 function Header() {
     const username = getUsername();
