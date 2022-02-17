@@ -1,6 +1,12 @@
 import {types} from "mobx-state-tree";
 
-import GameDescription from "./GameDescription";
+const GameDescription = types
+    .model({
+        id: types.identifier,
+        name: types.string,
+        author: types.string,
+        roundsCount: types.number
+    })
 
 const GameListStore = types
     .model({
