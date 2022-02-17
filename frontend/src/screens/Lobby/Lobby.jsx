@@ -11,16 +11,16 @@ import {useStore} from "../../common/RootStore";
 import {joinGameSession} from "../Game/services";
 import {getGameSessionDescriptions} from "./services";
 
-const GameSessionDescription = observer(({descr, navigate}) => {
+const GameSessionDescription = observer(({description, navigate}) => {
     return (
         <tr>
-            <td>{descr.creator}</td>
-            <td>{descr.gameName}</td>
-            <td>{descr.currentPlayers}/{descr.maxPlayers}</td>
+            <td>{description.creator}</td>
+            <td>{description.gameName}</td>
+            <td>{description.currentPlayers}/{description.maxPlayers}</td>
             <td>
                 <button
                     onClick={() => {
-                        joinGameSession(descr.creator)
+                        joinGameSession(description.creator)
                             .then(() => {
                                 navigate('/game');
                             })
@@ -48,7 +48,7 @@ const GameSessionDescription = observer(({descr, navigate}) => {
     );
 });
 
-const Lobby = observer(() => {
+const GameSessionsTable = observer(() => {
     const navigate = useNavigate();
     const {lobbyStore: store} = useStore();
 
@@ -67,30 +67,38 @@ const Lobby = observer(() => {
             });
 
         return () => listener.close()
-    }, [store]);
+    }, []);
+
+    return (
+        <table className="list lobby-table">
+            <thead key="lobby-table-head">
+            <tr>
+                <th>Создатель</th>
+                <th>Название</th>
+                <th>Игроки</th>
+            </tr>
+            </thead>
+            <tbody>
+            {store.descriptions.size > 0 && values(store.descriptions).map(description =>
+                <GameSessionDescription
+                    key={description.creator}
+                    description={description}
+                    navigate={navigate}
+                />
+            )}
+            </tbody>
+        </table>
+    )
+});
+
+const Lobby = observer(() => {
+    document.title = 'Лобби';
 
     return (
         <div className='lobby'>
             <header>Лобби</header>
 
-            <table className="list lobby-table">
-                <thead key="lobby-table-head">
-                <tr>
-                    <th>Создатель</th>
-                    <th>Название</th>
-                    <th>Игроки</th>
-                </tr>
-                </thead>
-                <tbody>
-                {store.descriptions.size > 0 && values(store.descriptions).map(descr =>
-                    <GameSessionDescription
-                        key={descr.creator}
-                        descr={descr}
-                        navigate={navigate}
-                    />
-                )}
-                </tbody>
-            </table>
+            <GameSessionsTable/>
         </div>
     );
 });
