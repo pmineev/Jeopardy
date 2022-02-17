@@ -2,8 +2,7 @@ import {types} from "mobx-state-tree";
 
 const GameDescription = types
     .model({
-        id: types.identifier,
-        name: types.string,
+        name: types.identifier,
         author: types.string,
         roundsCount: types.number
     })
@@ -18,14 +17,13 @@ const GamesStore = types
             data.forEach(descr => {
                 self.addDescription(
                     descr.name,
-                    descr.name,
                     descr.author,
                     descr.roundsCount)
             });
         },
-        addDescription(id, name, author, roundsCount) {
-            self.descriptions.set(id, GameDescription.create({
-                id, name, author, roundsCount
+        addDescription(name, author, roundsCount) {
+            self.descriptions.set(name, GameDescription.create({
+                name, author, roundsCount
             }))
         },
         setChosenGame(description) {

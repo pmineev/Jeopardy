@@ -110,7 +110,7 @@ const GamesTable = observer(() => {
             <tbody>
             {store.descriptions.size > 0 && values(store.descriptions).map(description =>
                 <GameDescription
-                    key={description.id}
+                    key={description.name}
                     description={description}
                 />
             )}
