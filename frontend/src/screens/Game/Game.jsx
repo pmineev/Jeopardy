@@ -173,7 +173,7 @@ const HostCard = observer(() => {
     )
 });
 
-const QuestionScreen = observer(() => {
+const TextScreen = observer(() => {
     const {gameStore: store} = useStore();
     const [screenText, setScreenText] = useState('')
 
@@ -208,7 +208,7 @@ const QuestionScreen = observer(() => {
     )
 });
 
-const QuestionCell = observer(({question, themeIndex, questionIndex}) => {
+const Question = observer(({question, themeIndex, questionIndex}) => {
     const [clicked, setClicked] = useState(false);
 
     return (
@@ -248,7 +248,7 @@ const Theme = ({theme, themeIndex}) => {
                 {theme.name}
             </td>
             {theme.questions.map((question, index) =>
-                <QuestionCell
+                <Question
                     key={question.value}
                     themeIndex={themeIndex}
                     question={question}
@@ -305,7 +305,7 @@ const GameScreen = observer(() => {
             case 'empty':
                 return <></>
             default:
-                return <QuestionScreen/>
+                return <TextScreen/>
         }
     }
 
