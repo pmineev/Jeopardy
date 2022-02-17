@@ -5,9 +5,9 @@ import './App.css'
 
 import PrivateRoute from "../../common/auth/PrivateRoute";
 import {isAuthenticated} from "../../common/auth/services";
-import RegisterForm from "../RegisterForm/RegisterForm";
-import LoginForm from "../LoginForm/LoginForm";
-import UserProfileForm from "../UserProfileForm/UserProfileForm";
+import Register from "../Register/Register";
+import Login from "../Login/Login";
+import UserProfile from "../UserProfile/UserProfile";
 import GameList from "../GameList/GameList";
 import AddGame from "../AddGame/AddGame";
 import Lobby from "../Lobby/Lobby";
@@ -30,11 +30,11 @@ function App() {
                     />
                     <Route
                         path="/register"
-                        element={<RegisterForm/>}
+                        element={<Register/>}
                     />
                     <Route
                         path="/login"
-                        element={<LoginForm/>}
+                        element={<Login/>}
                     />
                     <Route
                         element={<HeaderWrapper/>}
@@ -43,7 +43,7 @@ function App() {
                             path="/user"
                             element={
                                 <PrivateRoute>
-                                    <UserProfileForm/>
+                                    <UserProfile/>
                                 </PrivateRoute>
                             }
                         />

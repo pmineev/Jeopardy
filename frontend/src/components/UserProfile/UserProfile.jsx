@@ -8,7 +8,7 @@ import TextInput from "../../common/forms/TextInput";
 import {getUsername} from "../../common/auth/services";
 import {getUser, saveUser} from "./services";
 
-const UserProfileForm = () => {
+const UserProfile = () => {
     const [credentials, setCredentials] = useState({nickname: '', password: ''});
 
     document.title = 'Профиль пользователя';
@@ -100,4 +100,4 @@ const UserProfileForm = () => {
     );
 };
 
-export default UserProfileForm;
+export default UserProfile;

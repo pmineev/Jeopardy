@@ -4,38 +4,29 @@ import {Link, useNavigate} from "react-router-dom";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
-import {registerUser} from "../../common/auth/services";
+import {loginUser} from "../../common/auth/services";
 
-const RegisterForm = () => {
+const Login = () => {
     const navigate = useNavigate();
 
-    document.title = 'Регистрация'
+    document.title = 'Вход';
 
     return (
         <div className='form'>
             <Formik
                 initialValues={{
                     username: '',
-                    nickname: '',
                     password: '',
                 }}
                 validationSchema={Yup.object({
                     username: Yup.string()
-                        .min(2, 'Не менее 2 символов')
-                        .max(25, 'Не более 25 символов')
                         .required('Обязательное поле'),
-                    nickname: Yup.string()
-                        .min(2, 'Не менее 2 символов')
-                        .max(25, 'Не более 25 символов'),
                     password: Yup.string()
-                        .min(6, 'Не менее 6 символов')
-                        .max(128, 'Не более 128 символов')
                         .required('Обязательное поле')
                 })}
                 onSubmit={(values, {setSubmitting, setErrors}) => {
-                    registerUser(values)
+                    loginUser(values)
                         .then(() => {
-                            console.log('зареган');
                             setSubmitting(false);
                             navigate('/games');
                         })
@@ -43,11 +34,8 @@ const RegisterForm = () => {
                             let errorText;
 
                             switch (errorCode) {
-                                case 'user_already_exists':
-                                    errorText = 'Имя пользователя занято';
-                                    break;
-                                case 'nickname_already_exists':
-                                    errorText = 'Ник занят';
+                                case 'user_not_found':
+                                    errorText = 'Неверные данные';
                                     break;
                                 default:
                                     errorText = 'Ошибка';
@@ -59,17 +47,11 @@ const RegisterForm = () => {
                 }}
             >
                 <Form>
-                    <header>Регистрация</header>
+                    <header>Вход</header>
                     <TextInput
                         label="Имя пользователя"
                         name="username"
                         type="text"
-                    />
-                    <TextInput
-                        label="Ник"
-                        name="nickname"
-                        type="text"
-                        placeholder='Необязательно'
                     />
                     <TextInput
                         label="Пароль"
@@ -79,13 +61,13 @@ const RegisterForm = () => {
 
                     <SubmitError name='submitError'/>
 
-                    <Link to='/login'>Уже зарегистрированы?</Link>
+                    <Link to='/register'>Еще не зарегистрированы?</Link>
 
-                    <button type="submit">Зарегистрировать</button>
+                    <button type="submit">Войти</button>
                 </Form>
             </Formik>
         </div>
     );
 };
 
-export default RegisterForm;
+export default Login;
