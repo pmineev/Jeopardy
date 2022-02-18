@@ -31,7 +31,6 @@ const CreateGameSessionForm = observer(({navigate}) => {
             onSubmit={(values, {setSubmitting}) => {
                 createGameSession(store.chosenGame.name, values.maxPlayers)
                     .then(() => {
-                        setSubmitting(false);
                         navigate('/game');
                     })
                     .catch(errorCode => {
