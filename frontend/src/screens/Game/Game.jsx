@@ -214,26 +214,28 @@ const Question = observer(({question, themeIndex, questionIndex}) => {
     return (
         <td className={`question-cell ${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
             onClick={() => {
-                setClicked(true);
-                chooseQuestion(themeIndex, questionIndex)
-                    .catch(errorCode => {
-                        switch (errorCode) {
-                            case 'not_current_player':
-                                toast('Сейчас выбираете не вы');
-                                break;
-                            case 'wrong_stage':
-                                toast('Сейчас нельзя выбирать вопрос');
-                                break;
-                            case 'game_session_not_found':
-                                toast.error('Игра не найдена');
-                                break;
-                            case 'wrong_question_request':
-                                toast.error('Некорректный запрос');
-                                break;
-                            default:
-                                console.log(errorCode);
-                        }
-                    });
+                if (!question.isAnswered) {
+                    setClicked(true);
+                    chooseQuestion(themeIndex, questionIndex)
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'not_current_player':
+                                    toast('Сейчас выбираете не вы');
+                                    break;
+                                case 'wrong_stage':
+                                    toast('Сейчас нельзя выбирать вопрос');
+                                    break;
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                case 'wrong_question_request':
+                                    toast.error('Некорректный запрос');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+                }
             }}
         >
             {question.isAnswered ? undefined : question.value}
