@@ -279,6 +279,7 @@ const RoundTable = ({themes}) => {
 const GameScreen = observer(() => {
     const {gameStore: store} = useStore();
     const [state, setState] = useState('empty')
+    let ref = useRef();
 
     useEffect(() => {
         switch (store.stage) {
@@ -316,6 +317,7 @@ const GameScreen = observer(() => {
                     key={state}
                     timeout={1000}
                     classNames="game-screen"
+                    nodeRef={ref}
                 >
                     {getChild()}
                 </CSSTransition>
