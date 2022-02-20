@@ -7,9 +7,6 @@ import {getSnapshot} from "mobx-state-tree";
 import {toast} from "react-toastify";
 import {CSSTransition, SwitchTransition} from "react-transition-group";
 
-import '../../common/round.css';
-import './Game.css';
-
 import {listenerUrls} from "../../common/listener";
 import {Stage, toOrdinal} from "../../common/utils";
 import {useStore} from "../../common/RootStore";
@@ -202,7 +199,7 @@ const TextScreen = observer(() => {
 
 
     return (
-        <div className='question'>
+        <div className='text'>
             {screenText}
         </div>
     )
@@ -212,7 +209,7 @@ const Question = observer(({question, themeIndex, questionIndex}) => {
     const [clicked, setClicked] = useState(false);
 
     return (
-        <td className={`question-cell ${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
+        <td className={`${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
             onClick={() => {
                 if (!question.isAnswered) {
                     setClicked(true);
@@ -246,9 +243,9 @@ const Question = observer(({question, themeIndex, questionIndex}) => {
 const Theme = ({theme, themeIndex}) => {
     return (
         <tr>
-            <td>
+            <th>
                 {theme.name}
-            </td>
+            </th>
             {theme.questions.map((question, index) =>
                 <Question
                     key={question.value}
@@ -264,15 +261,15 @@ const Theme = ({theme, themeIndex}) => {
 
 const RoundTable = ({themes}) => {
     return (
-        <table className='round round-table'>
+        <table>
             <tbody>
-                {themes.map((theme, index) =>
-                    <Theme
-                        key={theme.name}
-                        theme={theme}
-                        themeIndex={index}
-                    />
-                )}
+            {themes.map((theme, index) =>
+                <Theme
+                    key={theme.name}
+                    theme={theme}
+                    themeIndex={index}
+                />
+            )}
             </tbody>
         </table>
     )
@@ -319,7 +316,8 @@ const GameScreen = observer(() => {
                     key={state}
                     timeout={1000}
                     classNames="game-screen"
-                    nodeRef={ref}
+                    // nodeRef={ref}
+                    // TODO добавить addEndListener
                 >
                     {getChild()}
                 </CSSTransition>

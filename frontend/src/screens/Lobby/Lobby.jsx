@@ -4,8 +4,6 @@ import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
 
-import '../../common/list.css';
-
 import {Listener, listenerUrls} from "../../common/listener";
 import {useStore} from "../../common/RootStore";
 import {joinGameSession} from "../Game/services";
@@ -70,12 +68,13 @@ const GameSessionsTable = observer(() => {
     }, []);
 
     return (
-        <table className="list lobby-table">
-            <thead key="lobby-table-head">
+        <table>
+            <thead>
             <tr>
                 <th>Создатель</th>
                 <th>Название</th>
                 <th>Игроки</th>
+                <th>Играть</th>
             </tr>
             </thead>
             <tbody>
@@ -96,7 +95,7 @@ const Lobby = observer(() => {
 
     return (
         <div className='lobby'>
-            <header>Лобби</header>
+            <h1>Лобби</h1>
 
             <GameSessionsTable/>
         </div>

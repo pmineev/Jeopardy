@@ -12,7 +12,7 @@ const Login = () => {
     document.title = 'Вход';
 
     return (
-        <div className='form'>
+        <div className='login'>
             <Formik
                 initialValues={{
                     username: '',
@@ -47,7 +47,7 @@ const Login = () => {
                 }}
             >
                 <Form>
-                    <header>Вход</header>
+                    <h1>Вход</h1>
                     <TextInput
                         label="Имя пользователя"
                         name="username"

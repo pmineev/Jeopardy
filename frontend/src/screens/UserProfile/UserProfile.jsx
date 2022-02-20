@@ -35,7 +35,7 @@ const UserProfile = () => {
     }, [])
 
     return (
-        <div className='form'>
+        <div className='user-profile'>
             <Formik
                 enableReinitialize
                 initialValues={credentials}
@@ -79,7 +79,7 @@ const UserProfile = () => {
                 }}
             >
                 <Form>
-                    <header>Профиль</header>
+                    <h1>Профиль</h1>
                     <TextInput
                         label="Ник"
                         name="nickname"

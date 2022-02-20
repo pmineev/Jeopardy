@@ -7,8 +7,6 @@ import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
 
-import '../../common/list.css';
-
 import TextInput from "../../common/forms/TextInput";
 import {useStore} from "../../common/RootStore";
 import {createGameSession} from "../Game/services";
@@ -49,7 +47,7 @@ const CreateGameSessionForm = observer(({navigate}) => {
             }}
         >
             <Form>
-                <header>Новая игра</header>
+                <h1>Новая игра</h1>
                 <TextInput
                     label="Количество игроков"
                     name="maxPlayers"
@@ -98,12 +96,13 @@ const GamesTable = observer(() => {
     }, []);
 
     return (
-        <table className="list games-table">
-            <thead key="games-table-head">
+        <table className="games-table">
+            <thead>
             <tr>
                 <th>Автор</th>
                 <th>Название</th>
                 <th>Раунды</th>
+                <th>Играть</th>
             </tr>
             </thead>
             <tbody>
@@ -126,7 +125,7 @@ const Games = observer(() => {
 
     return (
         <div className='games'>
-            <header>Игры</header>
+            <h1>Игры</h1>
 
             <GamesTable/>
 
@@ -134,7 +133,7 @@ const Games = observer(() => {
 
 
             <Modal
-                className='modal form create-game-session'
+                className='modal'
                 overlayClassName='overlay'
                 isOpen={viewStore.isCreateGameSessionFormOpen}
                 onRequestClose={viewStore.toggleCreateGameSessionFormOpen}

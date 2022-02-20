@@ -4,11 +4,12 @@ const TextInput = ({label, ...props}) => {
     const [field, meta] = useField(props);
 
     return (
-        <div className='form-group'>
+        <div className='input-group'>
             <label htmlFor={props.name}> {label} </label>
-            <input className="text-input" {...field} {...props} />
-            <div className="error" style={{visibility: (meta.touched && meta.error) ? 'visible' : 'hidden'}}>
-                {meta.error || 'no error'} </div>
+            <input  {...field} {...props} />
+            <div className={'error' + ((meta.touched && meta.error) ? '' : ' hidden')}>
+                {meta.error || 'пусто'}
+            </div>
         </div>
     );
 };

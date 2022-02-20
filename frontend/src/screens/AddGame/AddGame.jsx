@@ -6,8 +6,6 @@ import Modal from "react-modal";
 import {observer} from "mobx-react-lite";
 import {getSnapshot} from "mobx-state-tree";
 
-import '../../common/round.css';
-
 import {toOrdinal} from "../../common/utils";
 import {useStore} from "../../common/RootStore";
 import SubmitError from "../../common/forms/SubmitError";
@@ -18,7 +16,6 @@ const AddGameForm = observer(() => {
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
     return (
-        <div className='form'>
             <Formik
                 initialValues={{
                     name: '',
@@ -52,7 +49,7 @@ const AddGameForm = observer(() => {
                 }}
             >
                 <Form>
-                    <header>Новая игра</header>
+                    <h1>Новая игра</h1>
                     <TextInput
                         label="Название"
                         name="name"
@@ -72,7 +69,6 @@ const AddGameForm = observer(() => {
                     <button type="submit">Создать игру</button>
                 </Form>
             </Formik>
-        </div>
     );
 });
 
@@ -95,7 +91,7 @@ const AddThemeForm = observer(() => {
             }}
         >
             <Form>
-                <header>Новая тема</header>
+                <h1>Новая тема</h1>
                 <TextInput
                     label="Название"
                     name="name"
@@ -113,12 +109,14 @@ const Question = observer(({question}) => {
 
     return (
         <td
-            className={`question-cell ${question.isSet ? '' : 'empty'}`}
+            className={question.isSet ? undefined : 'empty'}
             onClick={() => {
                 store.setSelectedQuestion(question);
                 viewStore.toggleAddQuestionFormOpen();
             }}
-        >{question.value}</td>
+        >
+            {question.value}
+        </td>
 
     )
 });
@@ -126,12 +124,9 @@ const Question = observer(({question}) => {
 const Theme = ({theme}) => {
     return (
         <tr>
-            <td
-                key={theme.name}
-                className='theme-name'
-            >
+            <th>
                 {theme.name}
-            </td>
+            </th>
             {theme.questions.map(question => (
                 <Question
                     key={theme.name + question.value.toString()}
@@ -166,7 +161,7 @@ const AddQuestionForm = observer(() => {
             }}
         >
             <Form>
-                <header>Вопрос за {store.selectedQuestion.value}</header>
+                <h1>Вопрос за {store.selectedQuestion.value}</h1>
                 <TextInput
                     label="Текст вопроса"
                     name="text"
@@ -235,7 +230,7 @@ const AddFinalQuestionForm = observer(({navigate}) => {
             }}
         >
             <Form>
-                <header>Финальный вопрос</header>
+                <h1>Финальный вопрос</h1>
                 <TextInput
                     label="Текст вопроса"
                     name="text"
@@ -260,9 +255,9 @@ const Round = observer(({round}) => {
 
     return (
         <>
-            <header>{toOrdinal(round.index + 1)} раунд</header>
+            <h1>{toOrdinal(round.index + 1)} раунд</h1>
 
-            <table className="round add-game-table">
+            <table>
                 <tbody>
                 {round.themes && round.themes.map(theme =>
                     <Theme key={theme.name}
@@ -271,12 +266,11 @@ const Round = observer(({round}) => {
                 )}
                 </tbody>
             </table>
-            <div className='button-group'>
-                <button onClick={viewStore.toggleAddThemeFormOpen}>Добавить тему</button>
-            </div>
+
+            <button onClick={viewStore.toggleAddThemeFormOpen}>Добавить тему</button>
 
             <div className='button-group'>
-                <button disabled={round.index === 0}
+                <button className={round.index === 0 ? 'hidden' : undefined}
                         onClick={store.previousRound}
                 >
                     Предыдущий раунд
@@ -305,7 +299,7 @@ const RoundsView = observer(() => {
             <Round round={store.selectedRound}/>
 
             <Modal
-                className='modal form add-theme'
+                className='modal'
                 overlayClassName='overlay'
                 isOpen={viewStore.isAddThemeFormOpen}
                 onRequestClose={viewStore.toggleAddThemeFormOpen}
@@ -315,7 +309,7 @@ const RoundsView = observer(() => {
             </Modal>
 
             <Modal
-                className='modal form add-question'
+                className='modal'
                 overlayClassName='overlay'
                 isOpen={viewStore.isAddQuestionFormOpen}
                 onRequestClose={viewStore.toggleAddQuestionFormOpen}
@@ -326,7 +320,7 @@ const RoundsView = observer(() => {
 
 
             <Modal
-                className='modal form add-final-question'
+                className='modal'
                 overlayClassName='overlay'
                 isOpen={viewStore.isAddFinalQuestionFormOpen}
                 onRequestClose={viewStore.toggleAddFinalQuestionFormOpen}
@@ -353,7 +347,7 @@ const AddGame = observer(() => {
     }, [store, viewStore]);
 
     return (
-        <div className='add-game'>
+        <div className={'add-game' + (viewStore.isAddGameFormOpen ? ' form' : '')}>
             {viewStore.isAddGameFormOpen
                 ? <AddGameForm/>
                 : <RoundsView/>

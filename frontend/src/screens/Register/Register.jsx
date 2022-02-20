@@ -12,7 +12,7 @@ const Register = () => {
     document.title = 'Регистрация'
 
     return (
-        <div className='form'>
+        <div className='register'>
             <Formik
                 initialValues={{
                     username: '',
@@ -59,7 +59,8 @@ const Register = () => {
                 }}
             >
                 <Form>
-                    <header>Регистрация</header>
+                    <h1>Регистрация</h1>
+
                     <TextInput
                         label="Имя пользователя"
                         name="username"

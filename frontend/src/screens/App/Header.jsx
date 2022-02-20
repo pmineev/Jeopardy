@@ -1,6 +1,4 @@
-import {Link, NavLink} from "react-router-dom";
-
-import './Header.css';
+import {Link} from "react-router-dom";
 
 import {getUsername} from "../../common/auth/services";
 
@@ -8,22 +6,18 @@ function Header() {
     const username = getUsername();
 
     return (
-        <header className="nav">
+        <header>
             <nav>
-                <NavLink
-                    to='/games'
-                    className={({isActive}) => isActive ? " active" : ""}
-                >
+                <Link to='/games'>
                     Игры
-                </NavLink>
-                <NavLink
-                    to='/lobby'
-                    className={({isActive}) => isActive ? " active" : ""}
-                >
+                </Link>
+                <Link to='/lobby'>
                     Лобби
-                </NavLink>
+                </Link>
             </nav>
-            <Link to='/user'>{username}</Link>
+            <Link to='/user'>
+                {username}
+            </Link>
         </header>
     );
 }
