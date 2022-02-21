@@ -9,7 +9,7 @@ import {CSSTransition, SwitchTransition} from "react-transition-group";
 
 import {listenerUrls} from "../../common/listener";
 import {Stage, toOrdinal} from "../../common/utils";
-import {useStore} from "../../common/RootStore";
+import useStore from "../../common/RootStore";
 import GameSessionListener from "./listener";
 import {getNickname} from "../../common/auth/services";
 import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer} from "./services";

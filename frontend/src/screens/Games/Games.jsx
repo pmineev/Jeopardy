@@ -7,7 +7,7 @@ import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
 
 import TextInput from "../../common/forms/TextInput";
-import {useStore} from "../../common/RootStore";
+import useStore from "../../common/RootStore";
 import {createGameSession} from "../Game/services";
 import Modal from "../Modal/Modal";
 import {getGameDescriptions} from "./services";

@@ -6,7 +6,7 @@ import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
 
 import {toOrdinal} from "../../common/utils";
-import {useStore} from "../../common/RootStore";
+import useStore from "../../common/RootStore";
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
 import Modal from "../Modal/Modal";

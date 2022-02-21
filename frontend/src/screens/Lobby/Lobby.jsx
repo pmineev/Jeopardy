@@ -5,7 +5,7 @@ import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
 
 import {Listener, listenerUrls} from "../../common/listener";
-import {useStore} from "../../common/RootStore";
+import useStore from "../../common/RootStore";
 import {joinGameSession} from "../Game/services";
 import {getGameSessionDescriptions} from "./services";
 

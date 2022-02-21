@@ -29,11 +29,9 @@ let rootStore = RootStore.create({
 
 let rootStoreContext = createContext(rootStore);
 
-const RootStoreProvider = rootStoreContext.Provider;
-
 const useStore = () => {
     return useContext(rootStoreContext);
 }
 
-export {RootStoreProvider, useStore};
+export default useStore;
 
