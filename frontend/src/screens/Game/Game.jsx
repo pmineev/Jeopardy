@@ -338,7 +338,6 @@ const PlayerCard = observer(({player}) => {
     const [timeoutId, setTimeoutId] = useState(null);
     const tooltipRef = useRef(null);
 
-
     useEffect(() => {
         const delayHide = (ms) => {
             clearTimeout(timeoutId);
@@ -362,8 +361,14 @@ const PlayerCard = observer(({player}) => {
                     src={getAvatarUrl()}
                     alt={player.nickname}
                 />
-                <div>{player.nickname}</div>
-                <div>{player.score}</div>
+                <div
+                    className='nickname'
+                >
+                    {player.nickname}
+                </div>
+                <div>
+                    {player.score}
+                </div>
             </div>
             <ReactTooltip
                 className='tooltip'

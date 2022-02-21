@@ -92,6 +92,10 @@ header {
     font-size: 1.3em;
 }
 
+header .profile {
+    white-space: pre;
+}
+
 nav {
     display: flex;
     gap: 20px;
@@ -384,6 +388,10 @@ td {
 
 .player-card img {
     max-height: 50%;
+}
+
+.player-card .nickname {
+    white-space: pre;
 }
 
 .tooltip {

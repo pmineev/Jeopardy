@@ -15,7 +15,8 @@ function Header() {
                     Лобби
                 </Link>
             </nav>
-            <Link to='/user'>
+            <Link to='/user'
+                  className='profile'>
                 {username}
             </Link>
         </header>
