@@ -308,6 +308,8 @@ td {
     justify-content: center;
     align-items: center;
     font: var(--game-font);
+    padding: 5%;
+    box-sizing: border-box;
     text-align: center;
     user-select: none;
 }
