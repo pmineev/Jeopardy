@@ -2,13 +2,15 @@ import {useEffect, useState} from 'react';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import {toast} from "react-toastify";
+import {useNavigate} from "react-router-dom";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
-import {getUsername} from "../../common/auth/services";
+import {getUsername, logoutUser} from "../../common/auth/services";
 import {getUser, saveUser} from "./services";
 
 const UserProfile = () => {
+    const navigate = useNavigate()
     const [credentials, setCredentials] = useState({nickname: '', password: ''});
 
     document.title = 'Профиль пользователя';
@@ -96,6 +98,13 @@ const UserProfile = () => {
                     <button type="submit">Сохранить</button>
                 </Form>
             </Formik>
+
+            <button onClick={() => {
+                logoutUser();
+                navigate('/');
+            }}>
+                Выйти
+            </button>
         </div>
     );
 };

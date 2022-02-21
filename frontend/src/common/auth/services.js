@@ -23,6 +23,10 @@ const loginUser = (username, password) => {
         });
 };
 
+const logoutUser = () => {
+    localStorage.clear();
+};
+
 const isAuthenticated = () => {
     return localStorage.getItem('access_token') !== null;
 }
@@ -43,4 +47,4 @@ const getNickname = () => {
     return localStorage.getItem('nickname');
 };
 
-export {registerUser, loginUser, setUsername, getUsername, setNickname, getNickname, isAuthenticated};
+export {registerUser, loginUser, setUsername, getUsername, setNickname, getNickname, isAuthenticated, logoutUser};
