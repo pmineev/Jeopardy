@@ -24,6 +24,7 @@ const AddGameForm = observer(() => {
                 }}
                 validationSchema={Yup.object({
                     name: Yup.string()
+                        .matches(/\S/, 'Тут же пусто')
                         .required('Обязательное поле'),
                     roundsCount: Yup.number()
                         .required('Обязательное поле')
@@ -81,6 +82,7 @@ const AddThemeForm = observer(() => {
             }}
             validationSchema={Yup.object({
                 name: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(20, 'Не более 20 символов')
             })}
@@ -148,9 +150,11 @@ const AddQuestionForm = observer(() => {
             }}
             validationSchema={Yup.object({
                 text: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(200, 'Не более 200 символов'),
                 answer: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(50, 'Не более 50 символов')
             })}
@@ -190,9 +194,11 @@ const AddFinalQuestionForm = observer(({navigate}) => {
             }}
             validationSchema={Yup.object({
                 text: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(200, 'Не более 200 символов'),
                 answer: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(50, 'Не более 50 символов')
             })}

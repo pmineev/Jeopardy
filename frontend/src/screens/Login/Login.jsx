@@ -20,8 +20,10 @@ const Login = () => {
                 }}
                 validationSchema={Yup.object({
                     username: Yup.string()
+                        .matches(/\S/, 'Тут же пусто')
                         .required('Обязательное поле'),
                     password: Yup.string()
+                        .matches(/\S/, 'Так не получится')
                         .required('Обязательное поле')
                 })}
                 onSubmit={({username, password}, {setSubmitting, setErrors}) => {
