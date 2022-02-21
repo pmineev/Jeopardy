@@ -4,9 +4,10 @@ const SubmitError = (name) => {
     const [, meta] = useField(name);
 
     return (
-        <div className='form-group'>
-            <div className="error" style={{visibility: meta.error ? 'visible' : 'hidden'}}>
-                {meta.error || 'no error'} </div>
+        <div className='input-group'>
+            <div className={'error' + (meta.error ? '' : ' hidden')}>
+                {meta.error || 'пусто'}
+            </div>
         </div>
     );
 };

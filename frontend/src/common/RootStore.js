@@ -1,18 +1,18 @@
 import {createContext, useContext} from "react";
 import {types} from "mobx-state-tree";
 
-import LobbyStore from "../components/Lobby/LobbyStore";
-import GameListStore from "../components/GameList/GameListStore";
-import GameListViewStore from "../components/GameList/GameListViewStore";
-import AddGameStore from "../components/AddGame/AddGameStore";
-import AddGameViewStore from "../components/AddGame/AddGameViewStore";
-import GameStore from "../components/Game/GameStore";
+import LobbyStore from "../screens/Lobby/LobbyStore";
+import GamesStore from "../screens/Games/GamesStore";
+import GamesViewStore from "../screens/Games/GamesViewStore";
+import AddGameStore from "../screens/AddGame/AddGameStore";
+import AddGameViewStore from "../screens/AddGame/AddGameViewStore";
+import GameStore from "../screens/Game/GameStore";
 
 const RootStore = types
     .model({
         lobbyStore: LobbyStore,
-        gameListStore: GameListStore,
-        gameListViewStore: GameListViewStore,
+        gamesStore: GamesStore,
+        gamesViewStore: GamesViewStore,
         addGameStore: AddGameStore,
         addGameViewStore: AddGameViewStore,
         gameStore: GameStore
@@ -20,8 +20,8 @@ const RootStore = types
 
 let rootStore = RootStore.create({
     lobbyStore: LobbyStore.create(),
-    gameListStore: GameListStore.create(),
-    gameListViewStore: GameListViewStore.create(),
+    gamesStore: GamesStore.create(),
+    gamesViewStore: GamesViewStore.create(),
     addGameStore: AddGameStore.create(),
     addGameViewStore: AddGameViewStore.create(),
     gameStore: GameStore.create()
@@ -29,11 +29,9 @@ let rootStore = RootStore.create({
 
 let rootStoreContext = createContext(rootStore);
 
-const RootStoreProvider = rootStoreContext.Provider;
-
 const useStore = () => {
     return useContext(rootStoreContext);
 }
 
-export {RootStoreProvider, useStore};
+export default useStore;
 

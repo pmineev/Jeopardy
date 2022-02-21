@@ -35,7 +35,7 @@ axios.interceptors.response.use(
 
         if (error.response.status === 400) {
             toast.error('Ошибка в формате запроса');
-            return Promise.reject(error.data.code);
+            return Promise.reject(error.response.data.code);
         }
 
         if (error.response.data.code === 'token_not_valid') {
