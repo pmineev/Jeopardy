@@ -1,17 +1,13 @@
 import axios from "axios";
 
-const registerUser = (credentials) => {
+const registerUser = (username, nickname, password) => {
     const url = '/users/';
-    return axios.post(url, {
-        username: credentials.username,
-        nickname: credentials.nickname,
-        password: credentials.password
-    })
+    return axios.post(url, {username, nickname, password})
         .then(response => {
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
-            setUsername(credentials.username);
-            setNickname(credentials.nickname);
+            setUsername(username);
+            setNickname(nickname);
         });
 };
 

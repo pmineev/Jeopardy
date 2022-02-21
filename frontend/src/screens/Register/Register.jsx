@@ -32,8 +32,8 @@ const Register = () => {
                         .max(128, 'Не более 128 символов')
                         .required('Обязательное поле')
                 })}
-                onSubmit={(values, {setSubmitting, setErrors}) => {
-                    registerUser(values)
+                onSubmit={({username, nickname, password}, {setSubmitting, setErrors}) => {
+                    registerUser(username, nickname || username, password)
                         .then(() => {
                             console.log('зареган');
                             setSubmitting(false);
