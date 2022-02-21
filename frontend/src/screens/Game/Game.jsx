@@ -98,7 +98,7 @@ const HostCard = observer(() => {
 
     switch (store.stage) {
         case Stage.WAITING: {
-            hostText = 'ожидаем игроков';
+            hostText = `Ожидаем игроков...`;
             hostImageURL = getHostImageUrl(Stage.WAITING);
             break;
         }
@@ -118,7 +118,7 @@ const HostCard = observer(() => {
             break;
         }
         case Stage.FINAL_ROUND_STARTED: {
-            hostText += 'Впереди финальный раунд.';
+            hostText += '';
             hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
             break;
         }
@@ -130,7 +130,7 @@ const HostCard = observer(() => {
         case Stage.ANSWERING: {
             const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
             const value = store.currentQuestion.value;
-            hostText = `${themeName} за ${value}`;
+            hostText = `${themeName} за ${value}.`;
             hostImageURL = getHostImageUrl(Stage.ANSWERING);
 
             if (store.answeringPlayer)
@@ -142,12 +142,12 @@ const HostCard = observer(() => {
         }
         case Stage.FINAL_ROUND: {
             hostImageURL = getHostImageUrl(Stage.FINAL_ROUND);
-            hostText = 'Финальный раунд';
+            hostText = 'Финальный раунд.';
             break;
         }
         case Stage.END_GAME: {
             const winner = store.players.reduce((a, b) => a.score > b.score ? a : b);
-            hostText = `Победил ${winner.nickname}!`;
+            hostText = `Правильный ответ: ${store.finalRound.answer}.\nПобедил ${winner.nickname}!`;
             hostImageURL = getHostImageUrl(Stage.END_GAME);
             break;
         }
