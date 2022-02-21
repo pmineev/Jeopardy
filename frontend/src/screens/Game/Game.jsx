@@ -429,8 +429,10 @@ const Game = observer(() => {
     }, [store]);
 
     useEffect(() => {
+        let timeoutId;
+
         function wait(callback) {
-            setTimeout(callback, 5000)
+            timeoutId = setTimeout(callback, 5000);
         }
 
         switch (store.stage) {
@@ -462,6 +464,10 @@ const Game = observer(() => {
                 break;
             default:
                 break;
+        }
+
+        return () => {
+            clearTimeout(timeoutId);
         }
     }, [store, store.stage]);
 
