@@ -25,6 +25,8 @@ const CreateGameSessionForm = observer(({navigate}) => {
                     .required('Обязательное поле')
                     .min(2, 'Не менее 2 игроков')
                     .max(10, 'Не более 10 игроков')
+                    .typeError('Введите число')
+                    .integer('Так тоже не прокатит')
             })}
             onSubmit={(values, {setSubmitting}) => {
                 createGameSession(store.chosenGame.name, values.maxPlayers)
@@ -88,7 +90,7 @@ const GamesTable = observer(() => {
     useEffect(() => {
         getGameDescriptions()
             .then(result => {
-                store.set(result.data);
+                store.initialize(result.data);
             })
             .catch(error => {
                 console.log(error);

@@ -13,7 +13,7 @@ const GamesStore = types
         chosenGame: types.maybe(types.reference(GameDescription))
     })
     .actions(self => ({
-        set(data) {
+        initialize(data) {
             data.forEach(descr => {
                 self.addDescription(
                     descr.name,
