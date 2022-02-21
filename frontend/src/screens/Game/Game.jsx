@@ -324,10 +324,11 @@ const GameScreen = observer(() => {
                     key={state}
                     timeout={1000}
                     classNames="game-screen"
-                    // nodeRef={ref}
-                    // TODO добавить addEndListener
+                    nodeRef={ref}
                 >
-                    {getChild()}
+                    <div ref={ref} className='transition-wrapper'>
+                        {getChild()}
+                    </div>
                 </CSSTransition>
             </SwitchTransition>
         </div>
