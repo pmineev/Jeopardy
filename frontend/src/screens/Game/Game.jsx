@@ -208,14 +208,19 @@ const TextScreen = observer(() => {
 
 const Question = observer(({question, themeIndex, questionIndex}) => {
     const {gameStore: store} = useStore();
-    const [clicked, setClicked] = useState(false);
+    const [selected, setSelected] = useState(false);
     const nickname = getNickname();
 
+    useEffect(() => {
+        if (store.stage === Stage.ANSWERING && store.currentQuestion.question === question)
+            setSelected(true);
+    }, [store.stage])
+
     return (
-        <td className={`${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
+        <td className={`${question.isAnswered ? 'empty' : ''} ${selected ? 'selected' : ''}`}
             onClick={() => {
                 if (store.currentPlayer.nickname === nickname && !question.isAnswered) {
-                    setClicked(true);
+                    setSelected(true);
                     chooseQuestion(themeIndex, questionIndex)
                         .catch(errorCode => {
                             switch (errorCode) {
