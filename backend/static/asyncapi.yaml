@@ -72,7 +72,6 @@ components:
         - $ref: '#/components/schemas/playerJoinedGameSessionEvent'
         - $ref: '#/components/schemas/playerLeftGameSessionEvent'
         - $ref: '#/components/schemas/roundStartedEvent'
-        - $ref: '#/components/schemas/currentPlayerChosenEvent'
         - $ref: '#/components/schemas/currentQuestionChosenEvent'
         - $ref: '#/components/schemas/playerAnsweredEvent'
         - $ref: '#/components/schemas/questionTimeoutEvent'
@@ -195,25 +194,20 @@ components:
           type: string
           const: roundStarted
         data:
-          $ref: '#/components/schemas/gameStateCurrentRound'
-
-    currentPlayerChosenEvent:
-      description: Выбран текущий игрок
-      type: object
-      required:
-      - event
-      - data
-      properties:
-        event:
-          type: string
-          const: currentPlayerChosen
-        data:
           type: object
           required:
-          - nickname
+          - round
+          - currentPlayer
           properties:
-            nickname:
-              $ref: '#/components/schemas/playerNickname'
+            round:
+              $ref: '#/components/schemas/gameStateCurrentRound'
+            currentPlayer:
+              type: object
+              required:
+              - nickname
+              properties:
+                nickname:
+                  $ref: '#/components/schemas/playerNickname'
 
     currentQuestionChosenEvent:
       description: Текущий вопрос выбран
