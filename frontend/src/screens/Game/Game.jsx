@@ -11,6 +11,7 @@ import {listenerUrls} from "../../common/listener";
 import {Stage, toOrdinal} from "../../common/utils";
 import {useStore} from "../../common/RootStore";
 import GameSessionListener from "./listener";
+import {getNickname} from "../../common/auth/services";
 import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer} from "./services";
 
 const PlayerControls = observer(() => {
@@ -206,18 +207,20 @@ const TextScreen = observer(() => {
 });
 
 const Question = observer(({question, themeIndex, questionIndex}) => {
+    const {gameStore: store} = useStore();
     const [clicked, setClicked] = useState(false);
+    const nickname = getNickname();
 
     return (
         <td className={`${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
             onClick={() => {
-                if (!question.isAnswered) {
+                if (store.currentPlayer.nickname === nickname && !question.isAnswered) {
                     setClicked(true);
                     chooseQuestion(themeIndex, questionIndex)
                         .catch(errorCode => {
                             switch (errorCode) {
                                 case 'not_current_player':
-                                    toast('Сейчас выбираете не вы');
+                                    toast.error('Сейчас выбираете не вы');
                                     break;
                                 case 'wrong_stage':
                                     toast('Сейчас нельзя выбирать вопрос');
