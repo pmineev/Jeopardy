@@ -16,11 +16,13 @@
     --empty-text-color: #958248;
     --selection-color: #636B96;
     --error-color: #DC4523;
+    --success-color: #008A00;
     --shadow-color: rgba(0, 0, 0, 0.5);
     --font: 18px 'Montserrat', sans-serif;
     --game-font: 36px 'Oswald', sans-serif;
 
     --toastify-icon-color-error: var(--error-color);
+    --toastify-icon-color-success: var(--success-color);
 }
 
 html {
@@ -427,4 +429,8 @@ td {
 
 .Toastify__toast--error {
     outline: 2px solid var(--error-color);
+}
+
+.Toastify__toast--success {
+    outline: 2px solid var(--success-color);
 }
