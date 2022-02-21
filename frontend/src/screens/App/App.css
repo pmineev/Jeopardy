@@ -359,6 +359,10 @@ td {
     width: 100%;
 }
 
+.host-card .text {
+    white-space: pre-wrap;
+}
+
 .players {
     grid-area: players;
     display: flex;

@@ -163,7 +163,7 @@ const HostCard = observer(() => {
                 src={hostImageURL}
                 alt='host'
             />
-            <div>
+            <div className='text'>
                 {hostText}
             </div>
         </div>
