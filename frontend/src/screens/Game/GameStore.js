@@ -94,8 +94,11 @@ const GameStore = types
 
             if (player)
                 player.isPlaying = true;
-            else
-                self.players.push({...data});  // TODO добавлять в алфавитном порядке
+            else {
+                self.players.push({...data});
+                self.players.sort((p1, p2) => p1.nickname > p2.nickname);
+            }
+
         },
         onPlayerLeft(data) {
             const playerIndex = self.players.findIndex(player => player.nickname === data.nickname);
