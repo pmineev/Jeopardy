@@ -1,19 +1,16 @@
-from typing import List, TYPE_CHECKING
+from typing import List
 
-if TYPE_CHECKING:
-    from ..user.repos import UserRepo
-    from ..game.repos import GameRepo
-
-from ..user.exceptions import UserNotFound
-from .exceptions import GameAlreadyExists
-from .dtos import GameDescriptionDTO
-from .entities import Question, Theme, Round, Game
+from backend.modules.game.dtos import GameDescriptionDTO
+from backend.modules.game.entities import Question, Theme, Round, Game
+from backend.modules.game.exceptions import GameAlreadyExists
+from backend.modules.game.repos import game_repo
+from backend.modules.user.exceptions import UserNotFound
+from backend.modules.user.repos import user_repo
 
 
 class GameService:
-    def __init__(self, repo: 'GameRepo', user_repo: 'UserRepo'):
-        self.repo = repo
-        self.user_repo = user_repo
+    repo = game_repo
+    user_repo = user_repo
 
     def create(self, game_data, username: str):
         if not self.user_repo.is_exists(username):

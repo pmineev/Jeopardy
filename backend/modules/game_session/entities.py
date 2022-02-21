@@ -6,13 +6,12 @@ if TYPE_CHECKING:
     from ..user.entities import User
     from ..game.entities import Question, Round, Game
 
-from ...core.entities import Entity
-from .enums import Stage
-from .exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
-from .events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
-    CurrentPlayerChosenEvent, CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, \
-    PlayerIncorrectlyAnsweredEvent, FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
-    PlayerInactiveEvent
+from backend.core.entities import Entity
+from backend.modules.game_session.enums import Stage
+from backend.modules.game_session.exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
+from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
+    CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
+    FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent
 
 
 @dataclass
@@ -126,10 +125,9 @@ class GameSession(Entity):
     def start_game(self):
         self.current_round = self.game.rounds[0]
         self.current_player = random.choice(self.players)
-        self.stage = Stage.CHOOSING_QUESTION
+        self.stage = Stage.ROUND_STARTED
 
-        self.add_event(CurrentPlayerChosenEvent(self, self.current_player))  # TODO объединить в одно событие
-        self.add_event(RoundStartedEvent(self, self.current_round))
+        self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
 
         print(f'gs has started, current player - {self.current_player.username}')
 
@@ -141,10 +139,9 @@ class GameSession(Entity):
         if self.current_round.order < len(self.game.rounds):
             self.current_round = self.game.rounds[self.current_round.order]
             self._set_winner_current_player()
-            self.stage = Stage.CHOOSING_QUESTION
+            self.stage = Stage.ROUND_STARTED
 
-            self.add_event(CurrentPlayerChosenEvent(self, self.current_player))
-            self.add_event(RoundStartedEvent(self, self.current_round))
+            self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
 
             print(f'{self.current_round.order} started, winner: {self.current_player.username}')
         else:
@@ -163,11 +160,11 @@ class GameSession(Entity):
     def choose_question(self, user: 'User', theme_index, question_index):
         player = self._get_player(user)
 
+        if self.stage not in [Stage.CHOOSING_QUESTION, Stage.ROUND_STARTED]:
+            raise WrongStage
+
         if player != self.current_player:
             raise NotCurrentPlayer
-
-        if not self.stage == Stage.CHOOSING_QUESTION:
-            raise WrongStage
 
         try:
             question = self.current_round.themes[theme_index].questions[question_index]

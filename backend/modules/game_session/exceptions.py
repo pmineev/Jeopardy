@@ -1,22 +1,22 @@
 class GameSessionNotFound(Exception):
-    error = 'game_session_not_found'
+    code = 'game_session_not_found'
 
 
 class TooManyPlayers(Exception):
-    error = 'too_many_players'
+    code = 'too_many_players'
 
 
 class NotCurrentPlayer(Exception):
-    error = 'not_current_player'
+    code = 'not_current_player'
 
 
 class WrongQuestionRequest(Exception):
-    error = 'wrong_question_request'
+    code = 'wrong_question_request'
 
 
 class AlreadyPlaying(Exception):
-    error = 'already_playing'
+    code = 'already_playing'
 
 
 class WrongStage(Exception):
-    error = 'wrong_stage'
+    code = 'wrong_stage'

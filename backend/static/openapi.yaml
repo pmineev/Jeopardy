@@ -253,6 +253,10 @@ paths:
       responses:
         '201':
           description: Игровая сессия создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameState'
         '400':
           description: Некорректные данные
           content:
@@ -312,6 +316,10 @@ paths:
       responses:
         '201':
           description: Пользователь успешно присоединился к игре
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gameState'
         '400':
           description: Некорректные данные
           content:
@@ -444,12 +452,16 @@ components:
       required:
       - access
       - refresh
+      - nickname
       properties:
         refreshToken:
           description: refresh-токен
           type: string
         accessToken:
           description: access-токен
+          type: string
+        nickname:
+          description: nickname
           type: string
 
     gameDescription:
@@ -811,9 +823,9 @@ components:
       description: Причина отклонения запроса
       type: object
       required:
-      - error
+      - code
       properties:
-        error:
+        code:
           description: Код причины
           type: string
           enum:
@@ -830,4 +842,5 @@ components:
           - wrong_question_request
           - already_playing
           - wrong_stage
+          - invalid_refresh_token
 

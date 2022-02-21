@@ -3,18 +3,20 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .entities import User, Session
 
-from ...core.dtos import DTO
+from backend.core.dtos import DTO
 
 
 class SessionDTO(DTO):
     def __init__(self, session: 'Session'):
         self.access = session.access
         self.refresh = session.refresh
+        self.nickname = session.nickname
 
     def to_response(self):
         return dict(
             access=self.access,
-            refresh=self.refresh
+            refresh=self.refresh,
+            nickname=self.nickname
         )
 
 

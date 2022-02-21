@@ -1,12 +1,12 @@
 from typing import List, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from ..user.entities import User
     from ..game.entities import Round, Theme, Question
-    from ..game_session.entities import CurrentQuestion
-    from .entities import GameSession, Player, Answer
+    from .entities import GameSession, Player, Answer, CurrentQuestion
 
-from ...core.dtos import DTO
-from .enums import Stage
+from backend.core.dtos import DTO
+from backend.modules.game_session.enums import Stage
 
 
 class CorrectAnswerDTO(DTO):
@@ -117,6 +117,18 @@ class CurrentRoundDTO(DTO):
         )
 
 
+class RoundStartedDTO(DTO):
+    def __init__(self, current_round: 'Round', current_player: 'Player'):
+        self.round = CurrentRoundDTO(current_round, [])
+        self.current_player = PlayerNicknameDTO(current_player)
+
+    def to_response(self):
+        return dict(
+            round=self.round.to_response(),
+            currentPlayer=self.current_player.to_response()
+        )
+
+
 class GameStateDTO(DTO):
     def __init__(self, gs: 'GameSession'):
         self.stage = gs.stage
@@ -170,7 +182,9 @@ class PlayerNicknameDTO(DTO):
         self.nickname = player.nickname
 
     def to_response(self):
-        return dict(nickname=self.nickname)
+        return dict(
+            nickname=self.nickname
+        )
 
 
 class ChosenQuestionDTO(DTO):
@@ -200,8 +214,10 @@ class FinalRoundTimeoutDTO(DTO):
 
 
 class CreatorNicknameDTO(DTO):
-    def __init__(self, gs: 'GameSession'):
-        self.nickname = gs.creator.nickname
+    def __init__(self, user: 'User'):
+        self.nickname = user.nickname
 
     def to_response(self):
-        return dict(creator=self.nickname)
+        return dict(
+            creator=self.nickname
+        )
