@@ -1,7 +1,4 @@
 import {Slide, ToastContainer} from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-
-import './Toast.css';
 
 const Toast = () => {
     return (
@@ -10,6 +7,9 @@ const Toast = () => {
             transition={Slide}
             hideProgressBar
             draggable={false}
+            closeButton={false}
+            pauseOnFocusLoss={false}
+            autoClose={3000}
         />
     )
 }

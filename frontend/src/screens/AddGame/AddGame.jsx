@@ -1,24 +1,21 @@
 import {useEffect} from "react";
-import {useHistory} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import Modal from "react-modal";
 import {observer} from "mobx-react-lite";
-import {getSnapshot} from "mobx-state-tree";
-
-import '../../common/round.css';
+import {toast} from "react-toastify";
 
 import {toOrdinal} from "../../common/utils";
-import {useStore} from "../../common/RootStore";
+import useStore from "../../common/RootStore";
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
+import Modal from "../Modal/Modal";
 import {postGame} from "./services";
 
 const AddGameForm = observer(() => {
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
     return (
-        <div className='form'>
             <Formik
                 initialValues={{
                     name: '',
@@ -27,6 +24,7 @@ const AddGameForm = observer(() => {
                 }}
                 validationSchema={Yup.object({
                     name: Yup.string()
+                        .matches(/\S/, 'Тут же пусто')
                         .required('Обязательное поле'),
                     roundsCount: Yup.number()
                         .required('Обязательное поле')
@@ -41,18 +39,18 @@ const AddGameForm = observer(() => {
                         .typeError('Введите число')
                         .integer('Так тоже не прокатит')
                 })}
-                onSubmit={(values, {setSubmitting}) => {
+                onSubmit={({name, roundsCount, questionsCount}, {setSubmitting}) => {
                     setSubmitting(false);
                     store.setGameParams(
-                        values.name,
-                        Number(values.roundsCount),
-                        Number(values.questionsCount)
+                        name,
+                        Number(roundsCount),
+                        Number(questionsCount)
                     );
                     viewStore.toggleAddGameFormOpen();
                 }}
             >
                 <Form>
-                    <header>Новая игра</header>
+                    <h1>Новая игра</h1>
                     <TextInput
                         label="Название"
                         name="name"
@@ -72,7 +70,6 @@ const AddGameForm = observer(() => {
                     <button type="submit">Создать игру</button>
                 </Form>
             </Formik>
-        </div>
     );
 });
 
@@ -85,17 +82,18 @@ const AddThemeForm = observer(() => {
             }}
             validationSchema={Yup.object({
                 name: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(20, 'Не более 20 символов')
             })}
-            onSubmit={(values, {setSubmitting}) => {
+            onSubmit={({name}, {setSubmitting}) => {
                 setSubmitting(false);
                 viewStore.toggleAddThemeFormOpen();
-                store.selectedRound.addTheme(values.name);
+                store.selectedRound.addTheme(name);
             }}
         >
             <Form>
-                <header>Новая тема</header>
+                <h1>Новая тема</h1>
                 <TextInput
                     label="Название"
                     name="name"
@@ -113,12 +111,14 @@ const Question = observer(({question}) => {
 
     return (
         <td
-            className={`question-cell ${question.isSet ? '' : 'empty'}`}
+            className={question.isSet ? undefined : 'empty'}
             onClick={() => {
                 store.setSelectedQuestion(question);
                 viewStore.toggleAddQuestionFormOpen();
             }}
-        >{question.value}</td>
+        >
+            {question.value}
+        </td>
 
     )
 });
@@ -126,12 +126,9 @@ const Question = observer(({question}) => {
 const Theme = ({theme}) => {
     return (
         <tr>
-            <td
-                key={theme.name}
-                className='theme-name'
-            >
+            <th>
                 {theme.name}
-            </td>
+            </th>
             {theme.questions.map(question => (
                 <Question
                     key={theme.name + question.value.toString()}
@@ -153,20 +150,22 @@ const AddQuestionForm = observer(() => {
             }}
             validationSchema={Yup.object({
                 text: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(200, 'Не более 200 символов'),
                 answer: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(50, 'Не более 50 символов')
             })}
-            onSubmit={(values, {setSubmitting}) => {
+            onSubmit={({text, answer}, {setSubmitting}) => {
                 setSubmitting(false);
                 viewStore.toggleAddQuestionFormOpen();
-                store.selectedQuestion.set(values.text, values.answer);
+                store.selectedQuestion.set(text, answer);
             }}
         >
             <Form>
-                <header>Вопрос за {store.selectedQuestion.value}</header>
+                <h1>Вопрос за {store.selectedQuestion.value}</h1>
                 <TextInput
                     label="Текст вопроса"
                     name="text"
@@ -184,7 +183,7 @@ const AddQuestionForm = observer(() => {
     );
 });
 
-const AddFinalQuestionForm = observer(({history}) => {
+const AddFinalQuestionForm = observer(({navigate}) => {
     const {addGameStore: store} = useStore();
 
     return (
@@ -195,34 +194,23 @@ const AddFinalQuestionForm = observer(({history}) => {
             }}
             validationSchema={Yup.object({
                 text: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(200, 'Не более 200 символов'),
                 answer: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
                     .required('Обязательное поле')
                     .max(50, 'Не более 50 символов')
             })}
-            onSubmit={(values, {setSubmitting, setErrors}) => {
-                store.setFinalRound(values.text, values.answer);
+            onSubmit={({text, answer}, {setSubmitting, setErrors}) => {
+                store.setFinalRound(text, answer);
                 if (store.isAllRoundsFilled)
                     if (store.isAllQuestionsFilled) {
-                        let storeSnapshot = getSnapshot(store);
-                        postGame({
-                            name: storeSnapshot.name,
-                            rounds: storeSnapshot.rounds.map(round => ({
-                                themes: round.themes.map(theme => ({
-                                    name: theme.name,
-                                    questions: theme.questions.map(({id, ...rest}) => rest)
-                                }))
-                            })),
-                            finalRound: {
-                                value: storeSnapshot.finalRound.value,
-                                text: storeSnapshot.finalRound.text,
-                                answer: storeSnapshot.finalRound.answer
-                            }
-                        })
+                        postGame(store.game)
                             .then(() => {
                                 setSubmitting(false);
-                                history.push('/games');
+                                toast.success('Игра сохранена!')
+                                navigate('/games');
                             })
                             .catch(error =>
                                 setErrors({'submitError': error.message})
@@ -235,7 +223,7 @@ const AddFinalQuestionForm = observer(({history}) => {
             }}
         >
             <Form>
-                <header>Финальный вопрос</header>
+                <h1>Финальный вопрос</h1>
                 <TextInput
                     label="Текст вопроса"
                     name="text"
@@ -260,9 +248,9 @@ const Round = observer(({round}) => {
 
     return (
         <>
-            <header>{toOrdinal(round.index + 1)} раунд</header>
+            <h1>{toOrdinal(round.index + 1)} раунд</h1>
 
-            <table className="round add-game-table">
+            <table>
                 <tbody>
                 {round.themes && round.themes.map(theme =>
                     <Theme key={theme.name}
@@ -271,12 +259,11 @@ const Round = observer(({round}) => {
                 )}
                 </tbody>
             </table>
-            <div className='button-group'>
-                <button onClick={viewStore.toggleAddThemeFormOpen}>Добавить тему</button>
-            </div>
+
+            <button onClick={viewStore.toggleAddThemeFormOpen}>Добавить тему</button>
 
             <div className='button-group'>
-                <button disabled={round.index === 0}
+                <button className={round.index === 0 ? 'hidden' : undefined}
                         onClick={store.previousRound}
                 >
                     Предыдущий раунд
@@ -297,7 +284,7 @@ const Round = observer(({round}) => {
 });
 
 const RoundsView = observer(() => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
     return (
@@ -305,35 +292,25 @@ const RoundsView = observer(() => {
             <Round round={store.selectedRound}/>
 
             <Modal
-                className='modal form add-theme'
-                overlayClassName='overlay'
                 isOpen={viewStore.isAddThemeFormOpen}
                 onRequestClose={viewStore.toggleAddThemeFormOpen}
-                ariaHideApp={false}
             >
                 <AddThemeForm/>
             </Modal>
 
             <Modal
-                className='modal form add-question'
-                overlayClassName='overlay'
                 isOpen={viewStore.isAddQuestionFormOpen}
                 onRequestClose={viewStore.toggleAddQuestionFormOpen}
-                ariaHideApp={false}
             >
                 <AddQuestionForm/>
             </Modal>
 
-
             <Modal
-                className='modal form add-final-question'
-                overlayClassName='overlay'
                 isOpen={viewStore.isAddFinalQuestionFormOpen}
                 onRequestClose={viewStore.toggleAddFinalQuestionFormOpen}
-                ariaHideApp={false}
             >
                 <AddFinalQuestionForm
-                    history={history}
+                    navigate={navigate}
                 />
             </Modal>
         </>
@@ -343,9 +320,9 @@ const RoundsView = observer(() => {
 const AddGame = observer(() => {
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
-    useEffect(() => {
-        document.title = 'Добавление игры'
+    document.title = 'Добавление игры';
 
+    useEffect(() => {
         return () => {
             store.clear();
             viewStore.clear();
@@ -353,7 +330,7 @@ const AddGame = observer(() => {
     }, [store, viewStore]);
 
     return (
-        <div className='add-game'>
+        <div className={'add-game' + (viewStore.isAddGameFormOpen ? ' form' : '')}>
             {viewStore.isAddGameFormOpen
                 ? <AddGameForm/>
                 : <RoundsView/>

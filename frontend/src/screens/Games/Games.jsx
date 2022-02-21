@@ -1,21 +1,19 @@
 import {useEffect} from 'react'
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import Modal from "react-modal";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
 
-import '../../common/list.css';
-
 import TextInput from "../../common/forms/TextInput";
-import {useStore} from "../../common/RootStore";
+import useStore from "../../common/RootStore";
 import {createGameSession} from "../Game/services";
+import Modal from "../Modal/Modal";
 import {getGameDescriptions} from "./services";
 
-const CreateGameSessionForm = observer(({history}) => {
-    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
+const CreateGameSessionForm = observer(({navigate}) => {
+    const {gamesStore: store, gamesViewStore: viewStore} = useStore();
 
     return (
         <Formik
@@ -27,12 +25,13 @@ const CreateGameSessionForm = observer(({history}) => {
                     .required('Обязательное поле')
                     .min(2, 'Не менее 2 игроков')
                     .max(10, 'Не более 10 игроков')
+                    .typeError('Введите число')
+                    .integer('Так тоже не прокатит')
             })}
-            onSubmit={(values, {setSubmitting}) => {
-                createGameSession(store.chosenGame.name, values.maxPlayers)
+            onSubmit={({maxPlayers}) => {
+                createGameSession(store.chosenGame.name, maxPlayers)
                     .then(() => {
-                        setSubmitting(false);
-                        history.push('/game');
+                        navigate('/game');
                     })
                     .catch(errorCode => {
                         switch (errorCode) {
@@ -50,7 +49,7 @@ const CreateGameSessionForm = observer(({history}) => {
             }}
         >
             <Form>
-                <header>Новая игра</header>
+                <h1>Новая игра</h1>
                 <TextInput
                     label="Количество игроков"
                     name="maxPlayers"
@@ -63,19 +62,19 @@ const CreateGameSessionForm = observer(({history}) => {
     );
 });
 
-const GameDescription = observer((props) => {
-    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
+const GameDescription = observer(({description}) => {
+    const {gamesStore: store, gamesViewStore: viewStore} = useStore();
 
     return (
         <tr>
-            <td>{props.descr.author}</td>
-            <td>{props.descr.name}</td>
-            <td>{props.descr.roundsCount}</td>
+            <td>{description.author}</td>
+            <td>{description.name}</td>
+            <td>{description.roundsCount}</td>
             <td>
                 <button
                     onClick={() => {
                         viewStore.toggleCreateGameSessionFormOpen();
-                        store.setChosenGame(props.descr);
+                        store.setChosenGame(description);
                     }}
                 >
                     Играть
@@ -85,60 +84,66 @@ const GameDescription = observer((props) => {
     );
 });
 
-const GameList = observer(() => {
-    const history = useHistory();
-    const {gameListStore: store, gameListViewStore: viewStore} = useStore();
+const GamesTable = observer(() => {
+    const {gamesStore: store} = useStore();
 
     useEffect(() => {
-        document.title = 'Игры';
-
         getGameDescriptions()
             .then(result => {
-                store.set(result.data);
+                store.initialize(result.data);
             })
             .catch(error => {
                 console.log(error);
             });
-    }, [store])
+    }, []);
+
+    return (
+        <table className="games-table">
+            <thead>
+            <tr>
+                <th>Автор</th>
+                <th>Название</th>
+                <th>Раунды</th>
+                <th>Играть</th>
+            </tr>
+            </thead>
+            <tbody>
+            {store.descriptions.size > 0 && values(store.descriptions).map(description =>
+                <GameDescription
+                    key={description.name}
+                    description={description}
+                />
+            )}
+            </tbody>
+        </table>
+    )
+});
+
+const Games = observer(() => {
+    const navigate = useNavigate();
+    const {gamesViewStore: viewStore} = useStore();
+
+    document.title = 'Игры';
 
     return (
         <div className='games'>
-            <header>Игры</header>
+            <h1>Игры</h1>
 
-            <table className="list games-table">
-                <thead key="games-table-head">
-                <tr>
-                    <th>Автор</th>
-                    <th>Название</th>
-                    <th>Раунды</th>
-                </tr>
-                </thead>
-                <tbody>
-                {values(store.descriptions).map(descr =>
-                    <GameDescription
-                        key={descr.id}
-                        descr={descr}
-                    />
-                )}
-                </tbody>
-            </table>
+            <GamesTable/>
 
-            <button onClick={() => history.push('/games/new')}>Создать новую игру</button>
+            <button onClick={() => navigate('/games/new')}>Создать новую игру</button>
 
 
             <Modal
-                className='modal form create-game-session'
-                overlayClassName='overlay'
                 isOpen={viewStore.isCreateGameSessionFormOpen}
                 onRequestClose={viewStore.toggleCreateGameSessionFormOpen}
-                ariaHideApp={false}
             >
                 <CreateGameSessionForm
-                    history={history}
+                    navigate={navigate}
                 />
             </Modal>
         </div>
     );
 });
 
-export default GameList;
+export default Games;

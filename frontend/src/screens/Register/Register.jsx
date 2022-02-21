@@ -1,18 +1,18 @@
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import {Link, useHistory} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
 import {registerUser} from "../../common/auth/services";
 
-const RegisterForm = () => {
-    const history = useHistory();
+const Register = () => {
+    const navigate = useNavigate();
 
     document.title = 'Регистрация'
 
     return (
-        <div className='form'>
+        <div className='register'>
             <Formik
                 initialValues={{
                     username: '',
@@ -23,21 +23,24 @@ const RegisterForm = () => {
                     username: Yup.string()
                         .min(2, 'Не менее 2 символов')
                         .max(25, 'Не более 25 символов')
+                        .matches(/\S/, 'Тут же пусто')
                         .required('Обязательное поле'),
                     nickname: Yup.string()
                         .min(2, 'Не менее 2 символов')
-                        .max(25, 'Не более 25 символов'),
+                        .max(25, 'Не более 25 символов')
+                        .matches(/\S/, 'Тут же пусто'),
                     password: Yup.string()
                         .min(6, 'Не менее 6 символов')
                         .max(128, 'Не более 128 символов')
+                        .matches(/\S/, 'Одни пробелы - это нехорошо')
                         .required('Обязательное поле')
                 })}
-                onSubmit={(values, {setSubmitting, setErrors}) => {
-                    registerUser(values)
+                onSubmit={({username, nickname, password}, {setSubmitting, setErrors}) => {
+                    registerUser(username, nickname || username, password)
                         .then(() => {
                             console.log('зареган');
                             setSubmitting(false);
-                            history.push('/games');
+                            navigate('/games');
                         })
                         .catch(errorCode => {
                             let errorText;
@@ -59,7 +62,8 @@ const RegisterForm = () => {
                 }}
             >
                 <Form>
-                    <header>Регистрация</header>
+                    <h1>Регистрация</h1>
+
                     <TextInput
                         label="Имя пользователя"
                         name="username"
@@ -88,4 +92,4 @@ const RegisterForm = () => {
     );
 };
 
-export default RegisterForm;
+export default Register;

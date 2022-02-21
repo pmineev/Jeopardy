@@ -1,25 +1,29 @@
 import {types} from "mobx-state-tree";
 
-import GameDescription from "./GameDescription";
+const GameDescription = types
+    .model({
+        name: types.identifier,
+        author: types.string,
+        roundsCount: types.number
+    })
 
-const GameListStore = types
+const GamesStore = types
     .model({
         descriptions: types.map(GameDescription),
         chosenGame: types.maybe(types.reference(GameDescription))
     })
     .actions(self => ({
-        set(data) {
+        initialize(data) {
             data.forEach(descr => {
                 self.addDescription(
-                    descr.name,
                     descr.name,
                     descr.author,
                     descr.roundsCount)
             });
         },
-        addDescription(id, name, author, roundsCount) {
-            self.descriptions.set(id, GameDescription.create({
-                id, name, author, roundsCount
+        addDescription(name, author, roundsCount) {
+            self.descriptions.set(name, GameDescription.create({
+                name, author, roundsCount
             }))
         },
         setChosenGame(description) {
@@ -27,4 +31,4 @@ const GameListStore = types
         }
     }))
 
-export default GameListStore;
+export default GamesStore;

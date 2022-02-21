@@ -2,13 +2,15 @@ import {useEffect, useState} from 'react';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import {toast} from "react-toastify";
+import {useNavigate} from "react-router-dom";
 
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
-import {getUsername} from "../../common/auth/services";
+import {getUsername, logoutUser} from "../../common/auth/services";
 import {getUser, saveUser} from "./services";
 
-const UserProfileForm = () => {
+const UserProfile = () => {
+    const navigate = useNavigate()
     const [credentials, setCredentials] = useState({nickname: '', password: ''});
 
     document.title = 'Профиль пользователя';
@@ -35,7 +37,7 @@ const UserProfileForm = () => {
     }, [])
 
     return (
-        <div className='form'>
+        <div className='user-profile'>
             <Formik
                 enableReinitialize
                 initialValues={credentials}
@@ -49,11 +51,11 @@ const UserProfileForm = () => {
                         .min(6, 'Не менее 6 символов')
                         .max(128, 'Не более 128 символов')
                 })}
-                onSubmit={(values, {setSubmitting, setErrors}) => {
-                    if (values.nickname.length === 0 && values.password.length === 0)
+                onSubmit={({nickname, password}, {setSubmitting, setErrors}) => {
+                    if (nickname.length === 0 && password.length === 0)
                         setErrors({'submitError': 'Заполните хотя бы одно поле'})
                     else
-                        saveUser(credentials.username, values.nickname, values.password)
+                        saveUser(credentials.username, nickname, password)
                             .then(() => {
                                     setSubmitting(false);
                                     toast('Данные сохранены');
@@ -79,7 +81,7 @@ const UserProfileForm = () => {
                 }}
             >
                 <Form>
-                    <header>Профиль</header>
+                    <h1>Профиль</h1>
                     <TextInput
                         label="Ник"
                         name="nickname"
@@ -96,8 +98,15 @@ const UserProfileForm = () => {
                     <button type="submit">Сохранить</button>
                 </Form>
             </Formik>
+
+            <button onClick={() => {
+                logoutUser();
+                navigate('/');
+            }}>
+                Выйти
+            </button>
         </div>
     );
 };
 
-export default UserProfileForm;
+export default UserProfile;

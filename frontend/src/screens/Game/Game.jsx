@@ -1,24 +1,22 @@
 import {useEffect, useRef, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {Field, Form, Formik} from "formik";
 import ReactTooltip from 'react-tooltip';
 import {getSnapshot} from "mobx-state-tree";
 import {toast} from "react-toastify";
 import {CSSTransition, SwitchTransition} from "react-transition-group";
 
-import '../../common/round.css';
-import './Game.css';
-
 import {listenerUrls} from "../../common/listener";
 import {Stage, toOrdinal} from "../../common/utils";
-import {useStore} from "../../common/RootStore";
+import useStore from "../../common/RootStore";
 import GameSessionListener from "./listener";
+import {getNickname} from "../../common/auth/services";
 import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer} from "./services";
 
 const PlayerControls = observer(() => {
     const {gameStore: store} = useStore();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     return (
         <div className='player-controls'>
@@ -26,9 +24,9 @@ const PlayerControls = observer(() => {
                 initialValues={{
                     answer: '',
                 }}
-                onSubmit={(values, {setSubmitting, resetForm}) => {
-                    if (values.answer?.length > 0) {
-                        submitAnswer(values.answer)
+                onSubmit={({answer}, {setSubmitting, resetForm}) => {
+                    if (answer?.length > 0) {
+                        submitAnswer(answer)
                             .then(() => {
                                 resetForm();
                                 setSubmitting(false);
@@ -68,10 +66,12 @@ const PlayerControls = observer(() => {
 
             <button
                 onClick={() => {
-                    if (store.stage !== Stage.END_GAME)
+                    if (store.stage === Stage.END_GAME)
+                        navigate('/games');
+                    else
                         leaveGameSession()
                             .then(() => {
-                                history.push('/games');
+                                navigate('/games');
                             })
                             .catch(errorCode => {
                                 switch (errorCode) {
@@ -99,7 +99,7 @@ const HostCard = observer(() => {
 
     switch (store.stage) {
         case Stage.WAITING: {
-            hostText = 'ожидаем игроков';
+            hostText = `Ожидаем игроков...`;
             hostImageURL = getHostImageUrl(Stage.WAITING);
             break;
         }
@@ -119,7 +119,7 @@ const HostCard = observer(() => {
             break;
         }
         case Stage.FINAL_ROUND_STARTED: {
-            hostText += 'Впереди финальный раунд.';
+            hostText += '';
             hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
             break;
         }
@@ -131,7 +131,7 @@ const HostCard = observer(() => {
         case Stage.ANSWERING: {
             const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
             const value = store.currentQuestion.value;
-            hostText = `${themeName} за ${value}`;
+            hostText = `${themeName} за ${value}.`;
             hostImageURL = getHostImageUrl(Stage.ANSWERING);
 
             if (store.answeringPlayer)
@@ -143,12 +143,12 @@ const HostCard = observer(() => {
         }
         case Stage.FINAL_ROUND: {
             hostImageURL = getHostImageUrl(Stage.FINAL_ROUND);
-            hostText = 'Финальный раунд';
+            hostText = 'Финальный раунд.';
             break;
         }
         case Stage.END_GAME: {
             const winner = store.players.reduce((a, b) => a.score > b.score ? a : b);
-            hostText = `Победил ${winner.nickname}!`;
+            hostText = `Правильный ответ: ${store.finalRound.answer}.\nПобедил ${winner.nickname}!`;
             hostImageURL = getHostImageUrl(Stage.END_GAME);
             break;
         }
@@ -164,14 +164,14 @@ const HostCard = observer(() => {
                 src={hostImageURL}
                 alt='host'
             />
-            <div>
+            <div className='text'>
                 {hostText}
             </div>
         </div>
     )
 });
 
-const QuestionScreen = observer(() => {
+const TextScreen = observer(() => {
     const {gameStore: store} = useStore();
     const [screenText, setScreenText] = useState('')
 
@@ -200,38 +200,47 @@ const QuestionScreen = observer(() => {
 
 
     return (
-        <div className='question'>
+        <div className='text'>
             {screenText}
         </div>
     )
 });
 
-const QuestionCell = observer(({question, themeIndex, questionIndex}) => {
-    const [clicked, setClicked] = useState(false);
+const Question = observer(({question, themeIndex, questionIndex}) => {
+    const {gameStore: store} = useStore();
+    const [selected, setSelected] = useState(false);
+    const nickname = getNickname();
+
+    useEffect(() => {
+        if (store.currentQuestion?.question === question)
+            setSelected(true);
+    }, [store.currentQuestion])
 
     return (
-        <td className={`question-cell ${question.isAnswered ? 'empty' : ''} ${clicked ? 'clicked' : ''}`}
+        <td className={`${question.isAnswered ? 'empty' : ''} ${selected ? 'selected' : ''}`}
             onClick={() => {
-                setClicked(true);
-                chooseQuestion(themeIndex, questionIndex)
-                    .catch(errorCode => {
-                        switch (errorCode) {
-                            case 'not_current_player':
-                                toast('Сейчас выбираете не вы');
-                                break;
-                            case 'wrong_stage':
-                                toast('Сейчас нельзя выбирать вопрос');
-                                break;
-                            case 'game_session_not_found':
-                                toast.error('Игра не найдена');
-                                break;
-                            case 'wrong_question_request':
-                                toast.error('Некорректный запрос');
-                                break;
-                            default:
-                                console.log(errorCode);
-                        }
-                    });
+                if (store.currentPlayer.nickname === nickname && !question.isAnswered) {
+                    setSelected(true);
+                    chooseQuestion(themeIndex, questionIndex)
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'not_current_player':
+                                    toast.error('Сейчас выбираете не вы');
+                                    break;
+                                case 'wrong_stage':
+                                    toast('Сейчас нельзя выбирать вопрос');
+                                    break;
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                case 'wrong_question_request':
+                                    toast.error('Некорректный запрос');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+                }
             }}
         >
             {question.isAnswered ? undefined : question.value}
@@ -242,11 +251,11 @@ const QuestionCell = observer(({question, themeIndex, questionIndex}) => {
 const Theme = ({theme, themeIndex}) => {
     return (
         <tr>
-            <td>
+            <th>
                 {theme.name}
-            </td>
+            </th>
             {theme.questions.map((question, index) =>
-                <QuestionCell
+                <Question
                     key={question.value}
                     themeIndex={themeIndex}
                     question={question}
@@ -260,15 +269,15 @@ const Theme = ({theme, themeIndex}) => {
 
 const RoundTable = ({themes}) => {
     return (
-        <table className='round round-table'>
+        <table>
             <tbody>
-                {themes.map((theme, index) =>
-                    <Theme
-                        key={theme.name}
-                        theme={theme}
-                        themeIndex={index}
-                    />
-                )}
+            {themes.map((theme, index) =>
+                <Theme
+                    key={theme.name}
+                    theme={theme}
+                    themeIndex={index}
+                />
+            )}
             </tbody>
         </table>
     )
@@ -277,6 +286,7 @@ const RoundTable = ({themes}) => {
 const GameScreen = observer(() => {
     const {gameStore: store} = useStore();
     const [state, setState] = useState('empty')
+    let ref = useRef();
 
     useEffect(() => {
         switch (store.stage) {
@@ -303,7 +313,7 @@ const GameScreen = observer(() => {
             case 'empty':
                 return <></>
             default:
-                return <QuestionScreen/>
+                return <TextScreen/>
         }
     }
 
@@ -314,8 +324,11 @@ const GameScreen = observer(() => {
                     key={state}
                     timeout={1000}
                     classNames="game-screen"
+                    nodeRef={ref}
                 >
-                    {getChild()}
+                    <div ref={ref} className='transition-wrapper'>
+                        {getChild()}
+                    </div>
                 </CSSTransition>
             </SwitchTransition>
         </div>
@@ -325,7 +338,6 @@ const GameScreen = observer(() => {
 const PlayerCard = observer(({player}) => {
     const [timeoutId, setTimeoutId] = useState(null);
     const tooltipRef = useRef(null);
-
 
     useEffect(() => {
         const delayHide = (ms) => {
@@ -350,8 +362,14 @@ const PlayerCard = observer(({player}) => {
                     src={getAvatarUrl()}
                     alt={player.nickname}
                 />
-                <div>{player.nickname}</div>
-                <div>{player.score}</div>
+                <div
+                    className='nickname'
+                >
+                    {player.nickname}
+                </div>
+                <div>
+                    {player.score}
+                </div>
             </div>
             <ReactTooltip
                 className='tooltip'
@@ -381,7 +399,7 @@ const Players = observer(() => {
 
 const Game = observer(() => {
     const {gameStore: store} = useStore();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = 'Игра';
@@ -402,7 +420,7 @@ const Game = observer(() => {
                     default:
                         console.log(errorCode);
                 }
-                history.push('/games');
+                navigate('/games');
             });
 
         return () => {
@@ -412,8 +430,10 @@ const Game = observer(() => {
     }, [store]);
 
     useEffect(() => {
+        let timeoutId;
+
         function wait(callback) {
-            setTimeout(callback, 5000)
+            timeoutId = setTimeout(callback, 5000);
         }
 
         switch (store.stage) {
@@ -445,6 +465,10 @@ const Game = observer(() => {
                 break;
             default:
                 break;
+        }
+
+        return () => {
+            clearTimeout(timeoutId);
         }
     }, [store, store.stage]);
 

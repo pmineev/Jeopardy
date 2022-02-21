@@ -108,24 +108,31 @@ const AddGameStore = types
     }))
     .views(self => ({
         get isAllRoundsFilled() {
-            for (const round of self.rounds) {
-                if (round.themes.length === 0) {
-                    return false;
-                }
-            }
-            return true;
+            return self.rounds.every(round =>
+                round.themes.length > 0
+            )
         },
         get isAllQuestionsFilled() {
-            for (const round of self.rounds) {
-                for (const theme of round.themes) {
-                    for (const question of theme.questions) {
-                        if (!question.isSet) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
+            return self.rounds.every(round =>
+                round.themes.every(theme =>
+                    theme.questions.every(question =>
+                        question.isSet
+                    )
+                )
+            )
+        },
+        get game() {
+            const {id, ...finalRound} = self.finalRound;
+            return {
+                name: self.name,
+                rounds: self.rounds.map(round => ({
+                    themes: round.themes.map(theme => ({
+                        name: theme.name,
+                        questions: theme.questions.map(({id, ...rest}) => rest)
+                    }))
+                })),
+                finalRound: finalRound
+            };
         }
     }));
 

@@ -1,0 +1,452 @@
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../../common/fonts/Montserrat.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Oswald';
+    src: url('../../common/fonts/Oswald.woff2') format('woff2');
+}
+
+:root {
+    --background-color: #2F45A0;
+    --primary-color: #0000BB;
+    --accent-color: #FFCC00;
+    --text-color: #FFDD77;
+    --empty-text-color: #958248;
+    --selection-color: #636B96;
+    --error-color: #DC4523;
+    --success-color: #008A00;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --font: 18px 'Montserrat', sans-serif;
+    --game-font: 36px 'Oswald', sans-serif;
+
+    --toastify-icon-color-error: var(--error-color);
+    --toastify-icon-color-success: var(--success-color);
+}
+
+html {
+    font: var(--font);
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+::selection {
+    background: var(--selection-color);
+}
+
+html, body, #root {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    margin: 0;
+}
+
+.register, .login, .user-profile, .games, .lobby, .add-game, .overlay, form, .player-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.register, .login, .user-profile, .add-game.form, .modal {
+    position: sticky;
+    top: 20%;
+}
+
+.games, .lobby, .add-game {
+    margin-left: 60px;
+    margin-right: 60px;
+
+    gap: 20px;
+}
+
+.ReactModal__Body--open #root {
+    filter: blur(10px);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: var(--shadow-color);
+}
+
+.modal form {
+    background-color: var(--background-color);
+}
+
+header {
+    height: 40px;
+    background-color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px;
+    font-size: 1.3em;
+}
+
+header .profile {
+    white-space: pre;
+}
+
+nav {
+    display: flex;
+    gap: 20px;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    font-size: 1.75em;
+    font-weight: normal;
+    margin-top: 0.5em;
+    margin-bottom: 0.75em;
+}
+
+form {
+    width: min(350px, 100%);
+
+    justify-content: center;
+    gap: 15px;
+
+    padding: 15px;
+
+    box-sizing: border-box;
+}
+
+.input-group {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.input-group .hidden {
+    visibility: hidden;
+}
+
+.error {
+    color: var(--error-color);
+    font-size: 0.75em;
+    font-weight: bold;
+}
+
+input, textarea, button {
+    font: inherit;
+    color: inherit;
+    background-color: inherit;
+    border: 2px solid var(--primary-color);
+}
+
+input:focus, textarea:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+button {
+    padding: 5px 10px 5px 10px;
+    margin: 0;
+    background-color: var(--primary-color);
+}
+
+button:hover {
+    border-color: var(--accent-color);
+}
+
+button:active {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    border-color: var(--accent-color);
+}
+
+table {
+    width: min(1000px, 100%);
+    border: 0;
+    border-spacing: 0;
+}
+
+tbody {
+    background-color: var(--primary-color);
+}
+
+td {
+    padding: 0;
+}
+
+.games tbody tr, .lobby tbody tr {
+    height: 60px;
+}
+
+.lobby th, .games th {
+    text-align: left;
+    font-weight: normal;
+}
+
+.lobby th:nth-child(1), .games th:nth-child(1) {
+    width: 30%;
+    padding-left: 20px;
+}
+
+.lobby th:nth-child(2), .games th:nth-child(2) {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.lobby th:nth-child(3), .games th:nth-child(3) {
+    width: 0;
+    padding-right: 20px;
+    text-align: right;
+}
+
+.lobby th:nth-child(4), .games th:nth-child(4) {
+    width: 0;
+    visibility: hidden;
+}
+
+.lobby tbody td:nth-child(1), .games tbody td:nth-child(1) {
+    padding-left: 20px;
+    box-shadow: inset 20px 30px 15px -15px var(--shadow-color), inset 20px -30px 15px -15px var(--shadow-color)
+}
+
+.lobby tbody td:nth-child(2), .games tbody td:nth-child(2) {
+    padding-left: 20px;
+    padding-right: 20px;
+    box-shadow: inset 0 30px 15px -15px var(--shadow-color), inset 0 -30px 15px -15px var(--shadow-color)
+}
+
+.lobby tbody td:nth-child(3), .games tbody td:nth-child(3) {
+    padding-right: 20px;
+    text-align: right;
+    box-shadow: inset -20px 30px 15px -15px var(--shadow-color), inset -20px -30px 15px -15px var(--shadow-color)
+}
+
+.lobby td button, .games td button {
+    height: 60px;
+}
+
+.add-game table, .game-screen table {
+    width: 100%;
+    table-layout: fixed;
+    font: var(--game-font);
+}
+
+.add-game tr {
+    height: 80px;
+}
+
+.add-game th, .game-screen th {
+    width: 30%;
+    font-weight: normal;
+}
+
+.add-game th, .add-game td, .game-screen th, .game-screen td {
+    box-shadow: inset 0 0 2vw 1vw var(--shadow-color);
+    text-align: center;
+    user-select: none;
+}
+
+.add-game td.empty {
+    color: var(--empty-text-color);
+}
+
+.add-game td:hover, .game-screen td:hover {
+    box-shadow: inset 0 0 0 5px var(--accent-color), inset 0 0 2vw 1vw var(--shadow-color);
+}
+
+.add-game td:active, .game-screen td:active {
+    color: var(--primary-color);
+    background-color: var(--accent-color);
+}
+
+.add-game .button-group {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.add-game .button-group button.hidden {
+    visibility: hidden;
+}
+
+.game {
+    flex: 1;
+    box-sizing: border-box;
+
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: 2fr 1fr;
+    gap: 10px 10px;
+    padding: 10px;
+    grid-template-areas:
+    "game-screen host-card"
+    "players player-controls";
+}
+
+.game-screen {
+    grid-area: game-screen;
+    background: var(--primary-color);
+    box-shadow: inset 0 0 100px 50px var(--shadow-color);
+}
+
+.game-screen .transition-wrapper, .game-screen table, .game-screen .text {
+    height: 100%;
+}
+
+.game-screen .text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font: var(--game-font);
+    padding: 5%;
+    box-sizing: border-box;
+    text-align: center;
+    user-select: none;
+}
+
+.game-screen-exit {
+    opacity: 1;
+}
+
+.game-screen-exit-active {
+    opacity: 0;
+    transition: opacity 500ms ease-in;
+}
+
+.game-screen-enter {
+    opacity: 0;
+}
+
+.game-screen-enter-active {
+    opacity: 1;
+    transition: opacity 500ms ease-in;
+}
+
+.game-screen td.selected {
+    animation-name: blink;
+    animation-duration: 200ms;
+    animation-iteration-count: 2;
+    animation-timing-function: step-end;
+}
+
+@keyframes blink {
+    0% {
+        color: var(--primary-color);
+        background-color: var(--accent-color)
+    }
+    50% {
+        color: var(--accent-color);
+        background-color: var(--primary-color)
+    }
+}
+
+.host-card {
+    grid-area: host-card;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.host-card img {
+    width: 100%;
+}
+
+.host-card .text {
+    white-space: pre-wrap;
+}
+
+.players {
+    grid-area: players;
+    display: flex;
+    gap: 10px;
+}
+
+.player-card {
+    flex: 1;
+
+    justify-content: space-around;
+
+    padding: 20px;
+
+    background: var(--primary-color);
+    box-shadow: inset 0 0 5vw 1vw var(--shadow-color);
+}
+
+.player-card img {
+    max-height: 50%;
+}
+
+.player-card .nickname {
+    white-space: pre;
+}
+
+.tooltip {
+    font: inherit !important;
+    color: inherit !important;
+    background-color: var(--background-color) !important;
+    border-radius: 0 !important;
+    border: 2px solid var(--primary-color) !important;
+}
+
+.tooltip:before {
+    border-top: 50px solid var(--primary-color) !important;
+    bottom: -50px !important;
+}
+
+.tooltip:after {
+    border-top: 46px solid var(--background-color) !important;
+    bottom: -46px !important;
+}
+
+.player-controls {
+    grid-area: player-controls;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.player-controls form {
+    width: 100%;
+    padding: 0;
+    position: unset;
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.player-controls textarea {
+    resize: none;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.Toastify__toast {
+    font: inherit;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    border-radius: 0;
+    outline: 2px solid var(--accent-color);
+}
+
+.Toastify__toast--error {
+    outline: 2px solid var(--error-color);
+}
+
+.Toastify__toast--success {
+    outline: 2px solid var(--success-color);
+}

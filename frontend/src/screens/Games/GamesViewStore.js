@@ -1,6 +1,6 @@
 import {types} from "mobx-state-tree";
 
-const GameListViewStore = types
+const GamesViewStore = types
     .model({
         isCreateGameSessionFormOpen: false
     })
@@ -10,4 +10,4 @@ const GameListViewStore = types
         }
     }))
 
-export default GameListViewStore;
+export default GamesViewStore;

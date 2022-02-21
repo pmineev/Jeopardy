@@ -9,15 +9,12 @@ const getGameState = () => {
 const createGameSession = (gameName, maxPlayers) => {
     const url = '/game_sessions/';
     console.log('create');
-    return axios.post(url, {
-        gameName: gameName,
-        maxPlayers: maxPlayers
-    });
+    return axios.post(url, {gameName, maxPlayers});
 };
 
 const joinGameSession = (creator) => {
     const url = `game_sessions/actions/join/`;
-    return axios.post(url, {creator: creator});
+    return axios.post(url, {creator});
 };
 
 const leaveGameSession = () => {
@@ -27,20 +24,16 @@ const leaveGameSession = () => {
 
 const chooseQuestion = (themeIndex, questionIndex) => {
     const url = 'game_sessions/current/question/';
-    return axios.post(url, {
-        themeIndex: themeIndex,
-        questionIndex: questionIndex
-    });
+    return axios.post(url, {themeIndex, questionIndex});
 };
 
 const submitAnswer = (answer) => {
     const url = 'game_sessions/current/answer/';
-    return axios.post(url, {answer: answer});
+    return axios.post(url, {answer});
 };
 
 const getHostImageUrl = (state) => {
-    const imageURL = baseStaticURL + '/img/kuleshov/' + state + '.jpg';
-    return imageURL;
+    return baseStaticURL + '/img/kuleshov/' + state + '.jpg';
 };
 
 const getAvatarUrl = () => {

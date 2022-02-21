@@ -1,28 +1,26 @@
 import {useEffect} from 'react';
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
 
-import '../../common/list.css';
-
 import {Listener, listenerUrls} from "../../common/listener";
-import {useStore} from "../../common/RootStore";
+import useStore from "../../common/RootStore";
 import {joinGameSession} from "../Game/services";
 import {getGameSessionDescriptions} from "./services";
 
-const GameSessionDescriptionView = observer(({descr, history}) => {
+const GameSessionDescription = observer(({description, navigate}) => {
     return (
         <tr>
-            <td>{descr.creator}</td>
-            <td>{descr.gameName}</td>
-            <td>{descr.currentPlayers}/{descr.maxPlayers}</td>
+            <td>{description.creator}</td>
+            <td>{description.gameName}</td>
+            <td>{description.currentPlayers}/{description.maxPlayers}</td>
             <td>
                 <button
                     onClick={() => {
-                        joinGameSession(descr.creator)
+                        joinGameSession(description.creator)
                             .then(() => {
-                                history.push('/game');
+                                navigate('/game');
                             })
                             .catch(errorCode => {
                                 switch (errorCode) {
@@ -48,9 +46,8 @@ const GameSessionDescriptionView = observer(({descr, history}) => {
     );
 });
 
-const Lobby = observer(() => {
-    // const [gameDescriptions, dispatch] = useReducer(reducer, []);
-    const history = useHistory();
+const GameSessionsTable = observer(() => {
+    const navigate = useNavigate();
     const {lobbyStore: store} = useStore();
 
     useEffect(() => {
@@ -68,30 +65,39 @@ const Lobby = observer(() => {
             });
 
         return () => listener.close()
-    }, [store]);
+    }, []);
+
+    return (
+        <table>
+            <thead>
+            <tr>
+                <th>Создатель</th>
+                <th>Название</th>
+                <th>Игроки</th>
+                <th>Играть</th>
+            </tr>
+            </thead>
+            <tbody>
+            {store.descriptions.size > 0 && values(store.descriptions).map(description =>
+                <GameSessionDescription
+                    key={description.creator}
+                    description={description}
+                    navigate={navigate}
+                />
+            )}
+            </tbody>
+        </table>
+    )
+});
+
+const Lobby = observer(() => {
+    document.title = 'Лобби';
 
     return (
         <div className='lobby'>
-            <header>Лобби</header>
+            <h1>Лобби</h1>
 
-            <table className="list lobby-table">
-                <thead key="lobby-table-head">
-                <tr>
-                    <th>Создатель</th>
-                    <th>Название</th>
-                    <th>Игроки</th>
-                </tr>
-                </thead>
-                <tbody>
-                {store.descriptions.size > 0 && values(store.descriptions).map(descr =>
-                    <GameSessionDescriptionView
-                        key={descr.creator}
-                        descr={descr}
-                        history={history}
-                    />
-                )}
-                </tbody>
-            </table>
+            <GameSessionsTable/>
         </div>
     );
 });
