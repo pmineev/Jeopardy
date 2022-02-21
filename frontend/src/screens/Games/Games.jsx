@@ -2,7 +2,6 @@ import {useEffect} from 'react'
 import {useNavigate} from "react-router-dom";
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import Modal from "react-modal";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
@@ -10,6 +9,7 @@ import {toast} from "react-toastify";
 import TextInput from "../../common/forms/TextInput";
 import {useStore} from "../../common/RootStore";
 import {createGameSession} from "../Game/services";
+import Modal from "../Modal/Modal";
 import {getGameDescriptions} from "./services";
 
 const CreateGameSessionForm = observer(({navigate}) => {
@@ -135,11 +135,8 @@ const Games = observer(() => {
 
 
             <Modal
-                className='modal'
-                overlayClassName='overlay'
                 isOpen={viewStore.isCreateGameSessionFormOpen}
                 onRequestClose={viewStore.toggleCreateGameSessionFormOpen}
-                ariaHideApp={false}
             >
                 <CreateGameSessionForm
                     navigate={navigate}

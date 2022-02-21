@@ -2,7 +2,6 @@ import {useEffect} from "react";
 import {useNavigate} from 'react-router-dom';
 import {Form, Formik} from "formik";
 import * as Yup from "yup";
-import Modal from "react-modal";
 import {observer} from "mobx-react-lite";
 import {toast} from "react-toastify";
 
@@ -10,6 +9,7 @@ import {toOrdinal} from "../../common/utils";
 import {useStore} from "../../common/RootStore";
 import SubmitError from "../../common/forms/SubmitError";
 import TextInput from "../../common/forms/TextInput";
+import Modal from "../Modal/Modal";
 import {postGame} from "./services";
 
 const AddGameForm = observer(() => {
@@ -286,32 +286,22 @@ const RoundsView = observer(() => {
             <Round round={store.selectedRound}/>
 
             <Modal
-                className='modal'
-                overlayClassName='overlay'
                 isOpen={viewStore.isAddThemeFormOpen}
                 onRequestClose={viewStore.toggleAddThemeFormOpen}
-                ariaHideApp={false}
             >
                 <AddThemeForm/>
             </Modal>
 
             <Modal
-                className='modal'
-                overlayClassName='overlay'
                 isOpen={viewStore.isAddQuestionFormOpen}
                 onRequestClose={viewStore.toggleAddQuestionFormOpen}
-                ariaHideApp={false}
             >
                 <AddQuestionForm/>
             </Modal>
 
-
             <Modal
-                className='modal'
-                overlayClassName='overlay'
                 isOpen={viewStore.isAddFinalQuestionFormOpen}
                 onRequestClose={viewStore.toggleAddFinalQuestionFormOpen}
-                ariaHideApp={false}
             >
                 <AddFinalQuestionForm
                     navigate={navigate}
