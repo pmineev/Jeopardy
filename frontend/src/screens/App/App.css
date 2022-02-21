@@ -308,6 +308,8 @@ td {
     justify-content: center;
     align-items: center;
     font: var(--game-font);
+    text-align: center;
+    user-select: none;
 }
 
 .game-screen-exit {
