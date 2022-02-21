@@ -212,9 +212,9 @@ const Question = observer(({question, themeIndex, questionIndex}) => {
     const nickname = getNickname();
 
     useEffect(() => {
-        if (store.stage === Stage.ANSWERING && store.currentQuestion.question === question)
+        if (store.currentQuestion?.question === question)
             setSelected(true);
-    }, [store.stage])
+    }, [store.currentQuestion])
 
     return (
         <td className={`${question.isAnswered ? 'empty' : ''} ${selected ? 'selected' : ''}`}
