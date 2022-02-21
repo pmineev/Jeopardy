@@ -34,7 +34,7 @@ class UserListView(APIView):
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except (UserAlreadyExists, UserNicknameAlreadyExists) as e:
-            return Response(status=status.HTTP_409_CONFLICT, data={'code': e.error})
+            return Response(status=status.HTTP_409_CONFLICT, data={'code': e.code})
 
         return Response(status=status.HTTP_201_CREATED, data=session_dto.to_response())
 
