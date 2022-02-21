@@ -200,21 +200,7 @@ const AddFinalQuestionForm = observer(({navigate}) => {
                 store.setFinalRound(values.text, values.answer);
                 if (store.isAllRoundsFilled)
                     if (store.isAllQuestionsFilled) {
-                        let storeSnapshot = getSnapshot(store);
-                        postGame({
-                            name: storeSnapshot.name,
-                            rounds: storeSnapshot.rounds.map(round => ({
-                                themes: round.themes.map(theme => ({
-                                    name: theme.name,
-                                    questions: theme.questions.map(({id, ...rest}) => rest)
-                                }))
-                            })),
-                            finalRound: {
-                                value: storeSnapshot.finalRound.value,
-                                text: storeSnapshot.finalRound.text,
-                                answer: storeSnapshot.finalRound.answer
-                            }
-                        })
+                        postGame(store.game)
                             .then(() => {
                                 setSubmitting(false);
                                 navigate('/games');
