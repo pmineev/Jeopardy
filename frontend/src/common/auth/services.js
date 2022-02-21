@@ -11,18 +11,15 @@ const registerUser = (username, nickname, password) => {
         });
 };
 
-const loginUser = (credentials) => {
+const loginUser = (username, password) => {
     const url = '/sessions/';
     return axios
-        .post(url, {
-            username: credentials.username,
-            password: credentials.password
-        })
+        .post(url, {username, password})
         .then(response => {
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
             setNickname(response.data.nickname);
-            setUsername(credentials.username);
+            setUsername(username);
         });
 };
 

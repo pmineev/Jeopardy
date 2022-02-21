@@ -49,11 +49,11 @@ const UserProfile = () => {
                         .min(6, 'Не менее 6 символов')
                         .max(128, 'Не более 128 символов')
                 })}
-                onSubmit={(values, {setSubmitting, setErrors}) => {
-                    if (values.nickname.length === 0 && values.password.length === 0)
+                onSubmit={({nickname, password}, {setSubmitting, setErrors}) => {
+                    if (nickname.length === 0 && password.length === 0)
                         setErrors({'submitError': 'Заполните хотя бы одно поле'})
                     else
-                        saveUser(credentials.username, values.nickname, values.password)
+                        saveUser(credentials.username, nickname, password)
                             .then(() => {
                                     setSubmitting(false);
                                     toast('Данные сохранены');

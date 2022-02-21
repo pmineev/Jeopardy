@@ -38,12 +38,12 @@ const AddGameForm = observer(() => {
                         .typeError('Введите число')
                         .integer('Так тоже не прокатит')
                 })}
-                onSubmit={(values, {setSubmitting}) => {
+                onSubmit={({name, roundsCount, questionsCount}, {setSubmitting}) => {
                     setSubmitting(false);
                     store.setGameParams(
-                        values.name,
-                        Number(values.roundsCount),
-                        Number(values.questionsCount)
+                        name,
+                        Number(roundsCount),
+                        Number(questionsCount)
                     );
                     viewStore.toggleAddGameFormOpen();
                 }}
@@ -84,10 +84,10 @@ const AddThemeForm = observer(() => {
                     .required('Обязательное поле')
                     .max(20, 'Не более 20 символов')
             })}
-            onSubmit={(values, {setSubmitting}) => {
+            onSubmit={({name}, {setSubmitting}) => {
                 setSubmitting(false);
                 viewStore.toggleAddThemeFormOpen();
-                store.selectedRound.addTheme(values.name);
+                store.selectedRound.addTheme(name);
             }}
         >
             <Form>
@@ -154,10 +154,10 @@ const AddQuestionForm = observer(() => {
                     .required('Обязательное поле')
                     .max(50, 'Не более 50 символов')
             })}
-            onSubmit={(values, {setSubmitting}) => {
+            onSubmit={({text, answer}, {setSubmitting}) => {
                 setSubmitting(false);
                 viewStore.toggleAddQuestionFormOpen();
-                store.selectedQuestion.set(values.text, values.answer);
+                store.selectedQuestion.set(text, answer);
             }}
         >
             <Form>
@@ -196,8 +196,8 @@ const AddFinalQuestionForm = observer(({navigate}) => {
                     .required('Обязательное поле')
                     .max(50, 'Не более 50 символов')
             })}
-            onSubmit={(values, {setSubmitting, setErrors}) => {
-                store.setFinalRound(values.text, values.answer);
+            onSubmit={({text, answer}, {setSubmitting, setErrors}) => {
+                store.setFinalRound(text, answer);
                 if (store.isAllRoundsFilled)
                     if (store.isAllQuestionsFilled) {
                         postGame(store.game)
@@ -324,9 +324,9 @@ const RoundsView = observer(() => {
 const AddGame = observer(() => {
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
-    useEffect(() => {
-        document.title = 'Добавление игры'
+    document.title = 'Добавление игры';
 
+    useEffect(() => {
         return () => {
             store.clear();
             viewStore.clear();

@@ -23,9 +23,9 @@ const PlayerControls = observer(() => {
                 initialValues={{
                     answer: '',
                 }}
-                onSubmit={(values, {setSubmitting, resetForm}) => {
-                    if (values.answer?.length > 0) {
-                        submitAnswer(values.answer)
+                onSubmit={({answer}, {setSubmitting, resetForm}) => {
+                    if (answer?.length > 0) {
+                        submitAnswer(answer)
                             .then(() => {
                                 resetForm();
                                 setSubmitting(false);

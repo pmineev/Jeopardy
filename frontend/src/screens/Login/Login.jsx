@@ -24,8 +24,8 @@ const Login = () => {
                     password: Yup.string()
                         .required('Обязательное поле')
                 })}
-                onSubmit={(values, {setSubmitting, setErrors}) => {
-                    loginUser(values)
+                onSubmit={({username, password}, {setSubmitting, setErrors}) => {
+                    loginUser(username, password)
                         .then(() => {
                             setSubmitting(false);
                             navigate('/games');

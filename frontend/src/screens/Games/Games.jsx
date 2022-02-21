@@ -28,8 +28,8 @@ const CreateGameSessionForm = observer(({navigate}) => {
                     .typeError('Введите число')
                     .integer('Так тоже не прокатит')
             })}
-            onSubmit={(values, {setSubmitting}) => {
-                createGameSession(store.chosenGame.name, values.maxPlayers)
+            onSubmit={({maxPlayers}) => {
+                createGameSession(store.chosenGame.name, maxPlayers)
                     .then(() => {
                         navigate('/game');
                     })
