@@ -4,7 +4,7 @@ import {Form, Formik} from "formik";
 import * as Yup from "yup";
 import Modal from "react-modal";
 import {observer} from "mobx-react-lite";
-import {getSnapshot} from "mobx-state-tree";
+import {toast} from "react-toastify";
 
 import {toOrdinal} from "../../common/utils";
 import {useStore} from "../../common/RootStore";
@@ -203,6 +203,7 @@ const AddFinalQuestionForm = observer(({navigate}) => {
                         postGame(store.game)
                             .then(() => {
                                 setSubmitting(false);
+                                toast.success('Игра сохранена!')
                                 navigate('/games');
                             })
                             .catch(error =>
