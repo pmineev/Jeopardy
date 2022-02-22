@@ -17,6 +17,7 @@
     --selection-color: #636B96;
     --error-color: #DC4523;
     --success-color: #008A00;
+    --inactive-color: #6464BB;
     --shadow-color: rgba(0, 0, 0, 0.5);
     --font: 18px 'Montserrat', sans-serif;
     --game-font: 36px 'Oswald', sans-serif;
@@ -199,6 +200,10 @@ td {
 
 .lobby .active button {
     color: var(--accent-color);
+}
+
+.lobby .inactive {
+    background-color: var(--inactive-color);
 }
 
 .lobby th, .games th {
