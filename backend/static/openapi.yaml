@@ -618,6 +618,7 @@ components:
       - maxPlayers
       - currentPlayers
       - isPlaying
+      - isLeft
       properties:
         creator:
           description: Ник создателя игровой сессии
@@ -634,7 +635,10 @@ components:
           type: integer
           minimum: 1
         isPlaying:
-          description: Есть ли пользователь в этой игровой сессии
+          description: Есть ли пользователь в этой сессии
+          type: boolean
+        isLeft:
+          description: Вышел ли пользователь из этой сессии
           type: boolean
 
     createGameSession:
