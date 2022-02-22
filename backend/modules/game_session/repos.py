@@ -4,8 +4,7 @@ if TYPE_CHECKING:
     from ..user.entities import User
 
 from backend.core.repos import Repository
-from backend.infra.models import ORMUser, ORMGameSession, ORMGame, ORMPlayer, ORMRound, ORMQuestion
-from backend.modules.game.exceptions import GameNotFound
+from backend.infra.models import ORMGameSession, ORMPlayer, ORMRound, ORMQuestion
 from backend.modules.game_session.exceptions import GameSessionNotFound
 from backend.modules.game_session.entities import GameSession
 
