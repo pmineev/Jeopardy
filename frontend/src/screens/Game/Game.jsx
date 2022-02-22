@@ -71,7 +71,7 @@ const PlayerControls = observer(() => {
                     else
                         leaveGameSession()
                             .then(() => {
-                                navigate('/games');
+                                navigate('/lobby');
                             })
                             .catch(errorCode => {
                                 switch (errorCode) {
