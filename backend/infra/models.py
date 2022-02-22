@@ -101,12 +101,12 @@ class ORMGameSession(Model):
     game = ForeignKey(ORMGame,
                       on_delete=PROTECT)
     max_players = IntegerField()
-    current_round = OneToOneField(ORMRound,
+    current_round = ForeignKey(ORMRound,
+                               on_delete=PROTECT,
+                               null=True)
+    current_question = ForeignKey(ORMQuestion,
                                   on_delete=PROTECT,
                                   null=True)
-    current_question = OneToOneField(ORMQuestion,
-                                     on_delete=PROTECT,
-                                     null=True)
     current_player = OneToOneField(ORMPlayer,
                                    on_delete=CASCADE,
                                    null=True)
