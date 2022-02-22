@@ -23,7 +23,7 @@ class GameSessionService:
     def create(self, game_session_data, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)
 
-        if self.repo.is_exists(user):
+        if user.is_playing:
             raise AlreadyPlaying
 
         game = self.game_repo.get(game_session_data['game_name'])
@@ -50,7 +50,7 @@ class GameSessionService:
     def join(self, username: str, join_data):
         user = self.user_repo.get(username)
 
-        if self.repo.is_exists(user):
+        if user.is_playing:
             raise AlreadyPlaying
 
         creator_nickname = join_data['creator']

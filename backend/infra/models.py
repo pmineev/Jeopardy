@@ -16,16 +16,22 @@ class ORMUser(Model):
     nickname = CharField(max_length=50,
                          unique=True)
 
+    @property
+    def game_session_id(self):
+        active_player = self.players.filter(is_playing=True).first()
+        return active_player.game_session_id if active_player else None
+
     def to_domain(self):
         return User(id=self.pk,
                     username=self.user.username,
-                    nickname=self.nickname)
+                    nickname=self.nickname,
+                    game_session_id=self.game_session_id)
 
 
 class ORMPlayer(Model):
-    user = OneToOneField(ORMUser,
-                         primary_key=True,
-                         on_delete=CASCADE)
+    user = ForeignKey(ORMUser,
+                      on_delete=CASCADE,
+                      related_name='players')
     game_session = ForeignKey('ORMGameSession',
                               on_delete=CASCADE,
                               related_name='players')
