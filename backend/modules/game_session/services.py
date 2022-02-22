@@ -16,7 +16,7 @@ class GameSessionService:
 
     def get_game_state(self, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_user(user)
+        game_session = self.repo.get_by_player(user)
 
         return GameStateDTO(game_session)
 
@@ -65,7 +65,7 @@ class GameSessionService:
 
     def leave(self, username: str):
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_user(user)
+        game_session = self.repo.get_by_player(user)
 
         game_session.leave(user)
 
@@ -80,7 +80,7 @@ class GameSessionService:
 
     def choose_question(self, username: str, question_data):
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_user(user)
+        game_session = self.repo.get_by_player(user)
 
         theme_index = question_data['theme_index']
         question_index = question_data['question_index']
@@ -111,7 +111,7 @@ class GameSessionService:
 
     def submit_answer(self, username: str, answer_data):
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_user(user)
+        game_session = self.repo.get_by_player(user)
 
         game_session.submit_answer(user, answer_data['answer'])
 

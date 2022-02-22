@@ -39,7 +39,7 @@ class GameSessionRepo(Repository):
         return orm_game_session.to_domain()
 
     @staticmethod
-    def get_by_user(user: 'User') -> 'GameSession':
+    def get_by_player(user: 'User') -> 'GameSession':
         try:
             orm_game_session = ORMGameSession.objects.get(players__user_id=user.id, players__is_playing=True)
         except ORMGameSession.DoesNotExist:
