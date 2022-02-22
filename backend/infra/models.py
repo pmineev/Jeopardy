@@ -16,16 +16,23 @@ class ORMUser(Model):
     nickname = CharField(max_length=50,
                          unique=True)
 
+    @property
+    def game_session_id(self):
+        active_player = self.players.filter(is_playing=True).first()
+        return active_player.game_session_id if active_player else None
+
     def to_domain(self):
         return User(id=self.pk,
                     username=self.user.username,
-                    nickname=self.nickname)
+                    nickname=self.nickname,
+                    game_sessions=list(self.players.values_list('game_session_id', flat=True)),
+                    game_session_id=self.game_session_id)
 
 
 class ORMPlayer(Model):
-    user = OneToOneField(ORMUser,
-                         primary_key=True,
-                         on_delete=CASCADE)
+    user = ForeignKey(ORMUser,
+                      on_delete=CASCADE,
+                      related_name='players')
     game_session = ForeignKey('ORMGameSession',
                               on_delete=CASCADE,
                               related_name='players')
@@ -101,12 +108,12 @@ class ORMGameSession(Model):
     game = ForeignKey(ORMGame,
                       on_delete=PROTECT)
     max_players = IntegerField()
-    current_round = OneToOneField(ORMRound,
+    current_round = ForeignKey(ORMRound,
+                               on_delete=PROTECT,
+                               null=True)
+    current_question = ForeignKey(ORMQuestion,
                                   on_delete=PROTECT,
                                   null=True)
-    current_question = OneToOneField(ORMQuestion,
-                                     on_delete=PROTECT,
-                                     null=True)
     current_player = OneToOneField(ORMPlayer,
                                    on_delete=CASCADE,
                                    null=True)

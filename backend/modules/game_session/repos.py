@@ -4,34 +4,27 @@ if TYPE_CHECKING:
     from ..user.entities import User
 
 from backend.core.repos import Repository
-from backend.infra.models import ORMUser, ORMGameSession, ORMGame, ORMPlayer, ORMRound, ORMQuestion
-from backend.modules.game.exceptions import GameNotFound
+from backend.infra.models import ORMGameSession, ORMPlayer, ORMRound, ORMQuestion
 from backend.modules.game_session.exceptions import GameSessionNotFound
 from backend.modules.game_session.entities import GameSession
 
 
 class GameSessionRepo(Repository):
     @staticmethod
-    def is_exists(user: 'User'):
-        return ORMGameSession.objects.filter(players__user__user=user.id).exists()
+    def is_exists(creator: 'User'):
+        return ORMGameSession.objects.filter(creator_id=creator.id).exists()
 
     @staticmethod
     def _create(game_session: 'GameSession') -> 'GameSession':
-        try:
-            orm_game = ORMGame.objects.get(name=game_session.game.name)
-        except ORMGame.DoesNotExist:
-            raise GameNotFound
-
-        orm_user = ORMUser.objects.get(user__username=game_session.creator.username)
-
-        orm_game_session = ORMGameSession.objects.create(creator=orm_user,
-                                                         game=orm_game,
+        orm_game_session = ORMGameSession.objects.create(creator_id=game_session.creator.id,
+                                                         game_id=game_session.game.id,
                                                          max_players=game_session.max_players)
-
-        ORMPlayer.objects.create(user=orm_user,
-                                 game_session=orm_game_session)
-
         game_session.id = orm_game_session.pk
+
+        player = game_session.players[0]
+        orm_player = ORMPlayer.objects.create(user_id=player.user.id,
+                                              game_session=orm_game_session)
+        player.id = orm_player.pk
 
         return game_session
 
@@ -45,9 +38,9 @@ class GameSessionRepo(Repository):
         return orm_game_session.to_domain()
 
     @staticmethod
-    def get_by_user(user: 'User') -> 'GameSession':
+    def get_by_player(user: 'User') -> 'GameSession':
         try:
-            orm_game_session = ORMGameSession.objects.get(players__user__user=user.id)
+            orm_game_session = ORMGameSession.objects.get(players__user_id=user.id, players__is_playing=True)
         except ORMGameSession.DoesNotExist:
             raise GameSessionNotFound
 
@@ -77,13 +70,15 @@ class GameSessionRepo(Repository):
         deleted_players_qs = orm_game_session.players.exclude(pk__in=players_ids)
         deleted_players_qs.delete()
         for player in game_session.players:
-            orm_player, created = orm_game_session.players \
-                .update_or_create(pk=player.user.id,
-                                  defaults=dict(
-                                      is_playing=player.is_playing,
-                                      score=player.score,
-                                      answer=player.answer.text if player.answer else None))
-            if created:
+            if player.id:
+                orm_player = ORMPlayer.objects.get(pk=player.id)
+                orm_player.is_playing = player.is_playing
+                orm_player.score = player.score
+                orm_player.answer = player.answer.text if player.answer else None
+                orm_player.save()
+            else:
+                orm_player = ORMPlayer.objects.create(user_id=player.user.id,
+                                                      game_session=orm_game_session)
                 player.id = orm_player.pk
 
         if game_session.current_round:

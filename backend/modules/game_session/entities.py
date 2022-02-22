@@ -11,7 +11,7 @@ from backend.modules.game_session.enums import Stage
 from backend.modules.game_session.exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
 from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
     CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
-    FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent
+    FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent
 
 
 @dataclass
@@ -95,7 +95,7 @@ class GameSession(Entity):
         if player:
             if not player.is_playing:
                 player.is_playing = True
-                self.add_event(PlayerJoinedEvent(self, player))
+                self.add_event(PlayerActiveEvent(self, player))
         else:
             if len(self.players) + 1 > self.max_players:
                 raise TooManyPlayers

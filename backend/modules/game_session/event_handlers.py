@@ -7,7 +7,7 @@ from backend.infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent, PlayerJoinedEvent, \
     PlayerLeftEvent, RoundStartedEvent, FinalRoundStartedEvent, CurrentQuestionChosenEvent, \
     PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
-    PlayerInactiveEvent
+    PlayerInactiveEvent, PlayerActiveEvent
 from backend.modules.game_session.services import GameSessionService
 
 
@@ -21,6 +21,10 @@ def notify_of_game_session_deleted(event: GameSessionDeletedEvent):
 
 def notify_of_player_joined(event: PlayerJoinedEvent):
     notify_to_lobby(event.creator_nickname_dto, 'player_joined')
+    notify_to_game_session(event.game_session_id, event.player_nickname_dto, 'player_joined')
+
+
+def notify_of_player_active(event: PlayerJoinedEvent):
     notify_to_game_session(event.game_session_id, event.player_nickname_dto, 'player_joined')
 
 
@@ -109,6 +113,7 @@ def register_handlers():
     EventDispatcher.register_handler(notify_of_game_session_created, GameSessionCreatedEvent)
     EventDispatcher.register_handler(notify_of_game_session_deleted, GameSessionDeletedEvent)
     EventDispatcher.register_handler(notify_of_player_joined, PlayerJoinedEvent)
+    EventDispatcher.register_handler(notify_of_player_active, PlayerActiveEvent)
     EventDispatcher.register_handler(notify_of_player_left, PlayerLeftEvent)
     EventDispatcher.register_handler(notify_of_player_inactive, PlayerInactiveEvent)
     EventDispatcher.register_handler(notify_of_round_started, RoundStartedEvent)
