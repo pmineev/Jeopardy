@@ -1,4 +1,4 @@
-import {types} from "mobx-state-tree";
+import {applySnapshot, types} from "mobx-state-tree";
 
 const GameSessionDescription = types
     .model({
@@ -47,9 +47,13 @@ const LobbyStore = types
             self.descriptions.get(data.creator).setPlayerLeft();
         },
         initialize(data) {
+            self.clear();
             data.forEach(descriptionData =>
                 self.descriptions.put(descriptionData)
             )
+        },
+        clear() {
+            applySnapshot(self, {});
         }
     }))
 
