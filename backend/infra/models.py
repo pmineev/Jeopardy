@@ -25,6 +25,7 @@ class ORMUser(Model):
         return User(id=self.pk,
                     username=self.user.username,
                     nickname=self.nickname,
+                    game_sessions=list(self.players.values_list('game_session_id', flat=True)),
                     game_session_id=self.game_session_id)
 
 

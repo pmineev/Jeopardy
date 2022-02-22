@@ -162,12 +162,13 @@ class GameStateDTO(DTO):
 
 
 class GameSessionDescriptionDTO(DTO):
-    def __init__(self, gs: 'GameSession', is_playing: bool):
+    def __init__(self, gs: 'GameSession', is_playing: bool, is_left: bool):
         self.creator = gs.creator.nickname
         self.game_name = gs.game.name
         self.max_players = gs.max_players
         self.current_players = len(gs.players)
         self.is_playing = is_playing
+        self.is_left = is_left
 
     def to_response(self):
         return dict(
@@ -175,7 +176,8 @@ class GameSessionDescriptionDTO(DTO):
             gameName=self.game_name,
             maxPlayers=self.max_players,
             currentPlayers=self.current_players,
-            isPlaying=self.is_playing
+            isPlaying=self.is_playing,
+            isLeft=self.is_left
         )
 
 

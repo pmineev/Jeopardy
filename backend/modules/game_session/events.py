@@ -15,7 +15,7 @@ class GameSessionCreatedEvent(Event):
         self.game_session_id = game_session.id
         self.creator_username = game_session.creator.username
 
-        self.game_session_description_dto = GameSessionDescriptionDTO(game_session, False).to_response()
+        self.game_session_description_dto = GameSessionDescriptionDTO(game_session, False, False).to_response()
 
 
 class GameSessionDeletedEvent(Event):

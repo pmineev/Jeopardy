@@ -50,7 +50,11 @@ class GameSessionService:
 
         game_sessions = self.repo.get_all()
 
-        return [GameSessionDescriptionDTO(gs, user.game_session_id == gs.id) for gs in game_sessions]
+        left_gs_ids = [id for id in user.game_sessions if id != user.game_session_id]
+
+        return [GameSessionDescriptionDTO(gs,
+                                          gs.id == user.game_session_id,
+                                          gs.id in left_gs_ids) for gs in game_sessions]
 
     def join(self, username: str, join_data):
         user = self.user_repo.get(username)
