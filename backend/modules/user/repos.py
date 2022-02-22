@@ -38,7 +38,7 @@ class UserRepo(Repository):
         orm_user = ORMUser.objects.create(user=orm_django_user,
                                           nickname=user.nickname)
 
-        user, id = orm_user.pk
+        user.id = orm_user.pk
 
         return user
 

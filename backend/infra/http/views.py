@@ -13,7 +13,7 @@ from backend.infra.http.serializers import RegisterUserCredentialsSerializer, Lo
 from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
 from backend.modules.game.services import GameService
 from backend.modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
-    WrongQuestionRequest, AlreadyPlaying, WrongStage
+    WrongQuestionRequest, AlreadyPlaying, WrongStage, AlreadyCreated
 from backend.modules.game_session.services import GameSessionService
 from backend.modules.user.exceptions import UserAlreadyExists, UserNotFound, UserNicknameAlreadyExists
 from backend.modules.user.services import UserService
@@ -34,7 +34,7 @@ class UserListView(APIView):
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except (UserAlreadyExists, UserNicknameAlreadyExists) as e:
-            return Response(status=status.HTTP_409_CONFLICT, data={'code': e.error})
+            return Response(status=status.HTTP_409_CONFLICT, data={'code': e.code})
 
         return Response(status=status.HTTP_201_CREATED, data=session_dto.to_response())
 
@@ -139,13 +139,13 @@ class GameSessionListView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameNotFound as e:
             return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
-        except AlreadyPlaying as e:
+        except (AlreadyCreated, AlreadyPlaying) as e:
             return Response(status=status.HTTP_409_CONFLICT, data={'code': e.code})
 
         return Response(status=status.HTTP_201_CREATED, data=game_state_dto.to_response())
 
     def get(self, request):
-        game_session_description_dtos = self.service.get_all_descriptions()
+        game_session_description_dtos = self.service.get_all_descriptions(request.user.username)
 
         return Response(data=[dto.to_response() for dto in game_session_description_dtos])
 

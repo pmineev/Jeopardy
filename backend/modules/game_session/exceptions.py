@@ -18,5 +18,9 @@ class AlreadyPlaying(Exception):
     code = 'already_playing'
 
 
+class AlreadyCreated(Exception):
+    code = 'already_created'
+
+
 class WrongStage(Exception):
     code = 'wrong_stage'
