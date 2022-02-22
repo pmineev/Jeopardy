@@ -12,8 +12,8 @@ from backend.modules.game_session.entities import GameSession
 
 class GameSessionRepo(Repository):
     @staticmethod
-    def is_exists(user: 'User'):
-        return ORMGameSession.objects.filter(players__user__user=user.id).exists()
+    def is_exists(creator: 'User'):
+        return ORMGameSession.objects.filter(creator_id=creator.id).exists()
 
     @staticmethod
     def _create(game_session: 'GameSession') -> 'GameSession':

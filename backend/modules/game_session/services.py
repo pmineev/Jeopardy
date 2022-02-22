@@ -4,7 +4,7 @@ from backend.modules.game.repos import game_repo
 from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO
 from backend.modules.game_session.entities import GameSession
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent
-from backend.modules.game_session.exceptions import AlreadyPlaying
+from backend.modules.game_session.exceptions import AlreadyPlaying, AlreadyCreated
 from backend.modules.game_session.repos import game_session_repo
 from backend.modules.user.repos import user_repo
 
@@ -25,6 +25,9 @@ class GameSessionService:
 
         if user.is_playing:
             raise AlreadyPlaying
+
+        if self.repo.is_exists(user):
+            raise AlreadyCreated
 
         game = self.game_repo.get(game_session_data['game_name'])
 
