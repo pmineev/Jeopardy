@@ -55,16 +55,14 @@ class GameSessionService:
     def join(self, username: str, join_data):
         user = self.user_repo.get(username)
 
-        if user.is_playing:
+        game_session = self.repo.get_by_creator(join_data['creator'])
+
+        if not user.is_playing:
+            game_session.join(user)
+
+            game_session = self.repo.save(game_session)
+        elif user.game_session_id != game_session.id:
             raise AlreadyPlaying
-
-        creator_nickname = join_data['creator']
-
-        game_session = self.repo.get_by_creator(creator_nickname)
-
-        game_session.join(user)
-
-        game_session = self.repo.save(game_session)
 
         return GameStateDTO(game_session)
 
