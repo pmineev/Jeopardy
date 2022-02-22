@@ -34,6 +34,14 @@ class PlayerJoinedEvent(Event):
         self.player_nickname_dto = PlayerNicknameDTO(player).to_response()
 
 
+class PlayerActiveEvent(Event):
+    def __init__(self, game_session: 'GameSession', player: 'Player'):
+        self.game_session_id = game_session.id
+        self.player_username = player.username
+
+        self.player_nickname_dto = PlayerNicknameDTO(player).to_response()
+
+
 class PlayerLeftEvent(Event):
     def __init__(self, game_session: 'GameSession', player: 'Player'):
         self.game_session_id = game_session.id
