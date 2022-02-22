@@ -5,8 +5,8 @@ const GameSessionDescription = types
         creator: types.identifier,
         gameName: types.string,
         maxPlayers: types.number,
-        currentPlayers: types.number
-
+        currentPlayers: types.number,
+        isPlaying: types.boolean
     })
     .actions(self => ({
         setPlayerJoined() {

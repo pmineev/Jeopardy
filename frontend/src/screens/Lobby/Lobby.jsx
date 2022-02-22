@@ -11,7 +11,7 @@ import {getGameSessionDescriptions} from "./services";
 
 const GameSessionDescription = observer(({description, navigate}) => {
     return (
-        <tr>
+        <tr className={description.isPlaying ? 'active' : undefined}>
             <td>{description.creator}</td>
             <td>{description.gameName}</td>
             <td>{description.currentPlayers}/{description.maxPlayers}</td>

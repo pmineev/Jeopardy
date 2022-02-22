@@ -188,8 +188,17 @@ td {
     padding: 0;
 }
 
-.games tbody tr, .lobby tbody tr {
+.lobby tbody tr, .games tbody tr {
     height: 60px;
+}
+
+.lobby .active {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+
+.lobby .active button {
+    color: var(--accent-color);
 }
 
 .lobby th, .games th {
