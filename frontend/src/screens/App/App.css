@@ -17,6 +17,7 @@
     --selection-color: #636B96;
     --error-color: #DC4523;
     --success-color: #008A00;
+    --active-color: #3264bb;
     --inactive-color: #6464BB;
     --shadow-color: rgba(0, 0, 0, 0.5);
     --font: 18px 'Montserrat', sans-serif;
@@ -398,6 +399,10 @@ td {
 
     background: var(--primary-color);
     box-shadow: inset 0 0 5vw 1vw var(--shadow-color);
+}
+
+.player-card.current {
+    --shadow-color: var(--active-color);
 }
 
 .player-card img {

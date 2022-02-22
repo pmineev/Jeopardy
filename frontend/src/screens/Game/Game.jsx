@@ -338,6 +338,7 @@ const GameScreen = observer(() => {
 });
 
 const PlayerCard = observer(({player}) => {
+    const {gameStore: store} = useStore();
     const [timeoutId, setTimeoutId] = useState(null);
     const tooltipRef = useRef(null);
 
@@ -355,7 +356,7 @@ const PlayerCard = observer(({player}) => {
     return (
         <>
             <div
-                className='player-card'
+                className={`player-card ${player === store.currentPlayer ? 'current' : ''}`}
                 data-tip=''
                 data-for={player.nickname + '-tooltip'}
                 ref={tooltipRef}
