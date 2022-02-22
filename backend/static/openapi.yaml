@@ -270,7 +270,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/requestRejectReason'
         '409':
-          description: Пользователь уже играет
+          description: |
+            Игровая сессия не создана.
+
+            Возможные причины:
+            - уже существует созданная пользователем игровая сессия;
+            - пользователь уже играет.
           content:
             application/json:
               schema:
@@ -841,6 +846,7 @@ components:
           - not_current_player
           - wrong_question_request
           - already_playing
+          - already_created
           - wrong_stage
           - invalid_refresh_token
 
