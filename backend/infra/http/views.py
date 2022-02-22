@@ -145,7 +145,7 @@ class GameSessionListView(APIView):
         return Response(status=status.HTTP_201_CREATED, data=game_state_dto.to_response())
 
     def get(self, request):
-        game_session_description_dtos = self.service.get_all_descriptions()
+        game_session_description_dtos = self.service.get_all_descriptions(request.user.username)
 
         return Response(data=[dto.to_response() for dto in game_session_description_dtos])
 

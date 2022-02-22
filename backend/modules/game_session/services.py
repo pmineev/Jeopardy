@@ -45,10 +45,12 @@ class GameSessionService:
 
         return GameStateDTO(game_session)
 
-    def get_all_descriptions(self) -> List[GameSessionDescriptionDTO]:
+    def get_all_descriptions(self, username: str) -> List[GameSessionDescriptionDTO]:
+        user = self.user_repo.get(username)
+
         game_sessions = self.repo.get_all()
 
-        return [GameSessionDescriptionDTO(game_session) for game_session in game_sessions]
+        return [GameSessionDescriptionDTO(gs, user.game_session_id == gs.id) for gs in game_sessions]
 
     def join(self, username: str, join_data):
         user = self.user_repo.get(username)
