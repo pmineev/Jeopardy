@@ -113,6 +113,8 @@ const GameStore = types
         },
         onRoundStarted(data) {
             console.log(data);
+            self.currentQuestion = undefined;
+
             self.setCurrentRound(data.round);
             self.setCurrentPlayer(data.currentPlayer.nickname);
 
