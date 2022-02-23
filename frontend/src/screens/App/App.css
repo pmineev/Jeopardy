@@ -121,7 +121,7 @@ h1 {
 }
 
 form {
-    width: min(350px, 100%);
+    max-width: 350px;
 
     justify-content: center;
     gap: 15px;
