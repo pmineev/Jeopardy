@@ -272,6 +272,7 @@ td {
 .add-game th, .game-screen th {
     width: 30%;
     font-weight: normal;
+    overflow-wrap: break-word;
 }
 
 .add-game th, .add-game td, .game-screen th, .game-screen td {
