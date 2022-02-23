@@ -17,6 +17,8 @@
     --selection-color: #636B96;
     --error-color: #DC4523;
     --success-color: #008A00;
+    --active-color: #3264bb;
+    --inactive-color: #6464BB;
     --shadow-color: rgba(0, 0, 0, 0.5);
     --font: 18px 'Montserrat', sans-serif;
     --game-font: 36px 'Oswald', sans-serif;
@@ -82,13 +84,14 @@ body {
 }
 
 header {
-    height: 40px;
+    height: 60px;
     background-color: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    padding: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
     font-size: 1.3em;
 }
 
@@ -115,10 +118,11 @@ h1 {
     font-weight: normal;
     margin-top: 0.5em;
     margin-bottom: 0.75em;
+    text-align: center;
 }
 
 form {
-    width: min(350px, 100%);
+    max-width: 350px;
 
     justify-content: center;
     gap: 15px;
@@ -188,8 +192,25 @@ td {
     padding: 0;
 }
 
-.games tbody tr, .lobby tbody tr {
+.lobby tbody tr, .games tbody tr {
     height: 60px;
+}
+
+.lobby .active {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+
+.lobby .active button {
+    color: var(--accent-color);
+}
+
+.lobby .active button:active {
+    color: var(--primary-color);
+}
+
+.lobby .inactive {
+    background-color: var(--inactive-color);
 }
 
 .lobby th, .games th {
@@ -252,6 +273,7 @@ td {
 .add-game th, .game-screen th {
     width: 30%;
     font-weight: normal;
+    overflow-wrap: break-word;
 }
 
 .add-game th, .add-game td, .game-screen th, .game-screen td {
@@ -361,8 +383,14 @@ td {
     gap: 10px;
 }
 
+.host-card .picture {
+    max-height: 75%;
+}
+
 .host-card img {
     width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .host-card .text {
@@ -380,18 +408,34 @@ td {
 
     justify-content: space-around;
 
-    padding: 20px;
+    padding: 2vh;
 
     background: var(--primary-color);
     box-shadow: inset 0 0 5vw 1vw var(--shadow-color);
+    transition: box-shadow 1000ms;
+}
+
+.player-card.current {
+    --shadow-color: var(--active-color);
+}
+
+.player-card .avatar {
+    max-height: 50%;
 }
 
 .player-card img {
-    max-height: 50%;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .player-card .nickname {
     white-space: pre;
+}
+
+.player-card .score {
+    font-size: larger;
+    font-weight: bolder;
 }
 
 .tooltip {

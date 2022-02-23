@@ -38,6 +38,10 @@ function App() {
                         element={<Login/>}
                     />
                     <Route
+                        path="*"
+                        element={<Navigate to="/" replace/>}
+                    />
+                    <Route
                         element={<HeaderWrapper/>}
                     >
                         <Route

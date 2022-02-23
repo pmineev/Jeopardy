@@ -5,6 +5,7 @@ const AddGameViewStore = types
         isAddGameFormOpen: true,
         isAddThemeFormOpen: false,
         isAddQuestionFormOpen: false,
+        isChangeGameNameFormOpen: false,
         isAddFinalQuestionFormOpen: false
     })
     .actions(self => ({
@@ -16,6 +17,9 @@ const AddGameViewStore = types
         },
         toggleAddQuestionFormOpen() {
             self.isAddQuestionFormOpen = !self.isAddQuestionFormOpen;
+        },
+        toggleChangeGameNameFormOpen() {
+            self.isChangeGameNameFormOpen = !self.isChangeGameNameFormOpen;
         },
         toggleAddFinalQuestionFormOpen() {
             self.isAddFinalQuestionFormOpen = !self.isAddFinalQuestionFormOpen;

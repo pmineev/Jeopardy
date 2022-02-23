@@ -62,7 +62,7 @@ const Round = types
 
 const GameStore = types
     .model({
-        stage: types.optional(types.enumeration('stage', Object.values(Stage)), Stage.WAITING),
+        stage: types.optional(types.enumeration('stage', Object.values(Stage)), Stage.EMPTY),
         players: types.array(Player),
         currentPlayer: types.maybe(types.reference(Player)),
         currentRound: types.maybe(Round),
@@ -113,6 +113,8 @@ const GameStore = types
         },
         onRoundStarted(data) {
             console.log(data);
+            self.currentQuestion = undefined;
+
             self.setCurrentRound(data.round);
             self.setCurrentPlayer(data.currentPlayer.nickname);
 
@@ -243,6 +245,9 @@ const GameStore = types
                     question.isAnswered
                 )
             )
+        },
+        get isInitialized() {
+            return self.players.length > 0
         }
     }));
 
