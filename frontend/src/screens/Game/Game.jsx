@@ -353,10 +353,12 @@ const PlayerCard = observer(({player}) => {
         delayHide(3000);
     }, [player.answer])
 
+    const isCurrent = () => player === store.currentPlayer && store.stage === Stage.CHOOSING_QUESTION;
+
     return (
         <>
             <div
-                className={`player-card ${player === store.currentPlayer ? 'current' : ''}`}
+                className={`player-card ${isCurrent() ? 'current' : ''}`}
                 data-tip=''
                 data-for={player.nickname + '-tooltip'}
                 ref={tooltipRef}
