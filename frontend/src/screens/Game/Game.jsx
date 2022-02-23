@@ -438,7 +438,7 @@ const Game = observer(() => {
         let timeoutId;
 
         function wait(callback) {
-            timeoutId = setTimeout(callback, 5000);
+            timeoutId = setTimeout(callback, 3000);
         }
 
         switch (store.stage) {
