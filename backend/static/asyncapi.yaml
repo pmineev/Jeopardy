@@ -330,6 +330,8 @@ components:
       - gameName
       - maxPlayers
       - currentPlayers
+      - isPlaying
+      - isLeft
       properties:
         creator:
           description: Ник создателя игровой сессии
@@ -345,6 +347,14 @@ components:
           description: Текущее количество игроков
           type: integer
           minimum: 1
+        isPlaying:
+          description: Есть ли пользователь в этой сессии
+          type: boolean
+          const: false
+        isLeft:
+          description: Вышел ли пользователь из этой сессии
+          type: boolean
+          const: false
 
     gameStateCurrentRound:
       description: Описание текущего раунда игровой сессии
