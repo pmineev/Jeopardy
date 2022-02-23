@@ -244,9 +244,15 @@ const AddFinalQuestionForm = observer(({navigate}) => {
                                 toast.success('Игра сохранена!')
                                 navigate('/games');
                             })
-                            .catch(error =>
-                                setErrors({'submitError': error.message})
-                            );
+                            .catch(errorCode => {
+                                switch (errorCode) {
+                                    case 'game_already_exists':
+                                        setErrors({'submitError': 'Игра с таким именем уже существует'});
+                                        break;
+                                    default:
+                                        console.log(errorCode);
+                                }
+                            });
                     } else
                         setErrors({'submitError': 'Заполните все вопросы'})
                 else
