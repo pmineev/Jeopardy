@@ -365,16 +365,16 @@ const PlayerCard = observer(({player}) => {
                 data-for={player.nickname + '-tooltip'}
                 ref={tooltipRef}
             >
-                <img
-                    src={getAvatarUrl()}
-                    alt={player.nickname}
-                />
-                <div
-                    className='nickname'
-                >
+                <div className='avatar'>
+                    <img
+                        src={getAvatarUrl()}
+                        alt={player.nickname}
+                    />
+                </div>
+                <div className='nickname'>
                     {player.nickname}
                 </div>
-                <div>
+                <div className='score'>
                     {player.score}
                 </div>
             </div>
