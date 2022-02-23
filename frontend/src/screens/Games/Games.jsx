@@ -38,6 +38,9 @@ const CreateGameSessionForm = observer(({navigate}) => {
                             case 'already_playing':
                                 toast('Вы уже играете');
                                 break;
+                            case 'already_created':
+                                toast('Вы уже создали игру');
+                                break;
                             case 'game_not_found':
                                 toast.error('Игра не найдена');
                                 break;
