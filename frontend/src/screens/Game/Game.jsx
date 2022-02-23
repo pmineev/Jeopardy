@@ -409,24 +409,24 @@ const Game = observer(() => {
     useEffect(() => {
         document.title = 'Игра';
 
-        let listener;
+        const listener = new GameSessionListener(listenerUrls.gameSession);
+        listener.setHandler(store.eventHandler);
 
-        getGameState()  // TODO! race condition
-            .then(response => {
-                store.initialize(response.data);
-                listener = new GameSessionListener(listenerUrls.gameSession);
-                listener.setHandler(store.eventHandler);
-            })
-            .catch(errorCode => {
-                switch (errorCode) {
-                    case 'game_session_not_found':
-                        toast("Вы не играете");
-                        break;
-                    default:
-                        console.log(errorCode);
-                }
-                navigate('/games');
-            });
+        if (!store.isInitialized)
+            getGameState()
+                .then(response => {
+                    store.initialize(response.data);
+                })
+                .catch(errorCode => {
+                    switch (errorCode) {
+                        case 'game_session_not_found':
+                            toast("Вы не играете");
+                            break;
+                        default:
+                            console.log(errorCode);
+                    }
+                    navigate('/games');
+                });
 
         return () => {
             listener?.close();

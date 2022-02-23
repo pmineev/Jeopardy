@@ -245,6 +245,9 @@ const GameStore = types
                     question.isAnswered
                 )
             )
+        },
+        get isInitialized() {
+            return self.players.length > 0
         }
     }));
 
