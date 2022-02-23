@@ -203,6 +203,10 @@ td {
     color: var(--accent-color);
 }
 
+.lobby .active button:active {
+    color: var(--primary-color);
+}
+
 .lobby .inactive {
     background-color: var(--inactive-color);
 }
