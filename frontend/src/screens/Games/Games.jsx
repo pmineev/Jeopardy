@@ -13,7 +13,7 @@ import Modal from "../Modal/Modal";
 import {getGameDescriptions} from "./services";
 
 const CreateGameSessionForm = observer(({navigate}) => {
-    const {gamesStore: store, gamesViewStore: viewStore} = useStore();
+    const {gamesStore: store, gamesViewStore: viewStore, gameStore} = useStore();
 
     return (
         <Formik
@@ -30,13 +30,17 @@ const CreateGameSessionForm = observer(({navigate}) => {
             })}
             onSubmit={({maxPlayers}) => {
                 createGameSession(store.chosenGame.name, maxPlayers)
-                    .then(() => {
+                    .then(response => {
+                        gameStore.initialize(response.data);
                         navigate('/game');
                     })
                     .catch(errorCode => {
                         switch (errorCode) {
                             case 'already_playing':
                                 toast('Вы уже играете');
+                                break;
+                            case 'already_created':
+                                toast('Вы уже создали игру');
                                 break;
                             case 'game_not_found':
                                 toast.error('Игра не найдена');

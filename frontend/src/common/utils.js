@@ -1,4 +1,5 @@
 const Stage = Object.freeze({
+    EMPTY: 'EMPTY',
     WAITING: 'WAITING',
     ROUND_STARTED: 'ROUND_STARTED',
     CHOOSING_QUESTION: 'CHOOSING_QUESTION',

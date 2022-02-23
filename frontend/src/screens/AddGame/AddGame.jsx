@@ -106,6 +106,38 @@ const AddThemeForm = observer(() => {
     );
 });
 
+const ChangeGameNameForm = observer(() => {
+    const {addGameStore: store, addGameViewStore: viewStore} = useStore();
+    return (
+        <Formik
+            initialValues={{
+                name: store.name
+            }}
+            validationSchema={Yup.object({
+                name: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
+                    .required('Обязательное поле')
+            })}
+            onSubmit={({name}, {setSubmitting}) => {
+                setSubmitting(false);
+                viewStore.toggleChangeGameNameFormOpen();
+                store.setGameName(name);
+            }}
+        >
+            <Form>
+                <h1>Изменить название игры</h1>
+                <TextInput
+                    label="Название"
+                    name="name"
+                    type="text"
+                />
+
+                <button type="submit">Сохранить</button>
+            </Form>
+        </Formik>
+    );
+});
+
 const Question = observer(({question}) => {
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
@@ -212,9 +244,15 @@ const AddFinalQuestionForm = observer(({navigate}) => {
                                 toast.success('Игра сохранена!')
                                 navigate('/games');
                             })
-                            .catch(error =>
-                                setErrors({'submitError': error.message})
-                            );
+                            .catch(errorCode => {
+                                switch (errorCode) {
+                                    case 'game_already_exists':
+                                        setErrors({'submitError': 'Игра с таким именем уже существует'});
+                                        break;
+                                    default:
+                                        console.log(errorCode);
+                                }
+                            });
                     } else
                         setErrors({'submitError': 'Заполните все вопросы'})
                 else
@@ -278,7 +316,10 @@ const Round = observer(({round}) => {
                 >
                     Следующий раунд
                 </button>
+
             </div>
+
+            <button onClick={viewStore.toggleChangeGameNameFormOpen}>Изменить название игры</button>
         </>
     );
 });
@@ -312,6 +353,13 @@ const RoundsView = observer(() => {
                 <AddFinalQuestionForm
                     navigate={navigate}
                 />
+            </Modal>
+
+            <Modal
+                isOpen={viewStore.isChangeGameNameFormOpen}
+                onRequestClose={viewStore.toggleChangeGameNameFormOpen}
+            >
+                <ChangeGameNameForm/>
             </Modal>
         </>
     );

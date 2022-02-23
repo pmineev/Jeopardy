@@ -71,7 +71,7 @@ const PlayerControls = observer(() => {
                     else
                         leaveGameSession()
                             .then(() => {
-                                navigate('/games');
+                                navigate('/lobby');
                             })
                             .catch(errorCode => {
                                 switch (errorCode) {
@@ -160,10 +160,12 @@ const HostCard = observer(() => {
 
     return (
         <div className='host-card'>
-            <img
-                src={hostImageURL}
-                alt='host'
-            />
+            <div className='picture'>
+                <img
+                    src={hostImageURL}
+                    alt='host'
+                />
+            </div>
             <div className='text'>
                 {hostText}
             </div>
@@ -214,7 +216,9 @@ const Question = observer(({question, themeIndex, questionIndex}) => {
     useEffect(() => {
         if (store.currentQuestion?.question === question)
             setSelected(true);
-    }, [store.currentQuestion])
+        if (store.stage !== Stage.ANSWERING)
+            setSelected(false);
+    }, [store.currentQuestion, store.stage])
 
     return (
         <td className={`${question.isAnswered ? 'empty' : ''} ${selected ? 'selected' : ''}`}
@@ -322,7 +326,7 @@ const GameScreen = observer(() => {
             <SwitchTransition className='game-screen'>
                 <CSSTransition
                     key={state}
-                    timeout={1000}
+                    timeout={500}
                     classNames="game-screen"
                     nodeRef={ref}
                 >
@@ -336,6 +340,7 @@ const GameScreen = observer(() => {
 });
 
 const PlayerCard = observer(({player}) => {
+    const {gameStore: store} = useStore();
     const [timeoutId, setTimeoutId] = useState(null);
     const tooltipRef = useRef(null);
 
@@ -350,24 +355,26 @@ const PlayerCard = observer(({player}) => {
         delayHide(3000);
     }, [player.answer])
 
+    const isCurrent = () => player === store.currentPlayer && store.stage === Stage.CHOOSING_QUESTION;
+
     return (
         <>
             <div
-                className='player-card'
+                className={`player-card ${isCurrent() ? 'current' : ''}`}
                 data-tip=''
                 data-for={player.nickname + '-tooltip'}
                 ref={tooltipRef}
             >
-                <img
-                    src={getAvatarUrl()}
-                    alt={player.nickname}
-                />
-                <div
-                    className='nickname'
-                >
+                <div className='avatar'>
+                    <img
+                        src={getAvatarUrl()}
+                        alt={player.nickname}
+                    />
+                </div>
+                <div className='nickname'>
                     {player.nickname}
                 </div>
-                <div>
+                <div className='score'>
                     {player.score}
                 </div>
             </div>
@@ -404,24 +411,24 @@ const Game = observer(() => {
     useEffect(() => {
         document.title = 'Игра';
 
-        let listener;
+        const listener = new GameSessionListener(listenerUrls.gameSession);
+        listener.setHandler(store.eventHandler);
 
-        getGameState()  // TODO! race condition
-            .then(response => {
-                store.initialize(response.data);
-                listener = new GameSessionListener(listenerUrls.gameSession);
-                listener.setHandler(store.eventHandler);
-            })
-            .catch(errorCode => {
-                switch (errorCode) {
-                    case 'game_session_not_found':
-                        toast("Вы не играете");
-                        break;
-                    default:
-                        console.log(errorCode);
-                }
-                navigate('/games');
-            });
+        if (!store.isInitialized)
+            getGameState()
+                .then(response => {
+                    store.initialize(response.data);
+                })
+                .catch(errorCode => {
+                    switch (errorCode) {
+                        case 'game_session_not_found':
+                            toast("Вы не играете");
+                            break;
+                        default:
+                            console.log(errorCode);
+                    }
+                    navigate('/games');
+                });
 
         return () => {
             listener?.close();
@@ -433,7 +440,7 @@ const Game = observer(() => {
         let timeoutId;
 
         function wait(callback) {
-            timeoutId = setTimeout(callback, 5000);
+            timeoutId = setTimeout(callback, 3000);
         }
 
         switch (store.stage) {

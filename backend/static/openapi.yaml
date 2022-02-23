@@ -270,7 +270,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/requestRejectReason'
         '409':
-          description: Пользователь уже играет
+          description: |
+            Игровая сессия не создана.
+
+            Возможные причины:
+            - уже существует созданная пользователем игровая сессия;
+            - пользователь уже играет.
           content:
             application/json:
               schema:
@@ -612,6 +617,8 @@ components:
       - gameName
       - maxPlayers
       - currentPlayers
+      - isPlaying
+      - isLeft
       properties:
         creator:
           description: Ник создателя игровой сессии
@@ -627,6 +634,12 @@ components:
           description: Текущее количество игроков
           type: integer
           minimum: 1
+        isPlaying:
+          description: Есть ли пользователь в этой сессии
+          type: boolean
+        isLeft:
+          description: Вышел ли пользователь из этой сессии
+          type: boolean
 
     createGameSession:
       description: Описание игровой сессии
@@ -841,6 +854,7 @@ components:
           - not_current_player
           - wrong_question_request
           - already_playing
+          - already_created
           - wrong_stage
           - invalid_refresh_token
 

@@ -9,9 +9,9 @@ import useStore from "../../common/RootStore";
 import {joinGameSession} from "../Game/services";
 import {getGameSessionDescriptions} from "./services";
 
-const GameSessionDescription = observer(({description, navigate}) => {
+const GameSessionDescription = observer(({description, navigate, gameStore}) => {
     return (
-        <tr>
+        <tr className={`${description.isPlaying ? 'active' : ''} ${description.isLeft ? 'inactive' : ''}`}>
             <td>{description.creator}</td>
             <td>{description.gameName}</td>
             <td>{description.currentPlayers}/{description.maxPlayers}</td>
@@ -19,7 +19,8 @@ const GameSessionDescription = observer(({description, navigate}) => {
                 <button
                     onClick={() => {
                         joinGameSession(description.creator)
-                            .then(() => {
+                            .then(response => {
+                                gameStore.initialize(response.data);
                                 navigate('/game');
                             })
                             .catch(errorCode => {
@@ -47,8 +48,8 @@ const GameSessionDescription = observer(({description, navigate}) => {
 });
 
 const GameSessionsTable = observer(() => {
+    const {lobbyStore: store, gameStore} = useStore();
     const navigate = useNavigate();
-    const {lobbyStore: store} = useStore();
 
     useEffect(() => {
         document.title = 'Лобби'
@@ -83,6 +84,7 @@ const GameSessionsTable = observer(() => {
                     key={description.creator}
                     description={description}
                     navigate={navigate}
+                    gameStore={gameStore}
                 />
             )}
             </tbody>
