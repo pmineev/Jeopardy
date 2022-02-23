@@ -381,8 +381,14 @@ td {
     gap: 10px;
 }
 
+.host-card .picture {
+    max-height: 75%;
+}
+
 .host-card img {
     width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .host-card .text {

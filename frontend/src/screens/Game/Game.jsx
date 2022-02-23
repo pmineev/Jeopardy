@@ -160,10 +160,12 @@ const HostCard = observer(() => {
 
     return (
         <div className='host-card'>
-            <img
-                src={hostImageURL}
-                alt='host'
-            />
+            <div className='picture'>
+                <img
+                    src={hostImageURL}
+                    alt='host'
+                />
+            </div>
             <div className='text'>
                 {hostText}
             </div>
