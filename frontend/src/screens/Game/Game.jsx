@@ -324,7 +324,7 @@ const GameScreen = observer(() => {
             <SwitchTransition className='game-screen'>
                 <CSSTransition
                     key={state}
-                    timeout={1000}
+                    timeout={500}
                     classNames="game-screen"
                     nodeRef={ref}
                 >
