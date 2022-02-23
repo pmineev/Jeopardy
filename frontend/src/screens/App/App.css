@@ -84,13 +84,14 @@ body {
 }
 
 header {
-    height: 40px;
+    height: 60px;
     background-color: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    padding: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
     font-size: 1.3em;
 }
 
