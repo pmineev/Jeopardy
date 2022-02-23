@@ -94,7 +94,10 @@ const AddGameStore = types
             self.selectedRound = self.rounds[self.selectedRound.index + 1];
         },
         setFinalRound(text, answer) {
-            self.finalRound.set(text, answer)
+            self.finalRound.set(text, answer);
+        },
+        setGameName(name) {
+            self.name = name;
         },
         clear() {
             self.name = undefined;

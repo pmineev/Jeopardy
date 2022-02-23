@@ -106,6 +106,38 @@ const AddThemeForm = observer(() => {
     );
 });
 
+const ChangeGameNameForm = observer(() => {
+    const {addGameStore: store, addGameViewStore: viewStore} = useStore();
+    return (
+        <Formik
+            initialValues={{
+                name: store.name
+            }}
+            validationSchema={Yup.object({
+                name: Yup.string()
+                    .matches(/\S/, 'Тут же пусто')
+                    .required('Обязательное поле')
+            })}
+            onSubmit={({name}, {setSubmitting}) => {
+                setSubmitting(false);
+                viewStore.toggleChangeGameNameFormOpen();
+                store.setGameName(name);
+            }}
+        >
+            <Form>
+                <h1>Изменить название игры</h1>
+                <TextInput
+                    label="Название"
+                    name="name"
+                    type="text"
+                />
+
+                <button type="submit">Сохранить</button>
+            </Form>
+        </Formik>
+    );
+});
+
 const Question = observer(({question}) => {
     const {addGameStore: store, addGameViewStore: viewStore} = useStore();
 
@@ -278,7 +310,10 @@ const Round = observer(({round}) => {
                 >
                     Следующий раунд
                 </button>
+
             </div>
+
+            <button onClick={viewStore.toggleChangeGameNameFormOpen}>Изменить название игры</button>
         </>
     );
 });
@@ -312,6 +347,13 @@ const RoundsView = observer(() => {
                 <AddFinalQuestionForm
                     navigate={navigate}
                 />
+            </Modal>
+
+            <Modal
+                isOpen={viewStore.isChangeGameNameFormOpen}
+                onRequestClose={viewStore.toggleChangeGameNameFormOpen}
+            >
+                <ChangeGameNameForm/>
             </Modal>
         </>
     );
