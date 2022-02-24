@@ -95,8 +95,6 @@ const HostCard = observer(() => {
     let hostText = '';
     let hostImageURL;
 
-    console.log("hostcard", getSnapshot(store));
-
     switch (store.stage) {
         case Stage.WAITING: {
             hostText = `Ожидаем игроков...`;
