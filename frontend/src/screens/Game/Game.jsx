@@ -28,7 +28,6 @@ const PlayerControls = observer(() => {
                     if (answer?.length > 0) {
                         submitAnswer(answer)
                             .then(() => {
-                                resetForm();
                                 setSubmitting(false);
                             })
                             .catch(errorCode => {
@@ -43,6 +42,7 @@ const PlayerControls = observer(() => {
                                         console.log(errorCode);
                                 }
                             });
+                        resetForm();
                     }
                 }}
             >
