@@ -7,7 +7,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 REACT_APP_DIR = BASE_DIR.parent / 'frontend' / 'build'
 
-SECRET_KEY = 'jp#%3h8jdub%+50*e3x-s7(@t2adr7ug+y3iu02w2z*8+5gq&#'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 DEBUG = True
 
