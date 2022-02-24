@@ -358,7 +358,7 @@ const PlayerCard = observer(({player}) => {
     return (
         <>
             <div
-                className={`player-card ${isCurrent() ? 'current' : ''}`}
+                className={`player-card ${isCurrent() ? 'current' : ''} ${player.isPlaying ? '' : 'inactive'}`}
                 data-tip=''
                 data-for={player.nickname + '-tooltip'}
                 ref={tooltipRef}
