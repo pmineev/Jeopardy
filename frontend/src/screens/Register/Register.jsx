@@ -38,7 +38,6 @@ const Register = () => {
                 onSubmit={({username, nickname, password}, {setSubmitting, setErrors}) => {
                     registerUser(username, nickname || username, password)
                         .then(() => {
-                            console.log('зареган');
                             setSubmitting(false);
                             navigate('/games');
                         })

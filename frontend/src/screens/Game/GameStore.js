@@ -73,7 +73,6 @@ const GameStore = types
     })
     .actions(self => ({
         eventHandler(event, data) {
-            console.log("listener", event, getSnapshot(self), data);
 
             const handlers = {
                 'player_joined': self.onPlayerJoined,
@@ -112,7 +111,6 @@ const GameStore = types
             self.setCurrentPlayer(data.nickname);
         },
         onRoundStarted(data) {
-            console.log(data);
             self.currentQuestion = undefined;
 
             self.setCurrentRound(data.round);
@@ -143,8 +141,6 @@ const GameStore = types
 
                 self.stage = Stage.CORRECT_ANSWER;
             }
-
-            console.log("answered", getSnapshot(self));
         },
         onQuestionTimeout(data) {
             self.currentQuestion.setIsAnswered();
@@ -168,7 +164,6 @@ const GameStore = types
         initialize(data) {
             self.clear();
 
-            console.log("init", data)
             self.stage = data.stage;
             data.players.forEach(playerData =>
                 self.addPlayer(playerData)
@@ -182,14 +177,11 @@ const GameStore = types
             if (data.finalRound)
                 self.setFinalRound(data.finalRound);
 
-            console.log("inited", getSnapshot(self))
-
         },
         setStage(stage) {
             self.stage = stage;
         },
         addPlayer(data) {
-            console.log(data)
             self.players.push(Player.create({...data}));
         },
         setCurrentRound(data) {
@@ -208,10 +200,8 @@ const GameStore = types
                     })
                 ))
             });
-            console.log("setCurrentRound", getSnapshot(self))
         },
         setCurrentPlayer(nickname) {
-            console.log(nickname)
             self.currentPlayer = self.players.find(player => player.nickname === nickname);
         },
         setCurrentQuestion(data) {
@@ -231,7 +221,6 @@ const GameStore = types
             self.answeringPlayer = undefined;
             self.players.forEach(player => {
                 player.answer = undefined;
-                console.log(`cleared ${player.nickname} answer`)
             })
         },
         clear() {

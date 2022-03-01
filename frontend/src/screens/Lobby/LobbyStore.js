@@ -24,7 +24,6 @@ const LobbyStore = types
     })
     .actions(self => ({
         eventHandler(event, data) {
-            console.log("lobby", event, data);
             const handlers = {
                 'game_session_created': self.onGameSessionCreated,
                 'game_session_deleted': self.onGameSessionDeleted,
