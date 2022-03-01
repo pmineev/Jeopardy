@@ -85,6 +85,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
     REACT_APP_DIR / 'static'
 ]
+STATIC_ROOT = BASE_DIR.parent / "staticfiles"
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
