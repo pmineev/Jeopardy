@@ -7,7 +7,7 @@ class BackendConfig(AppConfig):
     name = 'backend'
 
     def ready(self):
-        if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
+        if 'migrate' in sys.argv or 'makemigrations' in sys.argv or 'collectstatic' in sys.argv:
             return
 
         from backend.modules.game_session.event_handlers import register_handlers
