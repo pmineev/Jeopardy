@@ -7,9 +7,9 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 REACT_APP_DIR = BASE_DIR.parent / 'frontend' / 'build'
 
-SECRET_KEY = 'jp#%3h8jdub%+50*e3x-s7(@t2adr7ug+y3iu02w2z*8+5gq&#'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'backend', 'localhost']
 CORS_ORIGIN_ALLOW_ALL = True
@@ -62,10 +62,15 @@ ASGI_APPLICATION = 'backend.config.asgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 TIME_ZONE = 'UTC'
 
@@ -80,6 +85,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
     REACT_APP_DIR / 'static'
 ]
+STATIC_ROOT = BASE_DIR.parent / "staticfiles"
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
@@ -106,7 +112,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+            "hosts": [("redis", 6379)],
         },
     }
 }

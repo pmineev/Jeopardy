@@ -8,7 +8,6 @@ const getGameState = () => {
 
 const createGameSession = (gameName, maxPlayers) => {
     const url = '/game_sessions/';
-    console.log('create');
     return axios.post(url, {gameName, maxPlayers});
 };
 
@@ -37,9 +36,7 @@ const getHostImageUrl = (state) => {
 };
 
 const getAvatarUrl = () => {
-    const imageURL = baseStaticURL + '/img/avatar.png';
-    console.log(imageURL);
-    return imageURL;
+    return baseStaticURL + '/img/avatar.png';
 };
 
 export {

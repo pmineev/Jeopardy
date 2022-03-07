@@ -1,0 +1,10 @@
+/.idea
+
+/backend/migrations/
+/staticfiles/
+
+/frontend/node_modules/
+/frontend/package-lock.json
+/frontend/build/
+/db.env
+/django.env

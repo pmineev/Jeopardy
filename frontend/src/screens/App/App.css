@@ -419,6 +419,10 @@ td {
     --shadow-color: var(--active-color);
 }
 
+.player-card.inactive {
+    background-color: var(--inactive-color);
+}
+
 .player-card .avatar {
     max-height: 50%;
 }
@@ -465,6 +469,7 @@ td {
 }
 
 .player-controls form {
+    max-width: 100%;
     width: 100%;
     padding: 0;
     position: unset;

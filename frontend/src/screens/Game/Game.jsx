@@ -28,7 +28,6 @@ const PlayerControls = observer(() => {
                     if (answer?.length > 0) {
                         submitAnswer(answer)
                             .then(() => {
-                                resetForm();
                                 setSubmitting(false);
                             })
                             .catch(errorCode => {
@@ -43,6 +42,7 @@ const PlayerControls = observer(() => {
                                         console.log(errorCode);
                                 }
                             });
+                        resetForm();
                     }
                 }}
             >
@@ -94,8 +94,6 @@ const HostCard = observer(() => {
     const {gameStore: store} = useStore();
     let hostText = '';
     let hostImageURL;
-
-    console.log("hostcard", getSnapshot(store));
 
     switch (store.stage) {
         case Stage.WAITING: {
@@ -360,7 +358,7 @@ const PlayerCard = observer(({player}) => {
     return (
         <>
             <div
-                className={`player-card ${isCurrent() ? 'current' : ''}`}
+                className={`player-card ${isCurrent() ? 'current' : ''} ${player.isPlaying ? '' : 'inactive'}`}
                 data-tip=''
                 data-for={player.nickname + '-tooltip'}
                 ref={tooltipRef}

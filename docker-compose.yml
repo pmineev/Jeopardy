@@ -1,0 +1,38 @@
+version: "3.9"
+
+volumes:
+  postgres_data:
+  redis_data:
+
+services:
+  redis:
+    image: redis:6.2.6
+    container_name: redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+  db:
+    image: postgres:13.6-alpine
+    container_name: postgres
+    env_file:
+      - ./db.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  web:
+    build: .
+    container_name: web
+    command : >
+      bash -c "python manage.py makemigrations backend
+      && python manage.py migrate
+      && daphne -b 0.0.0.0 -p 8000 backend.config.asgi:application"
+    env_file:
+      - ./db.env
+      - ./django.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis

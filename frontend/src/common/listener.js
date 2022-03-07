@@ -16,13 +16,11 @@ class Listener {
 
         this.ws.onmessage = (message) => {
             const data = JSON.parse(message.data);
-            console.log('ws', data);
             this.handler(data.event, data.data);
         }
     }
 
     close() {
-        console.log('ws close');
         this.ws.close();
     }
 
