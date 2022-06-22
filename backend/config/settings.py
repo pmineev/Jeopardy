@@ -9,9 +9,9 @@ REACT_APP_DIR = BASE_DIR.parent / 'frontend' / 'build'
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
-DEBUG = False
+DEBUG = 'DJANGO_DEBUG' in os.environ
 
-ALLOWED_HOSTS = ['127.0.0.1', 'backend', 'localhost']
+ALLOWED_HOSTS = [os.environ.get('HOST')]
 CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [

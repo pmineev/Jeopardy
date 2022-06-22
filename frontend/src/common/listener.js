@@ -1,6 +1,8 @@
+import {API_HOST} from "./services";
+
 const listenerUrls = {
-    lobby: 'ws://127.0.0.1:8000/ws/lobby/',
-    gameSession: 'ws://127.0.0.1:8000/ws/game_session/'
+    lobby: `ws://${API_HOST}/ws/lobby/`,
+    gameSession: `ws://${API_HOST}/ws/game_session/`
 }
 
 class Listener {
