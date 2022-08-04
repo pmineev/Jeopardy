@@ -5,8 +5,8 @@ volumes:
 
 services:
   web:
-    container_name: web-dev
-    image: jeopardy-web-dev
+    container_name: jeopardy-dev
+    image: jeopardy-dev
     build:
       context: .
       target: backend-dev
