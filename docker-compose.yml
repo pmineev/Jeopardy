@@ -22,17 +22,10 @@ services:
     ports:
       - "5432:5432"
   web:
-    build: .
     container_name: web
-    command : >
-      bash -c "python manage.py makemigrations backend
-      && python manage.py migrate
-      && daphne -b 0.0.0.0 -p 8000 backend.config.asgi:application"
     env_file:
       - ./db.env
       - ./django.env
-    ports:
-      - "8000:8000"
     depends_on:
       - db
       - redis

@@ -9,9 +9,9 @@ REACT_APP_DIR = BASE_DIR.parent / 'frontend' / 'build'
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
-DEBUG = False
+DEBUG = 'DJANGO_DEBUG' in os.environ
 
-ALLOWED_HOSTS = ['127.0.0.1', 'backend', 'localhost']
+ALLOWED_HOSTS = [os.environ.get('HOST')]
 CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
@@ -86,6 +86,7 @@ STATICFILES_DIRS = [
     REACT_APP_DIR / 'static'
 ]
 STATIC_ROOT = BASE_DIR.parent / "staticfiles"
+WHITENOISE_ROOT = REACT_APP_DIR
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 

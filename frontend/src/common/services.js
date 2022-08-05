@@ -1,9 +1,10 @@
 import axios from 'axios';
 import {toast} from "react-toastify";
 
-const baseURL = 'http://127.0.0.1:8000/api';
-const baseStaticURL = 'http://127.0.0.1:8000/static';
-axios.defaults.baseURL = baseURL;
+const API_HOST = process.env.REACT_APP_API_HOST;
+
+const baseStaticURL = `http://${API_HOST}/static`;
+axios.defaults.baseURL = `http://${API_HOST}/api`;
 
 axios.interceptors.request.use(
     config => {
@@ -63,4 +64,4 @@ axios.interceptors.response.use(
 );
 
 
-export {baseStaticURL};
+export {API_HOST, baseStaticURL};

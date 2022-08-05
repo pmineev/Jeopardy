@@ -1,0 +1,42 @@
+version: "3.9"
+
+volumes:
+  frontend_build:
+
+services:
+  web:
+    container_name: jeopardy-dev
+    image: jeopardy-dev
+    build:
+      context: .
+      target: backend-dev
+    command : daphne -b 0.0.0.0 -p 8000 backend.config.asgi:application
+    environment:
+      DJANGO_DEBUG: "true"
+      HOST: "127.0.0.1"
+      REACT_APP_API_HOST: "127.0.0.1:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./staticfiles:/app/staticfiles
+      - ./frontend/build:/app/frontend/build
+    ports:
+      - "8000:8000"
+
+  frontend:
+    container_name: frontend-dev
+    image: jeopardy-frontend-dev
+    build:
+      context: .
+      target: frontend-base
+    working_dir: /frontend
+    command: npm run start
+    environment:
+      REACT_APP_API_HOST: "127.0.0.1:8000"
+    volumes:
+      - ./frontend/build:/frontend/build
+      - ./frontend/public:/frontend/public
+      - ./frontend/src:/frontend/src
+    ports:
+      - "3000:3000"
+    depends_on:
+    - web
