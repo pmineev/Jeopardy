@@ -8,9 +8,7 @@ services:
       context: .
       target: backend-prod
       args:
-        HOST: "195.133.147.176"
-    environment:
-      HOST: "195.133.147.176"
+        - HOST
     command : daphne -b 0.0.0.0 -p 8000 backend.config.asgi:application
     ports:
       - "80:8000"

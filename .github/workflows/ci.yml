@@ -25,5 +25,5 @@ jobs:
           context: .
           push: true
           target: backend-prod
-          build-args: HOST=195.133.147.176
+          build-args: HOST=${{ secrets.HOST }}
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/jeopardy
