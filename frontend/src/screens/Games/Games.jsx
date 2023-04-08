@@ -91,16 +91,6 @@ const GameDescription = observer(({description}) => {
 const GamesTable = observer(() => {
     const {gamesStore: store} = useStore();
 
-    useEffect(() => {
-        getGameDescriptions()
-            .then(result => {
-                store.initialize(result.data);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }, []);
-
     return (
         <table className="games-table">
             <thead>
@@ -112,7 +102,7 @@ const GamesTable = observer(() => {
             </tr>
             </thead>
             <tbody>
-            {store.descriptions.size > 0 && values(store.descriptions).map(description =>
+            {values(store.descriptions).map(description =>
                 <GameDescription
                     key={description.name}
                     description={description}
@@ -124,16 +114,29 @@ const GamesTable = observer(() => {
 });
 
 const Games = observer(() => {
+    const {gamesStore: store, gamesViewStore: viewStore} = useStore();
     const navigate = useNavigate();
-    const {gamesViewStore: viewStore} = useStore();
 
-    document.title = 'Игры';
+    useEffect(() => {
+        document.title = 'Игры';
+
+        getGameDescriptions()
+            .then(result => {
+                store.initialize(result.data);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }, []);
 
     return (
         <div className='games'>
             <h1>Игры</h1>
 
-            <GamesTable/>
+            {store.descriptions.size > 0
+                ? <GamesTable/>
+                : <h3>список игр пуст</h3>
+            }
 
             <button onClick={() => navigate('/games/new')}>Создать новую игру</button>
 
