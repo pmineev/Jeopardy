@@ -30,7 +30,7 @@ const CreateGameSessionForm = observer(({navigate}) => {
                     .integer('Так тоже не прокатит')
             })}
             onSubmit={({maxPlayers, host}) => {
-                createGameSession(store.chosenGame.name, maxPlayers)
+                createGameSession(store.chosenGame.name, maxPlayers, host)
                     .then(response => {
                         gameStore.initialize(response.data);
                         navigate('/game');

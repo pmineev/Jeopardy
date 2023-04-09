@@ -6,9 +6,9 @@ const getGameState = () => {
     return axios.get(url);
 };
 
-const createGameSession = (gameName, maxPlayers) => {
+const createGameSession = (gameName, maxPlayers, isHost) => {
     const url = '/game_sessions/';
-    return axios.post(url, {gameName, maxPlayers});
+    return axios.post(url, {gameName, maxPlayers, isHost});
 };
 
 const joinGameSession = (creator) => {
