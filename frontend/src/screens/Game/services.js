@@ -31,8 +31,8 @@ const submitAnswer = (answer) => {
     return axios.post(url, {answer});
 };
 
-const getHostImageUrl = (state) => {
-    return baseStaticURL + '/img/kuleshov/' + state + '.jpg';
+const getHostImageUrl = (stage) => {
+    return baseStaticURL + '/img/kuleshov/' + stage + '.jpg';
 };
 
 const getAvatarUrl = () => {
