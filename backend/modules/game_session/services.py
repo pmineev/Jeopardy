@@ -23,7 +23,7 @@ class GameSessionService:
     def create(self, game_session_data, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)
 
-        if user.is_playing:
+        if user.is_playing or user.is_hosting:
             raise AlreadyPlaying
 
         if self.repo.is_exists(user):
@@ -60,7 +60,7 @@ class GameSessionService:
 
         game_session = self.repo.get_by_creator(join_data['creator'])
 
-        if not user.is_playing:
+        if not (user.is_playing or user.is_hosting):
             game_session.join(user)
 
             game_session = self.repo.save(game_session)
