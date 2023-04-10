@@ -68,6 +68,7 @@ class GameSession(Entity):
                  max_players: int,
                  stage: Stage = Stage.WAITING,
                  id: Optional[int] = None,
+                 host: Optional['User'] = None,
                  players: Optional[List[Player]] = None,
                  current_player: Optional[Player] = None,
                  current_round: Optional['Round'] = None,
@@ -75,6 +76,7 @@ class GameSession(Entity):
                  answered_questions: Optional[List['CurrentQuestion']] = None):
         super().__init__(id)
         self.creator = creator
+        self.host = host
         self.game = game
         self.max_players = max_players
         self.stage = stage

@@ -32,6 +32,7 @@ class GameSessionService:
         game = self.game_repo.get(game_session_data['game_name'])
 
         game_session = GameSession(creator=user,
+                                   host=user if game_session_data['is_host'] else None,
                                    game=game,
                                    max_players=game_session_data['max_players'])
 

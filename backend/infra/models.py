@@ -105,6 +105,9 @@ class ORMGameSession(Model):
     creator = OneToOneField(ORMUser,
                             primary_key=True,
                             on_delete=PROTECT)
+    host = OneToOneField(ORMUser,
+                         on_delete=PROTECT,
+                         null=True)
     game = ForeignKey(ORMGame,
                       on_delete=PROTECT)
     max_players = IntegerField()
@@ -132,6 +135,7 @@ class ORMGameSession(Model):
     def to_domain(self):
         return GameSession(id=self.pk,
                            creator=self.creator.to_domain(),
+                           host=self.host.to_domain() if self.host else None,
                            game=self.game.to_domain(),
                            max_players=self.max_players,
                            players=[player.to_domain() for player in self.players.all()],

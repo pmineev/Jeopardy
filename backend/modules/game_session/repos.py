@@ -17,6 +17,7 @@ class GameSessionRepo(Repository):
     @staticmethod
     def _create(game_session: 'GameSession') -> 'GameSession':
         orm_game_session = ORMGameSession.objects.create(creator_id=game_session.creator.id,
+                                                         host_id=game_session.host.id if game_session.host else None,
                                                          game_id=game_session.game.id,
                                                          max_players=game_session.max_players)
         game_session.id = orm_game_session.pk
