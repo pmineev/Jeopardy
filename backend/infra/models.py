@@ -25,7 +25,7 @@ class ORMUser(Model):
     @property
     def hosted_game_session_id(self):
         try:
-            return self.ormgamesession.pk
+            return self.hosted_game_session.pk
         except ObjectDoesNotExist:
             return None
 
@@ -115,6 +115,7 @@ class ORMGameSession(Model):
                             primary_key=True,
                             on_delete=PROTECT)
     host = OneToOneField(ORMUser,
+                         related_name='hosted_game_session',
                          on_delete=PROTECT,
                          null=True)
     game = ForeignKey(ORMGame,
