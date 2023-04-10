@@ -11,6 +11,7 @@ class User(Entity):
                  password: Optional[str] = None,
                  game_sessions: Optional[List[int]] = None,
                  game_session_id: Optional[int] = None,
+                 hosted_game_session_id: Optional[int] = None,
                  id: Optional[int] = None):
         super().__init__(id)
         self.username = username
@@ -18,10 +19,15 @@ class User(Entity):
         self.password = password
         self.game_sessions = game_sessions
         self.game_session_id = game_session_id
+        self.hosted_game_session_id = hosted_game_session_id
 
     @property
     def is_playing(self):
         return self.game_session_id is not None
+
+    @property
+    def is_hosting(self):
+        return self.hosted_game_session_id is not None
 
 
 @dataclass

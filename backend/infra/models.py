@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User as ORMDjangoUser
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, CharField, TextField, IntegerField, \
     ForeignKey, ManyToManyField, OneToOneField, BooleanField, CASCADE, PROTECT
 from django_enum_choices.fields import EnumChoiceField
@@ -21,12 +22,20 @@ class ORMUser(Model):
         active_player = self.players.filter(is_playing=True).first()
         return active_player.game_session_id if active_player else None
 
+    @property
+    def hosted_game_session_id(self):
+        try:
+            return self.ormgamesession.pk
+        except ObjectDoesNotExist:
+            return None
+
     def to_domain(self):
         return User(id=self.pk,
                     username=self.user.username,
                     nickname=self.nickname,
                     game_sessions=list(self.players.values_list('game_session_id', flat=True)),
-                    game_session_id=self.game_session_id)
+                    game_session_id=self.game_session_id,
+                    hosted_game_session_id=self.hosted_game_session_id)
 
 
 class ORMPlayer(Model):
