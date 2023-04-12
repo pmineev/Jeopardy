@@ -19,6 +19,7 @@
     --success-color: #008A00;
     --active-color: #3264bb;
     --inactive-color: #6464BB;
+    --disabled-color: #1f2ea9;
     --shadow-color: rgba(0, 0, 0, 0.5);
     --font: 18px 'Montserrat', sans-serif;
     --game-font: 36px 'Oswald', sans-serif;
@@ -168,14 +169,18 @@ button {
     background-color: var(--primary-color);
 }
 
-button:hover {
+button:hover:enabled {
     border-color: var(--accent-color);
 }
 
-button:active {
+button:active:enabled {
     background-color: var(--accent-color);
     color: var(--primary-color);
     border-color: var(--accent-color);
+}
+
+button:disabled {
+    opacity: 25%;
 }
 
 table {
