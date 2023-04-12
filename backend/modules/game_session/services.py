@@ -16,7 +16,12 @@ class GameSessionService:
 
     def get_game_state(self, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_player(user)
+        if user.is_playing:
+            game_session = self.repo.get_by_player(user)
+        elif user.is_hosting:
+            game_session = self.repo.get(user.hosted_game_session_id)
+        else:
+            raise GameSessionNotFound()
 
         return GameStateDTO(game_session)
 
