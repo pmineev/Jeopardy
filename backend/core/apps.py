@@ -28,6 +28,10 @@ class BackendConfig(AppConfig):
 
         game_session_service = GameSessionService()
         for orm_game_session in ORMGameSession.objects.all():
+            if orm_game_session.host:
+                GameSessionConsumer.add_user(username=orm_game_session.host.user.username,
+                                             game_session_id=orm_game_session.pk)
+
             if orm_game_session.stage == Stage.ANSWERING:
                 Timers.start(key=orm_game_session.pk,
                              interval=CHOOSING_QUESTION_INTERVAL,
