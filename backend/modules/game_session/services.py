@@ -4,7 +4,7 @@ from backend.modules.game.repos import game_repo
 from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO
 from backend.modules.game_session.entities import GameSession
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent
-from backend.modules.game_session.exceptions import AlreadyPlaying, AlreadyCreated
+from backend.modules.game_session.exceptions import AlreadyPlaying, AlreadyCreated, GameSessionNotFound
 from backend.modules.game_session.repos import game_session_repo
 from backend.modules.user.repos import user_repo
 
@@ -83,6 +83,17 @@ class GameSessionService:
             self.repo.delete(game_session)
         else:
             self.repo.save(game_session)
+
+    def start(self, username: str):
+        user = self.user_repo.get(username)
+
+        if user.is_hosting:
+            game_session = self.repo.get(user.hosted_game_session_id)
+            game_session.start_game()
+
+            self.repo.save(game_session)
+        else:
+            raise GameSessionNotFound()
 
     def choose_question(self, username: str, question_data):
         user = self.user_repo.get(username)

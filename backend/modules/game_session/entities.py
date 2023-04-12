@@ -107,7 +107,7 @@ class GameSession(Entity):
 
             self.add_event(PlayerJoinedEvent(self, player))
 
-        if self.stage == Stage.WAITING and self._is_all_players_joined():
+        if not self.host and self.stage == Stage.WAITING and self._is_all_players_joined():
             self.start_game()
 
         print(f'{user.username} has joined')

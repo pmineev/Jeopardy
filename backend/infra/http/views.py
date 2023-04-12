@@ -184,6 +184,14 @@ class GameSessionViewSet(ViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
+    def start(self, request):
+        try:
+            self.service.start(request.user.username)
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
+
+        return Response(status=status.HTTP_201_CREATED)
+
     def choose_question(self, request):
         serializer = QuestionChoiceSerializer(data=request.data)
 
