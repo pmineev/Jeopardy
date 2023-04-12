@@ -12,7 +12,8 @@ import {Stage, toOrdinal} from "../../common/utils";
 import useStore from "../../common/RootStore";
 import GameSessionListener from "./listener";
 import {getNickname} from "../../common/auth/services";
-import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer} from "./services";
+import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer,
+    startGame} from "./services";
 
 const PlayerControls = observer(() => {
     const {gameStore: store} = useStore();
@@ -85,6 +86,31 @@ const PlayerControls = observer(() => {
                 }}
             >
                 Выйти из игры
+            </button>
+        </div>
+    )
+});
+
+const HostControls = observer(() => {
+    const {gameStore: store} = useStore();
+    return (
+        // TODO переименовать класс
+        <div className='player-controls'>
+            <button disabled={!store.isAllPlayersJoined}
+                onClick={() => {
+                    startGame()
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+                }}
+            >
+                Начать игру
             </button>
         </div>
     )
@@ -486,7 +512,10 @@ const Game = observer(() => {
 
             <HostCard/>
 
-            <PlayerControls/>
+            {store.host === getNickname()  //TODO выделить кнопку выхода в общий компонент
+                ? <HostControls/>
+                : <PlayerControls/>
+            }
         </div>
     )
 });

@@ -242,6 +242,9 @@ const GameStore = types
         },
         get isInitialized() {
             return self.players.length > 0
+        },
+        get isAllPlayersJoined() {
+            return self.players.length === self.maxPlayers
         }
     }));
 
