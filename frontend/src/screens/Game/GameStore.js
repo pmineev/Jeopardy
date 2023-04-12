@@ -64,6 +64,7 @@ const GameStore = types
     .model({
         maxPlayers: types.maybe(types.integer),
         stage: types.optional(types.enumeration('stage', Object.values(Stage)), Stage.EMPTY),
+        host: types.maybe(types.string),
         players: types.array(Player),
         currentPlayer: types.maybe(types.reference(Player)),
         currentRound: types.maybe(Round),
@@ -167,6 +168,8 @@ const GameStore = types
 
             self.maxPlayers = data.maxPlayers;
             self.stage = data.stage;
+            if (data.host)
+                self.host = data.host;
             data.players.forEach(playerData =>
                 self.addPlayer(playerData)
             );
