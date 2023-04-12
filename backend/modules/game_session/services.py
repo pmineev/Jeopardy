@@ -4,7 +4,7 @@ from backend.modules.game.repos import game_repo
 from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO
 from backend.modules.game_session.entities import GameSession
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent
-from backend.modules.game_session.exceptions import AlreadyPlaying, AlreadyCreated
+from backend.modules.game_session.exceptions import AlreadyPlaying, AlreadyCreated, GameSessionNotFound
 from backend.modules.game_session.repos import game_session_repo
 from backend.modules.user.repos import user_repo
 
@@ -16,7 +16,11 @@ class GameSessionService:
 
     def get_game_state(self, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_player(user)
+
+        if not user.is_playing:
+            raise GameSessionNotFound()
+
+        game_session = self.repo.get(user.game_session_id)
 
         return GameStateDTO(game_session)
 
@@ -70,7 +74,11 @@ class GameSessionService:
 
     def leave(self, username: str):
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_player(user)
+
+        if not user.is_playing:
+            raise GameSessionNotFound()
+
+        game_session = self.repo.get(user.game_session_id)
 
         game_session.leave(user)
 
@@ -85,7 +93,11 @@ class GameSessionService:
 
     def choose_question(self, username: str, question_data):
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_player(user)
+
+        if not user.is_playing:
+            raise GameSessionNotFound()
+
+        game_session = self.repo.get(user.game_session_id)
 
         theme_index = question_data['theme_index']
         question_index = question_data['question_index']
@@ -116,7 +128,11 @@ class GameSessionService:
 
     def submit_answer(self, username: str, answer_data):
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_player(user)
+
+        if not user.is_playing:
+            raise GameSessionNotFound()
+
+        game_session = self.repo.get(user.game_session_id)
 
         game_session.submit_answer(user, answer_data['answer'])
 
