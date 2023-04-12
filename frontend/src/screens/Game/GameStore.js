@@ -62,6 +62,7 @@ const Round = types
 
 const GameStore = types
     .model({
+        maxPlayers: types.maybe(types.integer),
         stage: types.optional(types.enumeration('stage', Object.values(Stage)), Stage.EMPTY),
         players: types.array(Player),
         currentPlayer: types.maybe(types.reference(Player)),
@@ -164,6 +165,7 @@ const GameStore = types
         initialize(data) {
             self.clear();
 
+            self.maxPlayers = data.maxPlayers;
             self.stage = data.stage;
             data.players.forEach(playerData =>
                 self.addPlayer(playerData)

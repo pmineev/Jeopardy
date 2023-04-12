@@ -132,6 +132,7 @@ class RoundStartedDTO(DTO):
 class GameStateDTO(DTO):
     def __init__(self, gs: 'GameSession'):
         self.host = gs.host.nickname if gs.host else None
+        self.max_players = gs.max_players
         self.stage = gs.stage
         self.players = [PlayerDTO(player) for player in gs.players]
         self.current_round = CurrentRoundDTO(gs.current_round, gs.answered_questions) \
@@ -147,6 +148,7 @@ class GameStateDTO(DTO):
 
     def to_response(self):
         response = dict(
+            maxPlayers=self.max_players,
             stage=self.stage.name,
             players=[player.to_response() for player in self.players]
         )
