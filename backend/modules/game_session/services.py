@@ -69,13 +69,19 @@ class GameSessionService:
 
         return GameStateDTO(game_session)
 
-    def leave(self, username: str):
+    def leave(self, username: str):  # TODO сообщать игрокам о выходе ведущего
         user = self.user_repo.get(username)
-        game_session = self.repo.get_by_player(user)
+        if user.is_playing:
+            game_session = self.repo.get_by_player(user)
+        elif user.is_hosting:
+            game_session = self.repo.get(user.hosted_game_session_id)
+        else:
+            raise GameSessionNotFound()
 
-        game_session.leave(user)
+        if not user.is_hosting:
+            game_session.leave(user)
 
-        if game_session.is_all_players_left():
+        if user.is_hosting or not game_session.host and game_session.is_all_players_left():
             game_session.add_event(GameSessionDeletedEvent(game_session))
 
             print('gs deleted')
