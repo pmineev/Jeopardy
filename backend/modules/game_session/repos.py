@@ -22,10 +22,11 @@ class GameSessionRepo(Repository):
                                                          max_players=game_session.max_players)
         game_session.id = orm_game_session.pk
 
-        player = game_session.players[0]
-        orm_player = ORMPlayer.objects.create(user_id=player.user.id,
-                                              game_session=orm_game_session)
-        player.id = orm_player.pk
+        if game_session.players:
+            player = game_session.players[0]
+            orm_player = ORMPlayer.objects.create(user_id=player.user.id,
+                                                  game_session=orm_game_session)
+            player.id = orm_player.pk
 
         return game_session
 
