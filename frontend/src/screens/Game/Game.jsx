@@ -15,10 +15,7 @@ import {getNickname} from "../../common/auth/services";
 import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer,
     startGame} from "./services";
 
-const PlayerControls = observer(() => {
-    const {gameStore: store} = useStore();
-    const navigate = useNavigate();
-
+const PlayerControls = () => {
     return (
         <div className='player-controls'>
             <Formik
@@ -64,6 +61,47 @@ const PlayerControls = observer(() => {
                     </Form>
                 )}
             </Formik>
+        </div>
+    )
+};
+
+const HostControls = observer(() => {
+    const {gameStore: store} = useStore();
+    return (
+        <div className='host-controls'>
+            <button disabled={!store.isAllPlayersJoined}
+                onClick={() => {
+                    startGame()
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                case 'wrong_stage':
+                                    toast.error('Игра уже началась');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+                }}
+            >
+                Начать игру
+            </button>
+        </div>
+    )
+});
+
+const Controls = observer(() => {
+    const {gameStore: store} = useStore();
+    const navigate = useNavigate();
+
+    return (
+        <div className='controls'>
+            {store.host === getNickname()
+                ? <HostControls/>
+                : <PlayerControls/>
+            }
 
             <button
                 onClick={() => {
@@ -86,34 +124,6 @@ const PlayerControls = observer(() => {
                 }}
             >
                 Выйти из игры
-            </button>
-        </div>
-    )
-});
-
-const HostControls = observer(() => {
-    const {gameStore: store} = useStore();
-    return (
-        // TODO переименовать класс
-        <div className='player-controls'>
-            <button disabled={!store.isAllPlayersJoined}
-                onClick={() => {
-                    startGame()
-                        .catch(errorCode => {
-                            switch (errorCode) {
-                                case 'game_session_not_found':
-                                    toast.error('Игра не найдена');
-                                    break;
-                                case 'wrong_stage':
-                                    toast.error('Игра уже началась');
-                                    break;
-                                default:
-                                    console.log(errorCode);
-                            }
-                        });
-                }}
-            >
-                Начать игру
             </button>
         </div>
     )
@@ -515,10 +525,7 @@ const Game = observer(() => {
 
             <HostCard/>
 
-            {store.host === getNickname()  //TODO выделить кнопку выхода в общий компонент
-                ? <HostControls/>
-                : <PlayerControls/>
-            }
+            <Controls/>
         </div>
     )
 });

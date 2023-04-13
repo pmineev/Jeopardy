@@ -321,7 +321,7 @@ td {
     padding: 10px;
     grid-template-areas:
     "game-screen host-card"
-    "players player-controls";
+    "players controls";
 }
 
 .game-screen {
@@ -465,12 +465,16 @@ td {
     bottom: -46px !important;
 }
 
-.player-controls {
-    grid-area: player-controls;
+.controls {
+    grid-area: controls;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+}
+
+.player-controls {
+    width: 100%;
 }
 
 .player-controls form {
