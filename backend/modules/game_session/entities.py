@@ -129,6 +129,9 @@ class GameSession(Entity):
         print(f'{user.username} has left')
 
     def start_game(self):
+        if self.stage != Stage.WAITING:
+            raise WrongStage()
+
         self.current_round = self.game.rounds[0]
         self.current_player = random.choice(self.players)
         self.stage = Stage.ROUND_STARTED

@@ -189,6 +189,8 @@ class GameSessionViewSet(ViewSet):
             self.service.start(request.user.username)
         except GameSessionNotFound as e:
             return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
+        except WrongStage as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'code': e.code})
 
         return Response(status=status.HTTP_201_CREATED)
 

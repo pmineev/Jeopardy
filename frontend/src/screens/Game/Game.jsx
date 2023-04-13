@@ -104,6 +104,9 @@ const HostControls = observer(() => {
                                 case 'game_session_not_found':
                                     toast.error('Игра не найдена');
                                     break;
+                                case 'wrong_stage':
+                                    toast.error('Игра уже началась');
+                                    break;
                                 default:
                                     console.log(errorCode);
                             }
