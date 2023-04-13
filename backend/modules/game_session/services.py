@@ -86,7 +86,7 @@ class GameSessionService:
         if not user.is_hosting:
             game_session.leave(user)
 
-        if user.is_hosting or not game_session.host and game_session.is_all_players_left():
+        if user.is_hosting or not game_session.is_hosted and game_session.is_all_players_left():
             game_session.add_event(GameSessionDeletedEvent(game_session))
 
             print('gs deleted')

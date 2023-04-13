@@ -92,6 +92,10 @@ class GameSession(Entity):
 
         self.answered_questions = answered_questions or []
 
+    @property
+    def is_hosted(self):
+        return self.host is not None
+
     def join(self, user: 'User'):
         player = self._get_player(user)
         if player:
@@ -107,7 +111,7 @@ class GameSession(Entity):
 
             self.add_event(PlayerJoinedEvent(self, player))
 
-        if not self.host and self.stage == Stage.WAITING and self._is_all_players_joined():
+        if not self.is_hosted and self.stage == Stage.WAITING and self._is_all_players_joined():
             self.start_game()
 
         print(f'{user.username} has joined')
