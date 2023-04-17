@@ -7,7 +7,7 @@ from backend.infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent, PlayerJoinedEvent, \
     PlayerLeftEvent, RoundStartedEvent, FinalRoundStartedEvent, CurrentQuestionChosenEvent, \
     PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
-    PlayerInactiveEvent, PlayerActiveEvent
+    PlayerInactiveEvent, PlayerActiveEvent, StartAnswerPeriodEvent
 from backend.modules.game_session.services import GameSessionService
 
 
@@ -77,7 +77,7 @@ def remove_group_from_notifier(event: GameSessionDeletedEvent):
     GameSessionConsumer.remove_group(event.game_session_id)
 
 
-def start_question_timer(event: CurrentQuestionChosenEvent):
+def start_question_timer(event: StartAnswerPeriodEvent):
     service = GameSessionService()
 
     Timers.start(key=event.game_session_id,
@@ -127,7 +127,7 @@ def register_handlers():
     EventDispatcher.register_handler(add_player_to_notifier, PlayerJoinedEvent)
     EventDispatcher.register_handler(remove_player_from_notifier, PlayerLeftEvent)
     EventDispatcher.register_handler(remove_group_from_notifier, GameSessionDeletedEvent)
-    EventDispatcher.register_handler(start_question_timer, CurrentQuestionChosenEvent)
+    EventDispatcher.register_handler(start_question_timer, StartAnswerPeriodEvent)
     EventDispatcher.register_handler(stop_question_timer, PlayerCorrectlyAnsweredEvent)
     EventDispatcher.register_handler(stop_question_timer, GameSessionDeletedEvent)
     EventDispatcher.register_handler(restart_question_timer, PlayerIncorrectlyAnsweredEvent)

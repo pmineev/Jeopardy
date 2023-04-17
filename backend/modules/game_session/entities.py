@@ -11,7 +11,8 @@ from backend.modules.game_session.enums import Stage
 from backend.modules.game_session.exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
 from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
     CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
-    FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent
+    FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent, \
+    StartAnswerPeriodEvent
 
 
 @dataclass
@@ -188,6 +189,7 @@ class GameSession(Entity):
         self.stage = Stage.ANSWERING
 
         self.add_event(CurrentQuestionChosenEvent(self, self.current_question))
+        self.add_event(StartAnswerPeriodEvent(self))
 
         print(f'{user.username} has chosen question, ti={theme_index} qi={question_index},'
               f' q:{self.current_question.text}, a:{self.current_question.answer}')
