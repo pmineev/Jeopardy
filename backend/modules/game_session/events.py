@@ -82,6 +82,11 @@ class CurrentQuestionChosenEvent(GameSessionEvent):
         self.current_question_dto = CurrentQuestionDTO(question).to_response()
 
 
+class AnswersAllowedEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+
 class StartAnswerPeriodEvent(GameSessionEvent):
     def __init__(self, game_session: 'GameSession'):
         super().__init__(game_session)

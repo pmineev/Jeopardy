@@ -12,7 +12,7 @@ from backend.modules.game_session.exceptions import TooManyPlayers, NotCurrentPl
 from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
     CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
     FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent, \
-    StartAnswerPeriodEvent
+    StartAnswerPeriodEvent, AnswersAllowedEvent
 
 
 @dataclass
@@ -200,6 +200,7 @@ class GameSession(Entity):
     def allow_answers(self):
         if self.stage == Stage.READING_QUESTION:
             self.stage = Stage.ANSWERING
+            self.add_event(AnswersAllowedEvent(self))
         else:
             raise WrongStage()
 
