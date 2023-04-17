@@ -280,6 +280,7 @@ const TextScreen = observer(() => {
                 setScreenText('Финальный раунд');
                 break;
             }
+            case Stage.READING_QUESTION:
             case Stage.ANSWERING: {
                 setScreenText(store.currentQuestion.text);
                 break;
