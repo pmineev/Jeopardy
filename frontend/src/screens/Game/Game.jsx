@@ -221,6 +221,7 @@ const HostCard = observer(() => {
             hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
             break;
         }
+        case Stage.READING_QUESTION:
         case Stage.ANSWERING: {
             const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
             const value = store.currentQuestion.value;
