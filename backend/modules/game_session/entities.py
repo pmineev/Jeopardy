@@ -186,13 +186,22 @@ class GameSession(Entity):
 
         self.current_question = CurrentQuestion(question, theme_index, question_index)
 
-        self.stage = Stage.ANSWERING
-
         self.add_event(CurrentQuestionChosenEvent(self, self.current_question))
-        self.add_event(StartAnswerPeriodEvent(self))
+
+        if self.is_hosted:
+            self.stage = Stage.READING_QUESTION
+        else:
+            self.stage = Stage.ANSWERING
+            self.add_event(StartAnswerPeriodEvent(self))
 
         print(f'{user.username} has chosen question, ti={theme_index} qi={question_index},'
               f' q:{self.current_question.text}, a:{self.current_question.answer}')
+
+    def allow_answers(self):
+        if self.stage == Stage.READING_QUESTION:
+            self.stage = Stage.ANSWERING
+        else:
+            raise WrongStage()
 
     def submit_answer(self, user: 'User', answer_text):
         player = self._get_player(user)

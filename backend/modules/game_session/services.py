@@ -117,6 +117,17 @@ class GameSessionService:
 
         self.repo.save(game_session)
 
+    def allow_answers(self, username: str):
+        user = self.user_repo.get(username)
+
+        if user.is_hosting:
+            game_session = self.repo.get(user.hosted_game_session_id)
+            game_session.allow_answers()
+
+            self.repo.save(game_session)
+        else:
+            raise GameSessionNotFound()
+
     def answer_timeout(self, game_session_id: int):
         game_session = self.repo.get(game_session_id)
 
