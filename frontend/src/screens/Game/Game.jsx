@@ -12,7 +12,7 @@ import {Stage, toOrdinal} from "../../common/utils";
 import useStore from "../../common/RootStore";
 import GameSessionListener from "./listener";
 import {getNickname} from "../../common/auth/services";
-import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer,
+import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer, allowAnswers,
     startGame} from "./services";
 
 const AnswerForm = () => {
@@ -124,6 +124,25 @@ const HostControls = observer(() => {
                 }}
             >
                 Начать игру
+            </button>
+            <button disabled={store.stage !== Stage.READING_QUESTION}
+                onClick={() => {
+                    allowAnswers()
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                case 'wrong_stage':
+                                    toast.error('Неверная стадия игры');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+                }}
+            >
+                Разрешить отвечать
             </button>
         </div>
     )

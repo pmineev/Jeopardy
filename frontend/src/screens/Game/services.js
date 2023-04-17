@@ -30,6 +30,10 @@ const chooseQuestion = (themeIndex, questionIndex) => {
     const url = 'game_sessions/current/question/';
     return axios.post(url, {themeIndex, questionIndex});
 };
+const allowAnswers = () => {
+    const url = 'game_sessions/current/actions/allow_answers/';
+    return axios.post(url);
+};
 
 const submitAnswer = (answer) => {
     const url = 'game_sessions/current/answer/';
@@ -45,6 +49,6 @@ const getAvatarUrl = () => {
 };
 
 export {
-    getGameState, createGameSession, joinGameSession, leaveGameSession, startGame, chooseQuestion, submitAnswer,
-    getHostImageUrl, getAvatarUrl
+    getGameState, createGameSession, joinGameSession, leaveGameSession, startGame, chooseQuestion, allowAnswers,
+    submitAnswer, getHostImageUrl, getAvatarUrl
 };
