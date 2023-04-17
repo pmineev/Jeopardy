@@ -127,7 +127,7 @@ const GameStore = types
 
             self.setCurrentQuestion(data);
 
-            self.stage = Stage.ANSWERING;
+            self.stage = self.host ? Stage.READING_QUESTION : Stage.ANSWERING;
         },
         onAnswersAllowed(data) {
             self.stage =  Stage.ANSWERING;
