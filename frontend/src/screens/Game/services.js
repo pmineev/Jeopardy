@@ -33,7 +33,7 @@ const chooseQuestion = (themeIndex, questionIndex) => {
 
 const submitAnswer = (answer) => {
     const url = 'game_sessions/current/answer/';
-    return axios.post(url, {answer});
+    return axios.post(url, answer ? {answer} : undefined);
 };
 
 const getHostImageUrl = (state) => {

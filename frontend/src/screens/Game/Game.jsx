@@ -63,13 +63,44 @@ const AnswerForm = () => {
     )
 };
 
-const PlayerControls = () => {
+
+const AnswerButtons = observer(() => {
+    const {gameStore: store} = useStore();
+    return (
+        <>
+            <button disabled={store.stage !== Stage.ANSWERING}
+                onClick={() => {
+                    submitAnswer()
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                case 'wrong_stage':
+                                    toast.error('Сейчас нельзя отвечать');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+                }}
+            >
+                Ответить
+            </button>
+        </>
+    )
+});
+
+const PlayerControls = observer(() => {
+    const {gameStore: store} = useStore();
     return (
         <div className='player-controls'>
-            <AnswerForm/>
+            {store.host
+                ? <AnswerButtons/>
+                : <AnswerForm/>}
         </div>
     )
-};
+});
 
 const HostControls = observer(() => {
     const {gameStore: store} = useStore();
