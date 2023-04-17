@@ -152,6 +152,6 @@ class GameSessionService:
         user = self.user_repo.get(username)
         game_session = self.repo.get_by_player(user)
 
-        game_session.submit_answer(user, answer_data['answer'])
+        game_session.submit_answer(user, answer_data['answer'] if answer_data else None)
 
         self.repo.save(game_session)

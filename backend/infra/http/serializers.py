@@ -54,4 +54,4 @@ class QuestionChoiceSerializer(Serializer):
 
 
 class AnswerRequestSerializer(Serializer):
-    answer = CharField()
+    answer = CharField(required=False)
