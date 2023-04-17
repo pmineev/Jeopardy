@@ -82,6 +82,7 @@ const GameStore = types
                 'current_player_chosen': self.onCurrentPlayerChosen,
                 'round_started': self.onRoundStarted,
                 'current_question_chosen': self.onCurrentQuestionChosen,
+                'answers_allowed': self.onAnswersAllowed,
                 'player_answered': self.onPlayerAnswered,
                 'question_timeout': self.onQuestionTimeout,
                 'final_round_started': self.onFinalRoundStarted,
@@ -127,6 +128,9 @@ const GameStore = types
             self.setCurrentQuestion(data);
 
             self.stage = Stage.ANSWERING;
+        },
+        onAnswersAllowed(data) {
+            self.stage =  Stage.ANSWERING;
         },
         onPlayerAnswered(data) {
             const player = self.players.find(player => player.nickname === data.nickname);
