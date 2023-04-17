@@ -15,52 +15,58 @@ import {getNickname} from "../../common/auth/services";
 import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer,
     startGame} from "./services";
 
+const AnswerForm = () => {
+    return (
+        <Formik
+            initialValues={{
+                answer: '',
+            }}
+            onSubmit={({answer}, {setSubmitting, resetForm}) => {
+                if (answer?.length > 0) {
+                    submitAnswer(answer)
+                        .then(() => {
+                            setSubmitting(false);
+                        })
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'wrong_stage':
+                                    toast('Сейчас нельзя отправлять ответ');
+                                    break;
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+                    resetForm();
+                }
+            }}
+        >
+            {({handleSubmit}) => (
+                <Form>
+                    <Field id="answer"
+                           as='textarea'
+                           name="answer"
+                           placeholder="Введите ответ"
+                           onKeyPress={event => {
+                               if (event.key === 'Enter') {
+                                   event.preventDefault();
+                                   handleSubmit();
+                               }
+                           }}
+                    />
+                    <button type="submit">Ответить</button>
+                </Form>
+            )}
+        </Formik>
+    )
+};
+
 const PlayerControls = () => {
     return (
         <div className='player-controls'>
-            <Formik
-                initialValues={{
-                    answer: '',
-                }}
-                onSubmit={({answer}, {setSubmitting, resetForm}) => {
-                    if (answer?.length > 0) {
-                        submitAnswer(answer)
-                            .then(() => {
-                                setSubmitting(false);
-                            })
-                            .catch(errorCode => {
-                                switch (errorCode) {
-                                    case 'wrong_stage':
-                                        toast('Сейчас нельзя отправлять ответ');
-                                        break;
-                                    case 'game_session_not_found':
-                                        toast.error('Игра не найдена');
-                                        break;
-                                    default:
-                                        console.log(errorCode);
-                                }
-                            });
-                        resetForm();
-                    }
-                }}
-            >
-                {({handleSubmit}) => (
-                    <Form>
-                        <Field id="answer"
-                               as='textarea'
-                               name="answer"
-                               placeholder="Введите ответ"
-                               onKeyPress={event => {
-                                   if (event.key === 'Enter') {
-                                       event.preventDefault();
-                                       handleSubmit();
-                                   }
-                               }}
-                        />
-                        <button type="submit">Ответить</button>
-                    </Form>
-                )}
-            </Formik>
+            <AnswerForm/>
         </div>
     )
 };
