@@ -75,7 +75,7 @@ const HostControls = observer(() => {
     const {gameStore: store} = useStore();
     return (
         <div className='host-controls'>
-            <button disabled={!store.isAllPlayersJoined}
+            <button disabled={!(store.stage === Stage.WAITING && store.isAllPlayersJoined)}
                 onClick={() => {
                     startGame()
                         .catch(errorCode => {
