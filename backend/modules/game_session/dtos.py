@@ -9,6 +9,16 @@ from backend.core.dtos import DTO
 from backend.modules.game_session.enums import Stage
 
 
+class CurrentQuestionAnswerDTO(DTO):
+    def __init__(self, game_session: 'GameSession'):
+        self.answer = game_session.current_question.answer
+
+    def to_response(self):
+        return dict(
+            answer=self.answer
+        )
+
+
 class CorrectAnswerDTO(DTO):
     def __init__(self, question: Union['Question', 'CurrentQuestion']):
         self.answer = question.answer

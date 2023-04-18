@@ -213,11 +213,11 @@ class GameSessionViewSet(ViewSet):
 
     def allow_answers(self, request):
         try:
-            self.service.allow_answers(request.user.username)
+            current_question_answer_dto = self.service.allow_answers(request.user.username)
         except GameSessionNotFound as e:
             return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED, data=current_question_answer_dto.to_response())
 
     def submit_answer(self, request):
         serializer = AnswerRequestSerializer(data=request.data)

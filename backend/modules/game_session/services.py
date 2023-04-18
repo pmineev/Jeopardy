@@ -1,7 +1,7 @@
 from typing import List
 
 from backend.modules.game.repos import game_repo
-from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO
+from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO, CurrentQuestionAnswerDTO
 from backend.modules.game_session.entities import GameSession
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent
 from backend.modules.game_session.exceptions import AlreadyPlaying, AlreadyCreated, GameSessionNotFound
@@ -125,6 +125,8 @@ class GameSessionService:
             game_session.allow_answers()
 
             self.repo.save(game_session)
+
+            return CurrentQuestionAnswerDTO(game_session)
         else:
             raise GameSessionNotFound()
 
