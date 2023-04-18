@@ -222,6 +222,9 @@ const GameStore = types
                 ...data
             });
         },
+        setCorrectAnswer(data) {
+            self.correctAnswer = data.answer;
+        },
         setFinalRound(data) {
             self.finalRound = FinalRound.create({...data});
         },

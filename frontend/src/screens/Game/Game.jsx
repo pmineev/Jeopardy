@@ -128,6 +128,9 @@ const HostControls = observer(() => {
             <button disabled={store.stage !== Stage.READING_QUESTION}
                 onClick={() => {
                     allowAnswers()
+                        .then(response => {
+                            store.setCorrectAnswer(response.data);
+                        })
                         .catch(errorCode => {
                             switch (errorCode) {
                                 case 'game_session_not_found':
@@ -223,16 +226,22 @@ const HostCard = observer(() => {
         }
         case Stage.READING_QUESTION:
         case Stage.ANSWERING: {
-            const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
-            const value = store.currentQuestion.value;
-            hostText = `${themeName} за ${value}.`;
             hostImageURL = getHostImageUrl(Stage.ANSWERING);
 
-            if (store.answeringPlayer)
-                if (!store.answeringPlayer.answer.isCorrect) {
-                    hostText = 'Неверно.';
-                    hostImageURL = getHostImageUrl('wrong');
-                }
+            if (store.host === getNickname() && store.stage === Stage.ANSWERING) {
+                hostText = `Правильный ответ: ${store.correctAnswer}.`
+            }
+            else {
+                const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
+                const value = store.currentQuestion.value;
+                hostText = `${themeName} за ${value}.`;
+
+                if (store.answeringPlayer)
+                    if (!store.answeringPlayer.answer.isCorrect) {
+                        hostText = 'Неверно.';
+                        hostImageURL = getHostImageUrl('wrong');
+                    }
+            }
             break;
         }
         case Stage.FINAL_ROUND: {
