@@ -92,6 +92,12 @@ class StartAnswerPeriodEvent(GameSessionEvent):
         super().__init__(game_session)
 
 
+class PlayerAnsweringEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession', player: 'Player'):
+        super().__init__(game_session)
+        self.player_nickname_dto = PlayerNicknameDTO(player).to_response()
+
+
 class PlayerCorrectlyAnsweredEvent(GameSessionEvent):
     def __init__(self, game_session: 'GameSession', player: 'Player'):
         super().__init__(game_session)
