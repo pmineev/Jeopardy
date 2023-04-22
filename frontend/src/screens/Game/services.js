@@ -40,6 +40,16 @@ const submitAnswer = (answer) => {
     return axios.post(url, answer ? {answer} : undefined);
 };
 
+const confirmAnswer = () => {
+    const url = 'game_sessions/current/actions/confirm_answer/';
+    return axios.post(url);
+};
+
+const rejectAnswer = () => {
+    const url = 'game_sessions/current/actions/reject_answer/';
+    return axios.post(url);
+};
+
 const getHostImageUrl = (state) => {
     return baseStaticURL + '/img/kuleshov/' + state + '.jpg';
 };
@@ -50,5 +60,5 @@ const getAvatarUrl = () => {
 
 export {
     getGameState, createGameSession, joinGameSession, leaveGameSession, startGame, chooseQuestion, allowAnswers,
-    submitAnswer, getHostImageUrl, getAvatarUrl
+    confirmAnswer, rejectAnswer, submitAnswer, getHostImageUrl, getAvatarUrl
 };

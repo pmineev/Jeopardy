@@ -13,7 +13,7 @@ import useStore from "../../common/RootStore";
 import GameSessionListener from "./listener";
 import {getNickname} from "../../common/auth/services";
 import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer, allowAnswers,
-    startGame} from "./services";
+    confirmAnswer, rejectAnswer, startGame} from "./services";
 
 const AnswerForm = () => {
     return (
@@ -146,6 +146,45 @@ const HostControls = observer(() => {
                 }}
             >
                 Разрешить отвечать
+            </button>
+            <button disabled={store.stage !== Stage.PLAYER_ANSWERING}
+                onClick={() => {
+                    confirmAnswer()
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                case 'wrong_stage':
+                                    toast.error('Неверная стадия игры');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+                }}
+            >
+                Правильный ответ
+            </button>
+            <button disabled={store.stage !== Stage.PLAYER_ANSWERING}
+                onClick={() => {
+                    rejectAnswer()
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                case 'wrong_stage':
+                                    toast.error('Неверная стадия игры');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+
+                }}
+            >
+                Неправильный ответ
             </button>
         </div>
     )
