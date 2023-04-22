@@ -129,6 +129,7 @@ const HostControls = observer(() => {
                 onClick={() => {
                     allowAnswers()
                         .then(response => {
+                            //TODO нужен отдельный запрос на получение правильного ответа для хоста
                             store.setCorrectAnswer(response.data);
                         })
                         .catch(errorCode => {
@@ -264,10 +265,12 @@ const HostCard = observer(() => {
             break;
         }
         case Stage.READING_QUESTION:
-        case Stage.ANSWERING: {
+        case Stage.ANSWERING:
+        case Stage.PLAYER_ANSWERING: {
             hostImageURL = getHostImageUrl(Stage.ANSWERING);
 
-            if (store.host === getNickname() && store.stage === Stage.ANSWERING) {
+            if (store.host === getNickname()
+                && (store.stage === Stage.ANSWERING || store.stage === Stage.PLAYER_ANSWERING)) {
                 hostText = `Правильный ответ: ${store.correctAnswer}.`
             }
             else {
@@ -330,7 +333,8 @@ const TextScreen = observer(() => {
                 break;
             }
             case Stage.READING_QUESTION:
-            case Stage.ANSWERING: {
+            case Stage.ANSWERING:
+            case Stage.PLAYER_ANSWERING: {
                 setScreenText(store.currentQuestion.text);
                 break;
             }

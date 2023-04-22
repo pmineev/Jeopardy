@@ -4,7 +4,7 @@ import {Stage} from "../../common/utils";
 
 const Answer = types
     .model({
-        text: '',
+        text: types.maybeNull(types.string),
         isCorrect: types.maybeNull(types.boolean)
     });
 
@@ -83,6 +83,7 @@ const GameStore = types
                 'round_started': self.onRoundStarted,
                 'current_question_chosen': self.onCurrentQuestionChosen,
                 'answers_allowed': self.onAnswersAllowed,
+                'player_answering': self.onPlayerAnswering,
                 'player_answered': self.onPlayerAnswered,
                 'question_timeout': self.onQuestionTimeout,
                 'final_round_started': self.onFinalRoundStarted,
@@ -147,6 +148,9 @@ const GameStore = types
 
                 self.stage = Stage.CORRECT_ANSWER;
             }
+        },
+        onPlayerAnswering(data) {
+            self.stage =  Stage.PLAYER_ANSWERING;
         },
         onQuestionTimeout(data) {
             self.currentQuestion.setIsAnswered();

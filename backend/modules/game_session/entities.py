@@ -12,7 +12,7 @@ from backend.modules.game_session.exceptions import TooManyPlayers, NotCurrentPl
 from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
     CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
     FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent, \
-    StartAnswerPeriodEvent, AnswersAllowedEvent
+    StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent
 
 
 @dataclass
@@ -208,16 +208,24 @@ class GameSession(Entity):
         player = self._get_player(user)
 
         if self.stage == Stage.ANSWERING:
-            value = self.current_question.value
+            if self.is_hosted:
+                self.stage = Stage.PLAYER_ANSWERING
+                self.current_player = player
+                print('submit', str([p is self.current_player for p in [*self.players, player]]))
+                
+                self.add_event(PlayerAnsweringEvent(self, player))
 
-            if self.current_question.answer == answer_text:
+                print(f'{user.username} is answering')
+            elif self.current_question.answer == answer_text:
                 answer = Answer(answer_text, is_correct=True)
                 player.answer = answer
-                player.score += value
+                player.score += self.current_question.value
 
                 self.answered_questions.append(self.current_question)
 
                 self.add_event(PlayerCorrectlyAnsweredEvent(self, player))
+
+                print(f'{user.username} has answered {answer_text}: correct')
 
                 if self.is_no_more_questions():
                     self.set_next_round()
@@ -229,11 +237,11 @@ class GameSession(Entity):
             else:
                 answer = Answer(answer_text, is_correct=False)
                 player.answer = answer
-                player.score -= value
+                player.score -= self.current_question.value
 
                 self.add_event(PlayerIncorrectlyAnsweredEvent(self, player))
 
-            print(f'{user.username} has answered {answer_text}:', 'correct' if answer.is_correct else 'wrong')
+                print(f'{user.username} has answered {answer_text}: wrong')
 
         elif self.stage == Stage.FINAL_ROUND:
             player.answer = Answer(answer_text)
