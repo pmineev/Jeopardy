@@ -157,3 +157,25 @@ class GameSessionService:
         game_session.submit_answer(user, answer_data['answer'] if answer_data else None)
 
         self.repo.save(game_session)
+
+    def confirm_answer(self, username: str):
+        user = self.user_repo.get(username)
+
+        if user.is_hosting:
+            game_session = self.repo.get(user.hosted_game_session_id)
+            game_session.confirm_answer()
+
+            self.repo.save(game_session)
+        else:
+            raise GameSessionNotFound()
+
+    def reject_answer(self, username: str):
+        user = self.user_repo.get(username)
+
+        if user.is_hosting:
+            game_session = self.repo.get(user.hosted_game_session_id)
+            game_session.reject_answer()
+
+            self.repo.save(game_session)
+        else:
+            raise GameSessionNotFound()

@@ -17,7 +17,7 @@ from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEve
 
 @dataclass
 class Answer:
-    text: str
+    text: Optional[str] = None
     is_correct: Optional[bool] = None
 
 
@@ -148,7 +148,7 @@ class GameSession(Entity):
 
         if self.current_round.order < len(self.game.rounds):
             self.current_round = self.game.rounds[self.current_round.order]
-            self._set_winner_current_player()
+            self._set_winner_current_player()   # TODO неактивный игрок не должен быть текущим
             self.stage = Stage.ROUND_STARTED
 
             self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
@@ -249,6 +249,31 @@ class GameSession(Entity):
             print(f'{user.username} final answer: {answer_text}')
         else:
             raise WrongStage
+
+    def confirm_answer(self):
+        if self.stage == Stage.PLAYER_ANSWERING:
+            self.current_player.answer = Answer(is_correct=True)
+            self.current_player.score += self.current_question.value
+
+            self.answered_questions.append(self.current_question)
+
+            self.add_event(PlayerCorrectlyAnsweredEvent(self, self.current_player))
+
+            if self.is_no_more_questions():
+                self.set_next_round()
+            else:
+                self.stage = Stage.CHOOSING_QUESTION
+        else:
+            raise WrongStage()
+
+    def reject_answer(self):
+        if self.stage == Stage.PLAYER_ANSWERING:
+            self.current_player.answer = Answer(is_correct=False)
+            self.current_player.score -= self.current_question.value
+
+            self.add_event(PlayerIncorrectlyAnsweredEvent(self, self.current_player))
+        else:
+            raise WrongStage()
 
     def answer_timeout(self):
         self.answered_questions.append(self.current_question)

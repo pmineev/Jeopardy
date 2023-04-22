@@ -233,3 +233,23 @@ class GameSessionViewSet(ViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN, data={'code': e.code})
 
         return Response(status=status.HTTP_201_CREATED)
+
+    def confirm_answer(self, request):
+        try:
+            self.service.confirm_answer(request.user.username)
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
+        except WrongStage as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'code': e.code})
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    def reject_answer(self, request):
+        try:
+            self.service.reject_answer(request.user.username)
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
+        except WrongStage as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'code': e.code})
+
+        return Response(status=status.HTTP_201_CREATED)
