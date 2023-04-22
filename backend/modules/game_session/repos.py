@@ -96,7 +96,11 @@ class GameSessionRepo(Repository):
             orm_game_session.current_question = None
 
         if game_session.current_player:
-            orm_current_player = ORMPlayer.objects.get(pk=game_session.current_player.id)
+            current_player = game_session.current_player
+            orm_current_player = ORMPlayer.objects.get(pk=current_player.id)
+            orm_current_player.score = current_player.score
+            orm_current_player.answer = current_player.answer.text if current_player.answer else None
+            orm_current_player.save()
             orm_game_session.current_player = orm_current_player
         else:
             orm_game_session.current_player = None
