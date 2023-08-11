@@ -131,7 +131,6 @@ const HostControls = observer(() => {
                 onClick={() => {
                     allowAnswers()
                         .then(response => {
-                            //TODO нужен отдельный запрос на получение правильного ответа для хоста
                             store.setCorrectAnswer(response.data);
                         })
                         .catch(errorCode => {
@@ -248,7 +247,7 @@ const HostCard = observer(() => {
             break;
         }
         case Stage.TIMEOUT: {
-            hostText = `Правильный ответ: ${store.correctAnswer}. `
+            hostText = `Правильный ответ: ${store.currentQuestion.answer}. `
             hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
             break;
         }
@@ -269,14 +268,17 @@ const HostCard = observer(() => {
         }
         case Stage.READING_QUESTION:
         case Stage.ANSWERING:
-        case Stage.PLAYER_ANSWERING: {
+        case Stage.PLAYER_ANSWERING:
+        case Stage.FINAL_ROUND_ANSWERING: {
             hostImageURL = getHostImageUrl(Stage.ANSWERING);
 
-            if (store.host === getNickname()
-                && (store.stage === Stage.ANSWERING || store.stage === Stage.PLAYER_ANSWERING)) {
-                hostText = `Правильный ответ: ${store.correctAnswer}.`
+            if (store.host === getNickname()) {
+                if (store.stage === Stage.ANSWERING
+                    || store.stage === Stage.PLAYER_ANSWERING
+                    || store.stage === Stage.FINAL_ROUND_ANSWERING)
+                    hostText = `Правильный ответ: ${store.currentQuestion.answer}.`
             }
-            else {
+            else if (store.stage !== Stage.FINAL_ROUND_ANSWERING) {
                 const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
                 const value = store.currentQuestion.value;
                 hostText = `${themeName} за ${value}.`;
@@ -342,7 +344,8 @@ const TextScreen = observer(() => {
                 setScreenText(store.currentQuestion.text);
                 break;
             }
-            case Stage.FINAL_ROUND: {
+            case Stage.FINAL_ROUND:
+            case Stage.FINAL_ROUND_ANSWERING: {
                 setScreenText(store.finalRound.text);
                 break;
             }

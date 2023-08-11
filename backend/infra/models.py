@@ -138,10 +138,13 @@ class ORMGameSession(Model):
 
     @property
     def current_question_indexes(self):
-        question_index = self.current_question.order - 1
-        orm_theme = self.current_round.themes.get(questions=self.current_question)
-        theme_index = orm_theme.order - 1
-        return theme_index, question_index
+        if self.current_question.order is not None:
+            question_index = self.current_question.order - 1
+            orm_theme = self.current_round.themes.get(questions=self.current_question)
+            theme_index = orm_theme.order - 1
+            return theme_index, question_index
+        else:
+            return None, None
 
     def to_domain(self):
         return GameSession(id=self.pk,

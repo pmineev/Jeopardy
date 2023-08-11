@@ -44,7 +44,10 @@ class Player(Entity):
 
 
 class CurrentQuestion(Entity):
-    def __init__(self, question: 'Question', theme_index: int, question_index: int):
+    def __init__(self,
+                 question: 'Question',
+                 theme_index: Optional[int] = None,
+                 question_index: Optional[int] = None):
         super().__init__(question.id)
         self._question = question
         self.theme_index = theme_index
@@ -163,6 +166,7 @@ class GameSession(Entity):
 
         self.current_round = None
         self.current_player = None  # TODO!!! счет текущего игрока не сохранится
+        self.current_question = CurrentQuestion(self.game.final_round)
 
         self.add_event(FinalRoundStartedEvent(self))
 

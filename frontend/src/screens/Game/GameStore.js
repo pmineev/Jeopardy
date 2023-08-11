@@ -32,10 +32,11 @@ const Question = types
 
 const CurrentQuestion = types
     .model({
-        question: types.reference(Question),
+        question: types.maybe(types.reference(Question)),
         text: types.string,
-        themeIndex: types.integer,
-        questionIndex: types.integer
+        answer: types.maybe(types.string),
+        themeIndex: types.maybeNull(types.integer),
+        questionIndex: types.maybeNull(types.integer)
     })
     .actions(self => ({
         setIsAnswered() {
@@ -154,7 +155,7 @@ const GameStore = types
         },
         onQuestionTimeout(data) {
             self.currentQuestion.setIsAnswered();
-            self.correctAnswer = data.answer;
+            self.currentQuestion.answer = data.answer;
             self.stage = Stage.TIMEOUT;
         },
         onFinalRoundStarted(data) {
@@ -218,22 +219,23 @@ const GameStore = types
             self.currentPlayer = self.players.find(player => player.nickname === nickname);
         },
         setCurrentQuestion(data) {
-            const currentQuestion = self.currentRound
-                .themes[data.themeIndex]
-                .questions[data.questionIndex];
+            const currentQuestion = data.themeIndex !== null
+                ? self.currentRound
+                    .themes[data.themeIndex]
+                    .questions[data.questionIndex]
+                : undefined;
             self.currentQuestion = CurrentQuestion.create({
                 question: currentQuestion,
                 ...data
             });
         },
         setCorrectAnswer(data) {
-            self.correctAnswer = data.answer;
+            self.currentQuestion.answer = data.answer;
         },
         setFinalRound(data) {
             self.finalRound = FinalRound.create({...data});
         },
         clearAnswers() {
-            self.correctAnswer = undefined;
             self.answeringPlayer = undefined;
             self.players.forEach(player => {
                 player.answer = undefined;

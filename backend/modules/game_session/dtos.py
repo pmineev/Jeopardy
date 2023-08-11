@@ -11,6 +11,7 @@ from backend.modules.game_session.enums import Stage
 
 class CurrentQuestionAnswerDTO(DTO):
     def __init__(self, game_session: 'GameSession'):
+        # TODO условие переместить в сервис, сделать отдельный дто
         if game_session.stage != Stage.FINAL_ROUND_ANSWERING:
             self.answer = game_session.current_question.answer
         else:
@@ -94,6 +95,15 @@ class CurrentQuestionDTO(DTO):
         )
 
 
+class HostCurrentQuestionDTO(CurrentQuestionDTO):
+    def __init__(self, question: 'CurrentQuestion'):
+        super().__init__(question)
+        self.answer = question.answer
+
+    def to_response(self):
+        return super().to_response() | dict(answer=self.answer)
+
+
 class QuestionDTO(DTO):
     def __init__(self, question: 'Question', is_answered: bool):
         self.value = question.value
@@ -153,6 +163,7 @@ class GameStateDTO(DTO):
         self.current_player = gs.current_player.nickname if gs.current_player else None
         self.current_question = CurrentQuestionDTO(gs.current_question) if gs.current_question else None
 
+        # TODO условие переместить в сервис, сделать отдельный дто
         if gs.stage in (Stage.FINAL_ROUND, Stage.FINAL_ROUND_ANSWERING, Stage.END_GAME):
             self.final_round = FinalRoundQuestionDTO(gs.game.final_round,
                                                      with_answer=gs.stage == Stage.END_GAME)
@@ -177,6 +188,13 @@ class GameStateDTO(DTO):
             response |= dict(finalRound=self.final_round.to_response())
 
         return response
+
+
+class HostGameStateDTO(GameStateDTO):
+    def __init__(self, gs: 'GameSession'):
+        super().__init__(gs)
+
+        self.current_question = HostCurrentQuestionDTO(gs.current_question) if gs.current_question else None
 
 
 class GameSessionDescriptionDTO(DTO):
