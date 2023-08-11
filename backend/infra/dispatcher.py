@@ -9,6 +9,7 @@ class EventDispatcher:
     handlers: Dict[Type['Event'], List[Callable[['Event'], None]]] = {}
 
     @classmethod
+    # TODO поменять местами аргументы
     def register_handler(cls, handler: Callable[['Event'], None], event_type: Type['Event']):
         event_handlers = cls.handlers.get(event_type)
         if event_handlers:

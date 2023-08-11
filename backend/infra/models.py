@@ -131,7 +131,8 @@ class ORMGameSession(Model):
                                    on_delete=CASCADE,
                                    null=True)
     stage = EnumChoiceField(Stage,
-                            default=Stage.WAITING)
+                            default=Stage.WAITING,
+                            max_length=30)
     answered_questions = ManyToManyField(ORMQuestion,
                                          related_name='answered_questions')
 

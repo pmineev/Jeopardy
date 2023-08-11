@@ -131,7 +131,7 @@ const GameStore = types
             self.stage = self.host ? Stage.READING_QUESTION : Stage.ANSWERING;
         },
         onAnswersAllowed(data) {
-            self.stage =  Stage.ANSWERING;
+            self.stage = self.stage === Stage.READING_QUESTION ? Stage.ANSWERING : Stage.FINAL_ROUND_ANSWERING
         },
         onPlayerAnswered(data) {
             const player = self.players.find(player => player.nickname === data.nickname);

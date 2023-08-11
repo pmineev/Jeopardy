@@ -7,7 +7,8 @@ from backend.infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent, PlayerJoinedEvent, \
     PlayerLeftEvent, RoundStartedEvent, FinalRoundStartedEvent, CurrentQuestionChosenEvent, \
     PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
-    PlayerInactiveEvent, PlayerActiveEvent, StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent
+    PlayerInactiveEvent, PlayerActiveEvent, StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent, \
+    FinalRoundAnswersAllowedEvent
 from backend.modules.game_session.services import GameSessionService
 
 
@@ -49,7 +50,7 @@ def notify_of_current_question_chosen(event: CurrentQuestionChosenEvent):
     notify_to_game_session(event.game_session_id, event.current_question_dto, 'current_question_chosen')
 
 
-def notify_of_answers_allowed(event: AnswersAllowedEvent):
+def notify_of_answers_allowed(event: AnswersAllowedEvent | FinalRoundAnswersAllowedEvent):
     notify_to_game_session(event.game_session_id, {}, 'answers_allowed')
 
 
@@ -128,6 +129,7 @@ def register_handlers():
     EventDispatcher.register_handler(notify_of_final_round_started, FinalRoundStartedEvent)
     EventDispatcher.register_handler(notify_of_current_question_chosen, CurrentQuestionChosenEvent)
     EventDispatcher.register_handler(notify_of_answers_allowed, AnswersAllowedEvent)
+    EventDispatcher.register_handler(notify_of_answers_allowed, FinalRoundAnswersAllowedEvent)
     EventDispatcher.register_handler(notify_of_player_answering, PlayerAnsweringEvent)
     EventDispatcher.register_handler(notify_of_player_answered, PlayerCorrectlyAnsweredEvent)
     EventDispatcher.register_handler(notify_of_player_answered, PlayerIncorrectlyAnsweredEvent)
@@ -143,4 +145,4 @@ def register_handlers():
     EventDispatcher.register_handler(stop_question_timer, PlayerCorrectlyAnsweredEvent)
     EventDispatcher.register_handler(stop_question_timer, GameSessionDeletedEvent)
     EventDispatcher.register_handler(restart_question_timer, PlayerIncorrectlyAnsweredEvent)
-    EventDispatcher.register_handler(start_final_round_timer, FinalRoundStartedEvent)
+    EventDispatcher.register_handler(start_final_round_timer, FinalRoundAnswersAllowedEvent)

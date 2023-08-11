@@ -95,7 +95,7 @@ const PlayerControls = observer(() => {
     const {gameStore: store} = useStore();
     return (
         <div className='player-controls'>
-            {store.host
+            {store.host && store.stage !== Stage.FINAL_ROUND_ANSWERING
                 ? <AnswerButtons/>
                 : <AnswerForm/>}
         </div>
@@ -104,8 +104,10 @@ const PlayerControls = observer(() => {
 
 const HostControls = observer(() => {
     const {gameStore: store} = useStore();
+    // TODO выровнять кнопки
     return (
         <div className='host-controls'>
+            {/*TODO скрывать кнопки при disabled*/}
             <button disabled={!(store.stage === Stage.WAITING && store.isAllPlayersJoined)}
                 onClick={() => {
                     startGame()
@@ -125,7 +127,7 @@ const HostControls = observer(() => {
             >
                 Начать игру
             </button>
-            <button disabled={store.stage !== Stage.READING_QUESTION}
+            <button disabled={!(store.stage === Stage.READING_QUESTION || store.stage === Stage.FINAL_ROUND)}
                 onClick={() => {
                     allowAnswers()
                         .then(response => {
@@ -233,6 +235,7 @@ const HostCard = observer(() => {
     let hostText = '';
     let hostImageURL;
 
+    // TODO перенести это все в стор
     switch (store.stage) {
         case Stage.WAITING: {
             hostText = `Ожидаем игроков...`;
@@ -292,6 +295,7 @@ const HostCard = observer(() => {
             break;
         }
         case Stage.END_GAME: {
+            // TODO несколько победителей при равенстве счета
             const winner = store.players.reduce((a, b) => a.score > b.score ? a : b);
             hostText = `Правильный ответ: ${store.finalRound.answer}.\nПобедил ${winner.nickname}!`;
             hostImageURL = getHostImageUrl(Stage.END_GAME);
@@ -583,6 +587,7 @@ const Game = observer(() => {
         }
     }, [store]);
 
+    // TODO перенести в стор
     useEffect(() => {
         let timeoutId;
 

@@ -12,7 +12,7 @@ from backend.modules.game_session.exceptions import TooManyPlayers, NotCurrentPl
 from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
     CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
     FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent, \
-    StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent
+    StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent, FinalRoundAnswersAllowedEvent
 
 
 @dataclass
@@ -124,6 +124,7 @@ class GameSession(Entity):
             self.players.remove(player)
             self.add_event(PlayerLeftEvent(self, player))
         else:
+            # TODO неактивный игрок не должен быть текущим
             player.is_playing = False
             self.add_event(PlayerInactiveEvent(self, player))
 
@@ -134,7 +135,7 @@ class GameSession(Entity):
             raise WrongStage()
 
         self.current_round = self.game.rounds[0]
-        self.current_player = random.choice(self.players)
+        self.current_player = random.choice(self.players)  # TODO лучше по алфавиту?
         self.stage = Stage.ROUND_STARTED
 
         self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
@@ -161,7 +162,7 @@ class GameSession(Entity):
         self.stage = Stage.FINAL_ROUND
 
         self.current_round = None
-        self.current_player = None
+        self.current_player = None  # TODO!!! счет текущего игрока не сохранится
 
         self.add_event(FinalRoundStartedEvent(self))
 
@@ -201,6 +202,9 @@ class GameSession(Entity):
         if self.stage == Stage.READING_QUESTION:
             self.stage = Stage.ANSWERING
             self.add_event(AnswersAllowedEvent(self))
+        elif self.stage == Stage.FINAL_ROUND:
+            self.stage = Stage.FINAL_ROUND_ANSWERING
+            self.add_event(FinalRoundAnswersAllowedEvent(self))
         else:
             raise WrongStage()
 
@@ -243,7 +247,7 @@ class GameSession(Entity):
 
                 print(f'{user.username} has answered {answer_text}: wrong')
 
-        elif self.stage == Stage.FINAL_ROUND:
+        elif self.stage == Stage.FINAL_ROUND_ANSWERING:
             player.answer = Answer(answer_text)
 
             print(f'{user.username} final answer: {answer_text}')

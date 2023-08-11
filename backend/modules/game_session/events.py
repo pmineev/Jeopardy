@@ -120,6 +120,11 @@ class FinalRoundStartedEvent(GameSessionEvent):
                                                      with_answer=False).to_response()
 
 
+class FinalRoundAnswersAllowedEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+
 class AnswerTimeoutEvent(GameSessionEvent):
     def __init__(self, game_session: 'GameSession', question: 'CurrentQuestion'):
         super().__init__(game_session)
