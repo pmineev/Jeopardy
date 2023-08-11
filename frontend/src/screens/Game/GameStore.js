@@ -149,6 +149,8 @@ const GameStore = types
 
                 self.stage = Stage.CORRECT_ANSWER;
             }
+            else
+                self.stage = Stage.ANSWERING
         },
         onPlayerAnswering(data) {
             self.stage =  Stage.PLAYER_ANSWERING;

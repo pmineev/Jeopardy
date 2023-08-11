@@ -278,6 +278,7 @@ class GameSession(Entity):
         if self.stage == Stage.PLAYER_ANSWERING:
             self.current_player.answer = Answer(is_correct=False)
             self.current_player.score -= self.current_question.value
+            self.stage = Stage.ANSWERING
 
             self.add_event(PlayerIncorrectlyAnsweredEvent(self, self.current_player))
         else:
