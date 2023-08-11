@@ -370,7 +370,7 @@ const Question = observer(({question, themeIndex, questionIndex}) => {
     useEffect(() => {
         if (store.currentQuestion?.question === question)
             setSelected(true);
-        if (store.stage !== Stage.ANSWERING)
+        if (!(store.stage === Stage.ANSWERING || store.stage === Stage.READING_QUESTION))
             setSelected(false);
     }, [store.currentQuestion, store.stage])
 
