@@ -69,7 +69,7 @@ class GameSessionService:
             game_session.join(user)
 
             game_session = self.repo.save(game_session)
-        elif user.game_session_id != game_session.id:
+        elif game_session.id not in (user.game_session_id, user.hosted_game_session_id):
             raise AlreadyPlaying
 
         return GameStateDTO(game_session)
