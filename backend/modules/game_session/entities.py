@@ -165,7 +165,7 @@ class GameSession(Entity):
         self.stage = Stage.FINAL_ROUND
 
         self.current_round = None
-        self.current_player = None  # TODO!!! счет текущего игрока не сохранится
+        # self.current_player = None
         self.current_question = CurrentQuestion(self.game.final_round)
 
         self.add_event(FinalRoundStartedEvent(self))

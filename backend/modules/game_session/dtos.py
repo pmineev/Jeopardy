@@ -160,14 +160,15 @@ class GameStateDTO(DTO):
         self.players = [PlayerDTO(player) for player in gs.players]
         self.current_round = CurrentRoundDTO(gs.current_round, gs.answered_questions) \
             if gs.current_round else None
-        self.current_player = gs.current_player.nickname if gs.current_player else None
         self.current_question = CurrentQuestionDTO(gs.current_question) if gs.current_question else None
 
         # TODO условие переместить в сервис, сделать отдельный дто
         if gs.stage in (Stage.FINAL_ROUND, Stage.FINAL_ROUND_ANSWERING, Stage.END_GAME):
+            self.current_player = None
             self.final_round = FinalRoundQuestionDTO(gs.game.final_round,
                                                      with_answer=gs.stage == Stage.END_GAME)
         else:
+            self.current_player = gs.current_player.nickname if gs.current_player else None
             self.final_round = None
 
     def to_response(self):
