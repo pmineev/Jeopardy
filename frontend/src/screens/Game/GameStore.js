@@ -141,7 +141,7 @@ const GameStore = types
             player.score = data.score;
             player.answer = Answer.create({...data.answer})
 
-            if (self.stage === Stage.PLAYER_ANSWERING) {
+            if (self.stage === Stage.ANSWERING || self.stage === Stage.PLAYER_ANSWERING) {
                 self.answeringPlayer = player;
 
                 if (player.answer.isCorrect) {
