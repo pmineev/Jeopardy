@@ -13,7 +13,7 @@ from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEve
     CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
     FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent, \
     StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent, FinalRoundAnswersAllowedEvent, \
-    StopAnswerPeriodEvent, RestartAnswerPeriodEvent, StartFinalRoundPeriodEvent
+    StopAnswerPeriodEvent, RestartAnswerPeriodEvent, StartFinalRoundPeriodEvent, GameEndedEvent
 
 
 @dataclass
@@ -289,6 +289,7 @@ class GameSession(Entity):
 
             if self._is_all_answers_checked():
                 self.stage = Stage.END_GAME
+                self.add_event(GameEndedEvent(self))
             else:
                 self._set_next_answering_player()
         else:
@@ -313,6 +314,7 @@ class GameSession(Entity):
 
             if self._is_all_answers_checked():
                 self.stage = Stage.END_GAME
+                self.add_event(GameEndedEvent(self))
             else:
                 self._set_next_answering_player()
         else:

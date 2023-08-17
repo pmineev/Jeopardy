@@ -8,7 +8,8 @@ if TYPE_CHECKING:
 
 from backend.core.events import Event
 from backend.modules.game_session.dtos import GameSessionDescriptionDTO, CreatorNicknameDTO, PlayerNicknameDTO, \
-    CurrentQuestionDTO, PlayerDTO, FinalRoundQuestionDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO, RoundStartedDTO
+    CurrentQuestionDTO, PlayerDTO, FinalRoundQuestionDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO, RoundStartedDTO, \
+    CurrentQuestionAnswerDTO
 
 
 class GameSessionEvent(Event, ABC):
@@ -151,3 +152,10 @@ class FinalRoundTimeoutEvent(GameSessionEvent):
         super().__init__(game_session)
 
         self.final_round_timeout_dto = FinalRoundTimeoutDTO(game_session).to_response()
+
+
+class GameEndedEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+        self.current_question_answer_dto = CurrentQuestionAnswerDTO(game_session).to_response()

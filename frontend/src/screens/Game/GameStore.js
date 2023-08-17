@@ -89,6 +89,7 @@ const GameStore = types
                 'question_timeout': self.onQuestionTimeout,
                 'final_round_started': self.onFinalRoundStarted,
                 'final_round_timeout': self.onFinalRoundTimeout,
+                'game_ended': self.onGameEnded,
             };
 
             handlers[event](data);
@@ -196,6 +197,9 @@ const GameStore = types
 
                 self.stage = Stage.END_GAME;
             }
+        },
+        onGameEnded(data) {
+            self.finalRound.answer = data.answer
         },
         initialize(data) {
             self.clear();

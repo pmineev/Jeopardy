@@ -8,7 +8,8 @@ from backend.modules.game_session.events import GameSessionCreatedEvent, GameSes
     PlayerLeftEvent, RoundStartedEvent, FinalRoundStartedEvent, CurrentQuestionChosenEvent, \
     PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
     PlayerInactiveEvent, PlayerActiveEvent, StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent, \
-    FinalRoundAnswersAllowedEvent, RestartAnswerPeriodEvent, StopAnswerPeriodEvent, StartFinalRoundPeriodEvent
+    FinalRoundAnswersAllowedEvent, RestartAnswerPeriodEvent, StopAnswerPeriodEvent, StartFinalRoundPeriodEvent, \
+    GameEndedEvent
 from backend.modules.game_session.services import GameSessionService
 
 
@@ -68,6 +69,9 @@ def notify_of_answer_timeout(event: AnswerTimeoutEvent):
 
 def notify_of_final_round_timeout(event: FinalRoundTimeoutEvent):
     notify_to_game_session(event.game_session_id, event.final_round_timeout_dto, 'final_round_timeout')
+
+def notify_of_game_ended(event: GameEndedEvent):
+    notify_to_game_session(event.game_session_id, event.current_question_answer_dto, 'game_ended')
 
 
 def add_creator_to_notifier(event: GameSessionCreatedEvent):
@@ -135,6 +139,7 @@ def register_handlers():
     EventDispatcher.register_handler(notify_of_player_answered, PlayerIncorrectlyAnsweredEvent)
     EventDispatcher.register_handler(notify_of_answer_timeout, AnswerTimeoutEvent)
     EventDispatcher.register_handler(notify_of_final_round_timeout, FinalRoundTimeoutEvent)
+    EventDispatcher.register_handler(notify_of_game_ended, GameEndedEvent)
     EventDispatcher.register_handler(add_creator_to_notifier, GameSessionCreatedEvent)
     EventDispatcher.register_handler(add_player_to_notifier, PlayerJoinedEvent)
     EventDispatcher.register_handler(remove_player_from_notifier, PlayerLeftEvent)
