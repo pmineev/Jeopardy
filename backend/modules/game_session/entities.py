@@ -257,7 +257,7 @@ class GameSession(Entity):
 
                 print(f'{user.username} has answered {answer_text}: wrong')
 
-        elif self.stage == Stage.FINAL_ROUND_ANSWERING:
+        elif self.stage in [Stage.FINAL_ROUND, Stage.FINAL_ROUND_ANSWERING]:
             player.answer = Answer(answer_text)
 
             print(f'{user.username} final answer: {answer_text}')
