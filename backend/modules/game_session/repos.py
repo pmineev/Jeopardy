@@ -76,7 +76,8 @@ class GameSessionRepo(Repository):
                 orm_player = ORMPlayer.objects.get(pk=player.id)
                 orm_player.is_playing = player.is_playing
                 orm_player.score = player.score
-                orm_player.answer = player.answer.text if player.answer else None
+                orm_player.answer = player.answer.text
+                orm_player.is_answer_correct = player.answer.is_correct
                 orm_player.save()
             else:
                 orm_player = ORMPlayer.objects.create(user_id=player.user.id,
@@ -99,7 +100,8 @@ class GameSessionRepo(Repository):
             current_player = game_session.current_player
             orm_current_player = ORMPlayer.objects.get(pk=current_player.id)
             orm_current_player.score = current_player.score
-            orm_current_player.answer = current_player.answer.text if current_player.answer else None
+            orm_current_player.answer = current_player.answer.text
+            orm_current_player.is_answer_correct = current_player.answer.is_correct
             orm_current_player.save()
             orm_game_session.current_player = orm_current_player
         else:

@@ -48,13 +48,14 @@ class ORMPlayer(Model):
     is_playing = BooleanField(default=True)
     score = IntegerField(default=0)
     answer = TextField(null=True)
+    is_answer_correct = BooleanField(null=True)
 
     def to_domain(self):
         return Player(id=self.pk,
                       user=self.user.to_domain(),
                       score=self.score,
                       is_playing=self.is_playing,
-                      answer=Answer(text=self.answer) if self.answer else None)
+                      answer=Answer(text=self.answer, is_correct=self.is_answer_correct))
 
 
 class ORMQuestion(Model):
