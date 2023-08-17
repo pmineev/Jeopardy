@@ -45,17 +45,19 @@ const AnswerForm = () => {
         >
             {({handleSubmit}) => (
                 <Form>
-                    <Field id="answer"
-                           as='textarea'
-                           name="answer"
-                           placeholder="Введите ответ"
-                           onKeyPress={event => {
-                               if (event.key === 'Enter') {
-                                   event.preventDefault();
-                                   handleSubmit();
-                               }
-                           }}
-                    />
+                    <div className='textarea'>
+                        <Field id="answer"
+                               as='textarea'
+                               name="answer"
+                               placeholder="Введите ответ"
+                               onKeyPress={event => {
+                                   if (event.key === 'Enter') {
+                                       event.preventDefault();
+                                       handleSubmit();
+                                   }
+                               }}
+                        />
+                    </div>
                     <button type="submit">Ответить</button>
                 </Form>
             )}
@@ -97,7 +99,7 @@ const PlayerControls = observer(() => {
     const {gameStore: store} = useStore();
     return (
         <div className='player-controls'>
-            {store.host && store.stage !== Stage.FINAL_ROUND_ANSWERING
+            {!store.host
                 ? <AnswerButtons/>
                 : <AnswerForm/>}
         </div>
@@ -106,7 +108,6 @@ const PlayerControls = observer(() => {
 
 const HostControls = observer(() => {
     const {gameStore: store} = useStore();
-    // TODO выровнять кнопки
     return (
         <div className='host-controls'>
             {(store.stage === Stage.WAITING && store.isAllPlayersJoined) &&

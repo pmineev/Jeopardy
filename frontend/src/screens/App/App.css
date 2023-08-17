@@ -474,25 +474,40 @@ td {
 }
 
 .player-controls {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: stretch;
 }
 
 .player-controls form {
+    display: flex;
+    flex-direction: column;
     max-width: 100%;
+    align-items: center;
+    align-self: stretch;
     width: 100%;
     padding: 0;
-    position: unset;
-    justify-content: flex-start;
-    gap: 10px;
+}
+
+.player-controls .textarea {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    height: 6em;
 }
 
 .player-controls textarea {
     resize: none;
-    width: 100%;
+    height: 100%;
     margin: 0;
-    box-sizing: border-box;
 }
 
+.host-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
 .Toastify__toast {
     font: inherit;
     color: var(--text-color);
