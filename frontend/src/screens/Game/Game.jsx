@@ -68,25 +68,27 @@ const AnswerButtons = observer(() => {
     const {gameStore: store} = useStore();
     return (
         <>
-            <button disabled={store.stage !== Stage.ANSWERING}
-                onClick={() => {
-                    submitAnswer()
-                        .catch(errorCode => {
-                            switch (errorCode) {
-                                case 'game_session_not_found':
-                                    toast.error('Игра не найдена');
-                                    break;
-                                case 'wrong_stage':
-                                    toast.error('Сейчас нельзя отвечать');
-                                    break;
-                                default:
-                                    console.log(errorCode);
-                            }
-                        });
-                }}
-            >
-                Ответить
-            </button>
+            {store.stage === Stage.ANSWERING &&
+                <button
+                     onClick={() => {
+                         submitAnswer()
+                             .catch(errorCode => {
+                                 switch (errorCode) {
+                                     case 'game_session_not_found':
+                                         toast.error('Игра не найдена');
+                                         break;
+                                     case 'wrong_stage':
+                                         toast.error('Сейчас нельзя отвечать');
+                                         break;
+                                     default:
+                                         console.log(errorCode);
+                                 }
+                             });
+                     }}
+                >
+                    Ответить
+                </button>
+            }
         </>
     )
 });
@@ -107,87 +109,94 @@ const HostControls = observer(() => {
     // TODO выровнять кнопки
     return (
         <div className='host-controls'>
-            {/*TODO скрывать кнопки при disabled*/}
-            <button disabled={!(store.stage === Stage.WAITING && store.isAllPlayersJoined)}
-                onClick={() => {
-                    startGame()
-                        .catch(errorCode => {
-                            switch (errorCode) {
-                                case 'game_session_not_found':
-                                    toast.error('Игра не найдена');
-                                    break;
-                                case 'wrong_stage':
-                                    toast.error('Игра уже началась');
-                                    break;
-                                default:
-                                    console.log(errorCode);
-                            }
-                        });
-                }}
-            >
-                Начать игру
-            </button>
-            <button disabled={!(store.stage === Stage.READING_QUESTION || store.stage === Stage.FINAL_ROUND)}
-                onClick={() => {
-                    allowAnswers()
-                        .then(response => {
-                            store.setCorrectAnswer(response.data);
-                        })
-                        .catch(errorCode => {
-                            switch (errorCode) {
-                                case 'game_session_not_found':
-                                    toast.error('Игра не найдена');
-                                    break;
-                                case 'wrong_stage':
-                                    toast.error('Неверная стадия игры');
-                                    break;
-                                default:
-                                    console.log(errorCode);
-                            }
-                        });
-                }}
-            >
-                Разрешить отвечать
-            </button>
-            <button disabled={!(store.stage === Stage.PLAYER_ANSWERING || store.stage === Stage.FINAL_ROUND_ENDED)}
-                onClick={() => {
-                    confirmAnswer()
-                        .catch(errorCode => {
-                            switch (errorCode) {
-                                case 'game_session_not_found':
-                                    toast.error('Игра не найдена');
-                                    break;
-                                case 'wrong_stage':
-                                    toast.error('Неверная стадия игры');
-                                    break;
-                                default:
-                                    console.log(errorCode);
-                            }
-                        });
-                }}
-            >
-                Правильный ответ
-            </button>
-            <button disabled={!(store.stage === Stage.PLAYER_ANSWERING || store.stage === Stage.FINAL_ROUND_ENDED)}
-                onClick={() => {
-                    rejectAnswer()
-                        .catch(errorCode => {
-                            switch (errorCode) {
-                                case 'game_session_not_found':
-                                    toast.error('Игра не найдена');
-                                    break;
-                                case 'wrong_stage':
-                                    toast.error('Неверная стадия игры');
-                                    break;
-                                default:
-                                    console.log(errorCode);
-                            }
-                        });
+            {(store.stage === Stage.WAITING && store.isAllPlayersJoined) &&
+                <button
+                     onClick={() => {
+                         startGame()
+                             .catch(errorCode => {
+                                 switch (errorCode) {
+                                     case 'game_session_not_found':
+                                         toast.error('Игра не найдена');
+                                         break;
+                                     case 'wrong_stage':
+                                         toast.error('Игра уже началась');
+                                         break;
+                                     default:
+                                         console.log(errorCode);
+                                 }
+                             });
+                     }}
+                >
+                    Начать игру
+                </button>
+            }
+            {(store.stage === Stage.READING_QUESTION || store.stage === Stage.FINAL_ROUND) &&
+                <button
+                     onClick={() => {
+                         allowAnswers()
+                             .then(response => {
+                                 store.setCorrectAnswer(response.data);
+                             })
+                             .catch(errorCode => {
+                                 switch (errorCode) {
+                                     case 'game_session_not_found':
+                                         toast.error('Игра не найдена');
+                                         break;
+                                     case 'wrong_stage':
+                                         toast.error('Неверная стадия игры');
+                                         break;
+                                     default:
+                                         console.log(errorCode);
+                                 }
+                             });
+                     }}
+                >
+                    Разрешить отвечать
+                </button>
+            }
+            {(store.stage === Stage.PLAYER_ANSWERING || store.stage === Stage.FINAL_ROUND_ENDED) &&
+                <button
+                     onClick={() => {
+                         confirmAnswer()
+                             .catch(errorCode => {
+                                 switch (errorCode) {
+                                     case 'game_session_not_found':
+                                         toast.error('Игра не найдена');
+                                         break;
+                                     case 'wrong_stage':
+                                         toast.error('Неверная стадия игры');
+                                         break;
+                                     default:
+                                         console.log(errorCode);
+                                 }
+                             });
+                     }}
+                >
+                    Правильный ответ
+                </button>
+            }
+            {(store.stage === Stage.PLAYER_ANSWERING || store.stage === Stage.FINAL_ROUND_ENDED) &&
+                <button
+                     onClick={() => {
+                         rejectAnswer()
+                             .catch(errorCode => {
+                                 switch (errorCode) {
+                                     case 'game_session_not_found':
+                                         toast.error('Игра не найдена');
+                                         break;
+                                     case 'wrong_stage':
+                                         toast.error('Неверная стадия игры');
+                                         break;
+                                     default:
+                                         console.log(errorCode);
+                                 }
+                             });
 
-                }}
-            >
-                Неправильный ответ
-            </button>
+                     }}
+                >
+                    Неправильный ответ
+                </button>
+            }
         </div>
     )
 });
