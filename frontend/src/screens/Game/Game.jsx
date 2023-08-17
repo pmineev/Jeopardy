@@ -70,27 +70,25 @@ const AnswerButtons = observer(() => {
     const {gameStore: store} = useStore();
     return (
         <>
-            {store.stage === Stage.ANSWERING &&
-                <button
-                     onClick={() => {
-                         submitAnswer()
-                             .catch(errorCode => {
-                                 switch (errorCode) {
-                                     case 'game_session_not_found':
-                                         toast.error('Игра не найдена');
-                                         break;
-                                     case 'wrong_stage':
-                                         toast.error('Сейчас нельзя отвечать');
-                                         break;
-                                     default:
-                                         console.log(errorCode);
-                                 }
-                             });
-                     }}
-                >
-                    Ответить
-                </button>
-            }
+            <button
+                 onClick={() => {
+                     submitAnswer()
+                         .catch(errorCode => {
+                             switch (errorCode) {
+                                 case 'game_session_not_found':
+                                     toast.error('Игра не найдена');
+                                     break;
+                                 case 'wrong_stage':
+                                     toast.error('Сейчас нельзя отвечать');
+                                     break;
+                                 default:
+                                     console.log(errorCode);
+                             }
+                         });
+                 }}
+            >
+                Ответить
+            </button>
         </>
     )
 });
@@ -99,9 +97,13 @@ const PlayerControls = observer(() => {
     const {gameStore: store} = useStore();
     return (
         <div className='player-controls'>
-            {!store.host
-                ? <AnswerButtons/>
-                : <AnswerForm/>}
+            {(!store.host && (store.stage === Stage.ANSWERING || store.stage === Stage.FINAL_ROUND) ||
+                    store.host && store.stage === Stage.FINAL_ROUND_ANSWERING) &&
+                <AnswerForm/>
+            }
+            {store.host && store.stage === Stage.ANSWERING &&
+                <AnswerButtons/>
+            }
         </div>
     )
 });
