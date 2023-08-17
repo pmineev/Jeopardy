@@ -13,7 +13,7 @@ from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEve
     CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
     FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent, \
     StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent, FinalRoundAnswersAllowedEvent, \
-    StopAnswerPeriodEvent, RestartAnswerPeriodEvent
+    StopAnswerPeriodEvent, RestartAnswerPeriodEvent, StartFinalRoundPeriodEvent
 
 
 @dataclass
@@ -171,6 +171,8 @@ class GameSession(Entity):
         self.current_question = CurrentQuestion(self.game.final_round)
 
         self.add_event(FinalRoundStartedEvent(self))
+        if not self.is_hosted:
+            self.add_event(StartFinalRoundPeriodEvent(self))
 
         print(f'final round started, q:{self.game.final_round.text}, a:{self.game.final_round.answer}')
 

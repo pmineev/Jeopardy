@@ -91,6 +91,10 @@ class StartAnswerPeriodEvent(GameSessionEvent):
     def __init__(self, game_session: 'GameSession'):
         super().__init__(game_session)
 
+class StartFinalRoundPeriodEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
 
 class StopAnswerPeriodEvent(GameSessionEvent):
     def __init__(self, game_session: 'GameSession'):
