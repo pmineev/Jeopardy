@@ -50,7 +50,7 @@ class PlayerDTO(DTO):
         self.nickname = player.nickname
         self.score = player.score
         self.is_playing = player.is_playing
-        self.answer = AnswerDTO(player.answer) if player.answer else None
+        self.answer = AnswerDTO(player.answer)
 
     def to_response(self):
         response = dict(

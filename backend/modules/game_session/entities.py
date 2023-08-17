@@ -32,7 +32,7 @@ class Player(Entity):
         self.user = user
         self.score = score
         self.is_playing = is_playing
-        self.answer = answer
+        self.answer = answer or Answer()
 
     @property
     def username(self) -> str:
@@ -74,7 +74,7 @@ class GameSession(Entity):
                  id: Optional[int] = None,
                  host: Optional['User'] = None,
                  players: Optional[List[Player]] = None,
-                 current_player: Optional[Player] = None,
+                 current_player: Optional[Player] = None,  # TODO сделать свойством и брать объекты только из players
                  current_round: Optional['Round'] = None,
                  current_question: Optional['CurrentQuestion'] = None,
                  answered_questions: Optional[List['CurrentQuestion']] = None):
@@ -324,16 +324,12 @@ class GameSession(Entity):
         value = self.game.final_round.value
         answer_text = self.game.final_round.answer
         for player in self.players:
-            if player.answer:
-                if player.answer.text == answer_text:
-                    player.score += value
-                    player.answer.is_correct = True
-                else:
-                    player.score -= value
-                    player.answer.is_correct = False
+            if player.answer.text == answer_text:
+                player.score += value
+                player.answer.is_correct = True
             else:
                 player.score -= value
-                player.answer = Answer('', is_correct=False)
+                player.answer.is_correct = False
 
     def _get_player(self, user: 'User') -> Optional[Player]:
         for player in self.players:
@@ -348,4 +344,5 @@ class GameSession(Entity):
 
     def _clear_players_answers(self):
         for player in self.players:
-            player.answer = None
+            player.answer.text = None
+            player.answer.is_correct = None
