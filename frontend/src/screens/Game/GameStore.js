@@ -137,23 +137,41 @@ const GameStore = types
         onPlayerAnswered(data) {
             const player = self.players.find(player => player.nickname === data.nickname);
 
-            self.answeringPlayer = player;
-
             player.score = data.score;
             player.answer = Answer.create({...data.answer})
 
-            if (player.answer.isCorrect) {
-                self.currentQuestion.setIsAnswered();
+            if (self.stage === Stage.PLAYER_ANSWERING) {
+                self.answeringPlayer = player;
 
-                self.currentPlayer = player;
+                if (player.answer.isCorrect) {
+                    self.currentQuestion.setIsAnswered();
 
-                self.stage = Stage.CORRECT_ANSWER;
+                    self.currentPlayer = player;
+
+                    self.stage = Stage.CORRECT_ANSWER;
+                }
+                else
+                    self.stage = Stage.ANSWERING;
             }
-            else
-                self.stage = Stage.ANSWERING
+            else {
+                const notCheckedPlayers = self.players.filter(player => player.answer.isCorrect === null)
+                console.log(notCheckedPlayers)
+                if (notCheckedPlayers.length > 0)
+                    self.answeringPlayer = notCheckedPlayers.reduce((p1, p2) => p1.score > p2.score ? p1 : p2)
+                else {
+                    self.answeringPlayer = undefined;
+                    self.stage = Stage.END_GAME;
+                }
+            }
         },
         onPlayerAnswering(data) {
-            self.stage =  Stage.PLAYER_ANSWERING;
+            if (self.stage === Stage.ANSWERING) {
+                // TODO отображать отвечающего игрока
+                self.stage =  Stage.PLAYER_ANSWERING;
+            }
+            else {
+                self.answeringPlayer = self.players.find(player => player.nickname === data.nickname);
+            }
         },
         onQuestionTimeout(data) {
             self.currentQuestion.setIsAnswered();
@@ -170,9 +188,14 @@ const GameStore = types
                 player.answer = Answer.create({...playerData.answer});
             })
 
-            self.finalRound.answer = data.answer
+            if (self.host) {
+                self.stage = Stage.FINAL_ROUND_ENDED
+            }
+            else {
+                self.finalRound.answer = data.answer
 
-            self.stage = Stage.END_GAME;
+                self.stage = Stage.END_GAME;
+            }
         },
         initialize(data) {
             self.clear();
@@ -186,8 +209,14 @@ const GameStore = types
             );
             if (data.currentRound)
                 self.setCurrentRound(data.currentRound);
-            if (data.currentPlayer)
-                self.setCurrentPlayer(data.currentPlayer);
+            if (data.currentPlayer) {
+                if (self.stage === Stage.FINAL_ROUND_ENDED) {
+                    self.answeringPlayer = self.players.find(player =>
+                        player.nickname === data.currentPlayer);
+                }
+                else
+                    self.setCurrentPlayer(data.currentPlayer);
+            }
             if (data.currentQuestion)
                 self.setCurrentQuestion(data.currentQuestion);
             if (data.finalRound)

@@ -149,7 +149,7 @@ const HostControls = observer(() => {
             >
                 Разрешить отвечать
             </button>
-            <button disabled={store.stage !== Stage.PLAYER_ANSWERING}
+            <button disabled={!(store.stage === Stage.PLAYER_ANSWERING || store.stage === Stage.FINAL_ROUND_ENDED)}
                 onClick={() => {
                     confirmAnswer()
                         .catch(errorCode => {
@@ -168,7 +168,7 @@ const HostControls = observer(() => {
             >
                 Правильный ответ
             </button>
-            <button disabled={store.stage !== Stage.PLAYER_ANSWERING}
+            <button disabled={!(store.stage === Stage.PLAYER_ANSWERING || store.stage === Stage.FINAL_ROUND_ENDED)}
                 onClick={() => {
                     rejectAnswer()
                         .catch(errorCode => {
@@ -205,7 +205,7 @@ const Controls = observer(() => {
 
             <button
                 onClick={() => {
-                    if (store.stage === Stage.END_GAME)
+                    if (store.stage === Stage.END_GAME && !store.host)
                         navigate('/games');
                     else
                         leaveGameSession()
@@ -296,10 +296,18 @@ const HostCard = observer(() => {
             hostText = 'Финальный раунд.';
             break;
         }
+        case Stage.FINAL_ROUND_ENDED: {
+            hostImageURL = getHostImageUrl(Stage.FINAL_ROUND);
+            if (store.host === getNickname())
+                hostText = `Правильный ответ: ${store.currentQuestion.answer}.\n`
+
+            hostText += `Ответ игрока ${store.answeringPlayer.nickname}: ${store.answeringPlayer.answer?.text ?? '<нет ответа>'}`
+            break;
+        }
         case Stage.END_GAME: {
             // TODO несколько победителей при равенстве счета
             const winner = store.players.reduce((a, b) => a.score > b.score ? a : b);
-            hostText = `Правильный ответ: ${store.finalRound.answer}.\nПобедил ${winner.nickname}!`;
+            hostText = `Правильный ответ: ${store.currentQuestion.answer || store.finalRound.answer}.\nПобедил ${winner.nickname}!`;
             hostImageURL = getHostImageUrl(Stage.END_GAME);
             break;
         }

@@ -8,7 +8,7 @@ from backend.modules.game_session.events import GameSessionCreatedEvent, GameSes
     PlayerLeftEvent, RoundStartedEvent, FinalRoundStartedEvent, CurrentQuestionChosenEvent, \
     PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
     PlayerInactiveEvent, PlayerActiveEvent, StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent, \
-    FinalRoundAnswersAllowedEvent
+    FinalRoundAnswersAllowedEvent, RestartAnswerPeriodEvent, StopAnswerPeriodEvent
 from backend.modules.game_session.services import GameSessionService
 
 
@@ -142,7 +142,7 @@ def register_handlers():
     EventDispatcher.register_handler(start_question_timer, StartAnswerPeriodEvent)
     EventDispatcher.register_handler(start_question_timer, AnswersAllowedEvent)
     EventDispatcher.register_handler(stop_question_timer, PlayerAnsweringEvent)
-    EventDispatcher.register_handler(stop_question_timer, PlayerCorrectlyAnsweredEvent)
+    EventDispatcher.register_handler(stop_question_timer, StopAnswerPeriodEvent)
     EventDispatcher.register_handler(stop_question_timer, GameSessionDeletedEvent)
-    EventDispatcher.register_handler(restart_question_timer, PlayerIncorrectlyAnsweredEvent)
+    EventDispatcher.register_handler(restart_question_timer, RestartAnswerPeriodEvent)
     EventDispatcher.register_handler(start_final_round_timer, FinalRoundAnswersAllowedEvent)

@@ -78,6 +78,7 @@ class GameSessionService:
     def leave(self, username: str):  # TODO сообщать игрокам о выходе ведущего
         user = self.user_repo.get(username)
         if user.is_playing:
+            # TODO брать id сессии из user.game_session_id?
             game_session = self.repo.get_by_player(user)
         elif user.is_hosting:
             game_session = self.repo.get(user.hosted_game_session_id)
@@ -147,11 +148,12 @@ class GameSessionService:
 
         game_session.final_round_timeout()
 
-        game_session.add_event(GameSessionDeletedEvent(game_session))
+        if game_session.is_hosted:
+            self.repo.save(game_session)
+        else:
+            game_session.add_event(GameSessionDeletedEvent(game_session))
 
-        self.repo.delete(game_session)
-
-        print('game ended')
+            self.repo.delete(game_session)
 
     def submit_answer(self, username: str, answer_data):
         user = self.user_repo.get(username)

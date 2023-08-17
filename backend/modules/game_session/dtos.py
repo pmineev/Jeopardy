@@ -245,7 +245,7 @@ class ChosenQuestionDTO(DTO):
 class FinalRoundTimeoutDTO(DTO):
     def __init__(self, gs: 'GameSession'):
         self.players = [PlayerDTO(player) for player in gs.players]
-        self.answer = CorrectAnswerDTO(gs.game.final_round)
+        self.answer = CorrectAnswerDTO(gs.game.final_round)  # TODO не отправлять при игре с хостом
 
     def to_response(self):
         return dict(

@@ -92,6 +92,16 @@ class StartAnswerPeriodEvent(GameSessionEvent):
         super().__init__(game_session)
 
 
+class StopAnswerPeriodEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+
+class RestartAnswerPeriodEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+
 class PlayerAnsweringEvent(GameSessionEvent):
     def __init__(self, game_session: 'GameSession', player: 'Player'):
         super().__init__(game_session)
