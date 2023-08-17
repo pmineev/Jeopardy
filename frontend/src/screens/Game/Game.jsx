@@ -12,42 +12,40 @@ import {Stage, toOrdinal} from "../../common/utils";
 import useStore from "../../common/RootStore";
 import GameSessionListener from "./listener";
 import {getNickname} from "../../common/auth/services";
-import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer} from "./services";
+import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer, allowAnswers,
+    confirmAnswer, rejectAnswer, startGame} from "./services";
 
-const PlayerControls = observer(() => {
-    const {gameStore: store} = useStore();
-    const navigate = useNavigate();
-
+const AnswerForm = () => {
     return (
-        <div className='player-controls'>
-            <Formik
-                initialValues={{
-                    answer: '',
-                }}
-                onSubmit={({answer}, {setSubmitting, resetForm}) => {
-                    if (answer?.length > 0) {
-                        submitAnswer(answer)
-                            .then(() => {
-                                setSubmitting(false);
-                            })
-                            .catch(errorCode => {
-                                switch (errorCode) {
-                                    case 'wrong_stage':
-                                        toast('Сейчас нельзя отправлять ответ');
-                                        break;
-                                    case 'game_session_not_found':
-                                        toast.error('Игра не найдена');
-                                        break;
-                                    default:
-                                        console.log(errorCode);
-                                }
-                            });
-                        resetForm();
-                    }
-                }}
-            >
-                {({handleSubmit}) => (
-                    <Form>
+        <Formik
+            initialValues={{
+                answer: '',
+            }}
+            onSubmit={({answer}, {setSubmitting, resetForm}) => {
+                if (answer?.length > 0) {
+                    submitAnswer(answer)
+                        .then(() => {
+                            setSubmitting(false);
+                        })
+                        .catch(errorCode => {
+                            switch (errorCode) {
+                                case 'wrong_stage':
+                                    toast('Сейчас нельзя отправлять ответ');
+                                    break;
+                                case 'game_session_not_found':
+                                    toast.error('Игра не найдена');
+                                    break;
+                                default:
+                                    console.log(errorCode);
+                            }
+                        });
+                    resetForm();
+                }
+            }}
+        >
+            {({handleSubmit}) => (
+                <Form>
+                    <div className='textarea'>
                         <Field id="answer"
                                as='textarea'
                                name="answer"
@@ -59,14 +57,167 @@ const PlayerControls = observer(() => {
                                    }
                                }}
                         />
-                        <button type="submit">Ответить</button>
-                    </Form>
-                )}
-            </Formik>
+                    </div>
+                    <button type="submit">Ответить</button>
+                </Form>
+            )}
+        </Formik>
+    )
+};
+
+
+const AnswerButtons = observer(() => {
+    const {gameStore: store} = useStore();
+    return (
+        <>
+            <button
+                 onClick={() => {
+                     submitAnswer()
+                         .catch(errorCode => {
+                             switch (errorCode) {
+                                 case 'game_session_not_found':
+                                     toast.error('Игра не найдена');
+                                     break;
+                                 case 'wrong_stage':
+                                     toast.error('Сейчас нельзя отвечать');
+                                     break;
+                                 default:
+                                     console.log(errorCode);
+                             }
+                         });
+                 }}
+            >
+                Ответить
+            </button>
+        </>
+    )
+});
+
+const PlayerControls = observer(() => {
+    const {gameStore: store} = useStore();
+    return (
+        <div className='player-controls'>
+            {(!store.host && (store.stage === Stage.ANSWERING || store.stage === Stage.FINAL_ROUND) ||
+                    store.host && store.stage === Stage.FINAL_ROUND_ANSWERING) &&
+                <AnswerForm/>
+            }
+            {store.host && store.stage === Stage.ANSWERING &&
+                <AnswerButtons/>
+            }
+        </div>
+    )
+});
+
+const HostControls = observer(() => {
+    const {gameStore: store} = useStore();
+    return (
+        <div className='host-controls'>
+            {(store.stage === Stage.WAITING && store.isAllPlayersJoined) &&
+                <button
+                     onClick={() => {
+                         startGame()
+                             .catch(errorCode => {
+                                 switch (errorCode) {
+                                     case 'game_session_not_found':
+                                         toast.error('Игра не найдена');
+                                         break;
+                                     case 'wrong_stage':
+                                         toast.error('Игра уже началась');
+                                         break;
+                                     default:
+                                         console.log(errorCode);
+                                 }
+                             });
+                     }}
+                >
+                    Начать игру
+                </button>
+            }
+            {(store.stage === Stage.READING_QUESTION || store.stage === Stage.FINAL_ROUND) &&
+                <button
+                     onClick={() => {
+                         allowAnswers()
+                             .then(response => {
+                                 store.setCorrectAnswer(response.data);
+                             })
+                             .catch(errorCode => {
+                                 switch (errorCode) {
+                                     case 'game_session_not_found':
+                                         toast.error('Игра не найдена');
+                                         break;
+                                     case 'wrong_stage':
+                                         toast.error('Неверная стадия игры');
+                                         break;
+                                     default:
+                                         console.log(errorCode);
+                                 }
+                             });
+                     }}
+                >
+                    Разрешить отвечать
+                </button>
+            }
+            {(store.stage === Stage.PLAYER_ANSWERING || store.stage === Stage.FINAL_ROUND_ENDED) &&
+                <button
+                     onClick={() => {
+                         confirmAnswer()
+                             .catch(errorCode => {
+                                 switch (errorCode) {
+                                     case 'game_session_not_found':
+                                         toast.error('Игра не найдена');
+                                         break;
+                                     case 'wrong_stage':
+                                         toast.error('Неверная стадия игры');
+                                         break;
+                                     default:
+                                         console.log(errorCode);
+                                 }
+                             });
+                     }}
+                >
+                    Правильный ответ
+                </button>
+            }
+            {(store.stage === Stage.PLAYER_ANSWERING || store.stage === Stage.FINAL_ROUND_ENDED) &&
+                <button
+                     onClick={() => {
+                         rejectAnswer()
+                             .catch(errorCode => {
+                                 switch (errorCode) {
+                                     case 'game_session_not_found':
+                                         toast.error('Игра не найдена');
+                                         break;
+                                     case 'wrong_stage':
+                                         toast.error('Неверная стадия игры');
+                                         break;
+                                     default:
+                                         console.log(errorCode);
+                                 }
+                             });
+
+                     }}
+                >
+                    Неправильный ответ
+                </button>
+            }
+        </div>
+    )
+});
+
+const Controls = observer(() => {
+    const {gameStore: store} = useStore();
+    const navigate = useNavigate();
+
+    return (
+        <div className='controls'>
+            {store.host === getNickname()
+                ? <HostControls/>
+                : <PlayerControls/>
+            }
 
             <button
                 onClick={() => {
-                    if (store.stage === Stage.END_GAME)
+                    if (store.stage === Stage.END_GAME && !store.host)
                         navigate('/games');
                     else
                         leaveGameSession()
@@ -95,6 +246,7 @@ const HostCard = observer(() => {
     let hostText = '';
     let hostImageURL;
 
+    // TODO перенести это все в стор
     switch (store.stage) {
         case Stage.WAITING: {
             hostText = `Ожидаем игроков...`;
@@ -107,7 +259,7 @@ const HostCard = observer(() => {
             break;
         }
         case Stage.TIMEOUT: {
-            hostText = `Правильный ответ: ${store.correctAnswer}. `
+            hostText = `Правильный ответ: ${store.currentQuestion.answer}. `
             hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
             break;
         }
@@ -126,17 +278,29 @@ const HostCard = observer(() => {
             hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
             break;
         }
-        case Stage.ANSWERING: {
-            const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
-            const value = store.currentQuestion.value;
-            hostText = `${themeName} за ${value}.`;
+        case Stage.READING_QUESTION:
+        case Stage.ANSWERING:
+        case Stage.PLAYER_ANSWERING:
+        case Stage.FINAL_ROUND_ANSWERING: {
             hostImageURL = getHostImageUrl(Stage.ANSWERING);
 
-            if (store.answeringPlayer)
-                if (!store.answeringPlayer.answer.isCorrect) {
-                    hostText = 'Неверно.';
-                    hostImageURL = getHostImageUrl('wrong');
-                }
+            if (store.host === getNickname()) {
+                if (store.stage === Stage.ANSWERING
+                    || store.stage === Stage.PLAYER_ANSWERING
+                    || store.stage === Stage.FINAL_ROUND_ANSWERING)
+                    hostText = `Правильный ответ: ${store.currentQuestion.answer}.`
+            }
+            else if (store.stage !== Stage.FINAL_ROUND_ANSWERING) {
+                const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
+                const value = store.currentQuestion.value;
+                hostText = `${themeName} за ${value}.`;
+
+                if (store.answeringPlayer)
+                    if (!store.answeringPlayer.answer.isCorrect) {
+                        hostText = 'Неверно.';
+                        hostImageURL = getHostImageUrl('wrong');
+                    }
+            }
             break;
         }
         case Stage.FINAL_ROUND: {
@@ -144,9 +308,18 @@ const HostCard = observer(() => {
             hostText = 'Финальный раунд.';
             break;
         }
+        case Stage.FINAL_ROUND_ENDED: {
+            hostImageURL = getHostImageUrl(Stage.FINAL_ROUND);
+            if (store.host === getNickname())
+                hostText = `Правильный ответ: ${store.currentQuestion.answer}.\n`
+
+            hostText += `Ответ игрока ${store.answeringPlayer.nickname}: ${store.answeringPlayer.answer?.text ?? '<нет ответа>'}`
+            break;
+        }
         case Stage.END_GAME: {
+            // TODO несколько победителей при равенстве счета
             const winner = store.players.reduce((a, b) => a.score > b.score ? a : b);
-            hostText = `Правильный ответ: ${store.finalRound.answer}.\nПобедил ${winner.nickname}!`;
+            hostText = `Правильный ответ: ${store.currentQuestion.answer || store.finalRound.answer}.\nПобедил ${winner.nickname}!`;
             hostImageURL = getHostImageUrl(Stage.END_GAME);
             break;
         }
@@ -185,11 +358,14 @@ const TextScreen = observer(() => {
                 setScreenText('Финальный раунд');
                 break;
             }
-            case Stage.ANSWERING: {
+            case Stage.READING_QUESTION:
+            case Stage.ANSWERING:
+            case Stage.PLAYER_ANSWERING: {
                 setScreenText(store.currentQuestion.text);
                 break;
             }
-            case Stage.FINAL_ROUND: {
+            case Stage.FINAL_ROUND:
+            case Stage.FINAL_ROUND_ANSWERING: {
                 setScreenText(store.finalRound.text);
                 break;
             }
@@ -214,7 +390,7 @@ const Question = observer(({question, themeIndex, questionIndex}) => {
     useEffect(() => {
         if (store.currentQuestion?.question === question)
             setSelected(true);
-        if (store.stage !== Stage.ANSWERING)
+        if (!(store.stage === Stage.ANSWERING || store.stage === Stage.READING_QUESTION))
             setSelected(false);
     }, [store.currentQuestion, store.stage])
 
@@ -434,6 +610,7 @@ const Game = observer(() => {
         }
     }, [store]);
 
+    // TODO перенести в стор
     useEffect(() => {
         let timeoutId;
 
@@ -486,7 +663,7 @@ const Game = observer(() => {
 
             <HostCard/>
 
-            <PlayerControls/>
+            <Controls/>
         </div>
     )
 });

@@ -1,6 +1,6 @@
 import {useEffect} from 'react'
 import {useNavigate} from "react-router-dom";
-import {Form, Formik} from "formik";
+import {Field, Form, Formik} from "formik";
 import * as Yup from "yup";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
@@ -18,7 +18,8 @@ const CreateGameSessionForm = observer(({navigate}) => {
     return (
         <Formik
             initialValues={{
-                maxPlayers: '2'
+                maxPlayers: '2',
+                host: true
             }}
             validationSchema={Yup.object({
                 maxPlayers: Yup.number()
@@ -28,8 +29,8 @@ const CreateGameSessionForm = observer(({navigate}) => {
                     .typeError('Введите число')
                     .integer('Так тоже не прокатит')
             })}
-            onSubmit={({maxPlayers}) => {
-                createGameSession(store.chosenGame.name, maxPlayers)
+            onSubmit={({maxPlayers, host}) => {
+                createGameSession(store.chosenGame.name, maxPlayers, host)
                     .then(response => {
                         gameStore.initialize(response.data);
                         navigate('/game');
@@ -59,6 +60,10 @@ const CreateGameSessionForm = observer(({navigate}) => {
                     name="maxPlayers"
                     type="text"
                 />
+                <div className='checkbox'>
+                    <Field name="host" type="checkbox"/>
+                    <label htmlFor="host">Быть ведущим</label>
+                </div>
 
                 <button type="submit">Начать игру</button>
             </Form>

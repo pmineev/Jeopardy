@@ -8,7 +8,8 @@ if TYPE_CHECKING:
 
 from backend.core.events import Event
 from backend.modules.game_session.dtos import GameSessionDescriptionDTO, CreatorNicknameDTO, PlayerNicknameDTO, \
-    CurrentQuestionDTO, PlayerDTO, FinalRoundQuestionDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO, RoundStartedDTO
+    CurrentQuestionDTO, PlayerDTO, FinalRoundQuestionDTO, CorrectAnswerDTO, FinalRoundTimeoutDTO, RoundStartedDTO, \
+    CurrentQuestionAnswerDTO
 
 
 class GameSessionEvent(Event, ABC):
@@ -82,6 +83,36 @@ class CurrentQuestionChosenEvent(GameSessionEvent):
         self.current_question_dto = CurrentQuestionDTO(question).to_response()
 
 
+class AnswersAllowedEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+
+class StartAnswerPeriodEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+class StartFinalRoundPeriodEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+
+class StopAnswerPeriodEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+
+class RestartAnswerPeriodEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+
+class PlayerAnsweringEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession', player: 'Player'):
+        super().__init__(game_session)
+        self.player_nickname_dto = PlayerNicknameDTO(player).to_response()
+
+
 class PlayerCorrectlyAnsweredEvent(GameSessionEvent):
     def __init__(self, game_session: 'GameSession', player: 'Player'):
         super().__init__(game_session)
@@ -104,6 +135,11 @@ class FinalRoundStartedEvent(GameSessionEvent):
                                                      with_answer=False).to_response()
 
 
+class FinalRoundAnswersAllowedEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+
 class AnswerTimeoutEvent(GameSessionEvent):
     def __init__(self, game_session: 'GameSession', question: 'CurrentQuestion'):
         super().__init__(game_session)
@@ -116,3 +152,10 @@ class FinalRoundTimeoutEvent(GameSessionEvent):
         super().__init__(game_session)
 
         self.final_round_timeout_dto = FinalRoundTimeoutDTO(game_session).to_response()
+
+
+class GameEndedEvent(GameSessionEvent):
+    def __init__(self, game_session: 'GameSession'):
+        super().__init__(game_session)
+
+        self.current_question_answer_dto = CurrentQuestionAnswerDTO(game_session).to_response()

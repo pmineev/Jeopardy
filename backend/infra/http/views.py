@@ -184,6 +184,16 @@ class GameSessionViewSet(ViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
+    def start(self, request):
+        try:
+            self.service.start(request.user.username)
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
+        except WrongStage as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'code': e.code})
+
+        return Response(status=status.HTTP_201_CREATED)
+
     def choose_question(self, request):
         serializer = QuestionChoiceSerializer(data=request.data)
 
@@ -201,6 +211,14 @@ class GameSessionViewSet(ViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
+    def allow_answers(self, request):
+        try:
+            current_question_answer_dto = self.service.allow_answers(request.user.username)
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
+
+        return Response(status=status.HTTP_201_CREATED, data=current_question_answer_dto.to_response())
+
     def submit_answer(self, request):
         serializer = AnswerRequestSerializer(data=request.data)
 
@@ -209,6 +227,26 @@ class GameSessionViewSet(ViewSet):
             self.service.submit_answer(request.user.username, serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
+        except WrongStage as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'code': e.code})
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    def confirm_answer(self, request):
+        try:
+            self.service.confirm_answer(request.user.username)
+        except GameSessionNotFound as e:
+            return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
+        except WrongStage as e:
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'code': e.code})
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    def reject_answer(self, request):
+        try:
+            self.service.reject_answer(request.user.username)
         except GameSessionNotFound as e:
             return Response(status=status.HTTP_404_NOT_FOUND, data={'code': e.code})
         except WrongStage as e:

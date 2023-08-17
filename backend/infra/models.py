@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User as ORMDjangoUser
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, CharField, TextField, IntegerField, \
     ForeignKey, ManyToManyField, OneToOneField, BooleanField, CASCADE, PROTECT
 from django_enum_choices.fields import EnumChoiceField
@@ -21,12 +22,20 @@ class ORMUser(Model):
         active_player = self.players.filter(is_playing=True).first()
         return active_player.game_session_id if active_player else None
 
+    @property
+    def hosted_game_session_id(self):
+        try:
+            return self.hosted_game_session.pk
+        except ObjectDoesNotExist:
+            return None
+
     def to_domain(self):
         return User(id=self.pk,
                     username=self.user.username,
                     nickname=self.nickname,
                     game_sessions=list(self.players.values_list('game_session_id', flat=True)),
-                    game_session_id=self.game_session_id)
+                    game_session_id=self.game_session_id,
+                    hosted_game_session_id=self.hosted_game_session_id)
 
 
 class ORMPlayer(Model):
@@ -39,13 +48,14 @@ class ORMPlayer(Model):
     is_playing = BooleanField(default=True)
     score = IntegerField(default=0)
     answer = TextField(null=True)
+    is_answer_correct = BooleanField(null=True)
 
     def to_domain(self):
         return Player(id=self.pk,
                       user=self.user.to_domain(),
                       score=self.score,
                       is_playing=self.is_playing,
-                      answer=Answer(text=self.answer) if self.answer else None)
+                      answer=Answer(text=self.answer, is_correct=self.is_answer_correct))
 
 
 class ORMQuestion(Model):
@@ -105,6 +115,10 @@ class ORMGameSession(Model):
     creator = OneToOneField(ORMUser,
                             primary_key=True,
                             on_delete=PROTECT)
+    host = OneToOneField(ORMUser,
+                         related_name='hosted_game_session',
+                         on_delete=PROTECT,
+                         null=True)
     game = ForeignKey(ORMGame,
                       on_delete=PROTECT)
     max_players = IntegerField()
@@ -118,20 +132,25 @@ class ORMGameSession(Model):
                                    on_delete=CASCADE,
                                    null=True)
     stage = EnumChoiceField(Stage,
-                            default=Stage.WAITING)
+                            default=Stage.WAITING,
+                            max_length=30)
     answered_questions = ManyToManyField(ORMQuestion,
                                          related_name='answered_questions')
 
     @property
     def current_question_indexes(self):
-        question_index = self.current_question.order - 1
-        orm_theme = self.current_round.themes.get(questions=self.current_question)
-        theme_index = orm_theme.order - 1
-        return theme_index, question_index
+        if self.current_question.order is not None:
+            question_index = self.current_question.order - 1
+            orm_theme = self.current_round.themes.get(questions=self.current_question)
+            theme_index = orm_theme.order - 1
+            return theme_index, question_index
+        else:
+            return None, None
 
     def to_domain(self):
         return GameSession(id=self.pk,
                            creator=self.creator.to_domain(),
+                           host=self.host.to_domain() if self.host else None,
                            game=self.game.to_domain(),
                            max_players=self.max_players,
                            players=[player.to_domain() for player in self.players.all()],

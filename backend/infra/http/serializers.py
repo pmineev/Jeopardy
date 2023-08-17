@@ -1,4 +1,4 @@
-from rest_framework.serializers import Serializer, CharField, IntegerField, ListField
+from rest_framework.serializers import Serializer, CharField, IntegerField, ListField, BooleanField
 
 
 class RegisterUserCredentialsSerializer(Serializer):
@@ -45,6 +45,7 @@ class GameSerializer(Serializer):
 class CreateGameSessionSerializer(Serializer):
     gameName = CharField(source='game_name')
     maxPlayers = IntegerField(source='max_players')
+    isHost = BooleanField(source='is_host')
 
 
 class QuestionChoiceSerializer(Serializer):
@@ -53,4 +54,4 @@ class QuestionChoiceSerializer(Serializer):
 
 
 class AnswerRequestSerializer(Serializer):
-    answer = CharField()
+    answer = CharField(required=False)
