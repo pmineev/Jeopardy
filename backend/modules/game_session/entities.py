@@ -259,6 +259,9 @@ class GameSession(Entity):
             raise WrongStage
 
     def confirm_answer(self):
+        player = self._get_player(self.current_player.user)
+        self.current_player = player
+
         if self.stage == Stage.PLAYER_ANSWERING:
             self.current_player.answer = Answer(is_correct=True)
             self.current_player.score += self.current_question.value
@@ -275,6 +278,9 @@ class GameSession(Entity):
             raise WrongStage()
 
     def reject_answer(self):
+        player = self._get_player(self.current_player.user)
+        self.current_player = player
+
         if self.stage == Stage.PLAYER_ANSWERING:
             self.current_player.answer = Answer(is_correct=False)
             self.current_player.score -= self.current_question.value
