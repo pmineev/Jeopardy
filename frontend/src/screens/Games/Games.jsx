@@ -60,7 +60,7 @@ const CreateGameSessionForm = observer(({navigate}) => {
                     name="maxPlayers"
                     type="text"
                 />
-                <div>
+                <div className='checkbox'>
                     <Field name="host" type="checkbox"/>
                     <label htmlFor="host">Быть ведущим</label>
                 </div>
