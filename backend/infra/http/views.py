@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.views import APIView
@@ -104,6 +104,8 @@ class UserView(APIView):
 
 
 class GameListView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     service = GameService()
 
     def post(self, request):
@@ -126,6 +128,8 @@ class GameListView(APIView):
 
 
 class GameSessionListView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     service = GameSessionService()
 
     def post(self, request):
