@@ -12,7 +12,8 @@ axios.interceptors.request.use(
             || config.url === '/sessions/new_token/'
             || (config.method === 'post' && config.url === '/users/'))) {
             const access_token = localStorage.getItem('access_token');
-            config.headers['Authorization'] = `Bearer ${access_token}`;
+            if (access_token !== null)
+                config.headers['Authorization'] = `Bearer ${access_token}`;
         }
 
         return config;
