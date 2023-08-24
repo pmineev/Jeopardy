@@ -23,11 +23,7 @@ function App() {
                 <Routes>
                     <Route
                         path="/"
-                        element={
-                            isAuthenticated()
-                                ? <Navigate to="games"/>
-                                : <Navigate to="login"/>
-                        }
+                        element={<Navigate to="games"/>}
                     />
                     <Route
                         path="/register"
