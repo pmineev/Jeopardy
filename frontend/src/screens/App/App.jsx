@@ -54,11 +54,7 @@ function App() {
                         />
                         <Route
                             path="/games"
-                            element={
-                                <PrivateRoute>
-                                    <Games/>
-                                </PrivateRoute>
-                            }
+                            element={<Games/>}
                         />
                         <Route
                             path="/games/new"
@@ -70,11 +66,7 @@ function App() {
                         />
                         <Route
                             path="/lobby"
-                            element={
-                                <PrivateRoute>
-                                    <Lobby/>
-                                </PrivateRoute>
-                            }
+                            element={<Lobby/>}
                         />
                         <Route
                             path="/game"
