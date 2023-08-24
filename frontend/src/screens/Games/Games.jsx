@@ -148,7 +148,11 @@ const Games = observer(() => {
                 : <h3>список игр пуст</h3>
             }
 
-            <button onClick={() => navigate('/games/new')}>Создать новую игру</button>
+            <button onClick={() => isAuthenticated()
+                ? navigate('/games/new')
+                : toast("Сначала надо войти")}>
+                Создать новую игру
+            </button>
 
 
             <Modal
