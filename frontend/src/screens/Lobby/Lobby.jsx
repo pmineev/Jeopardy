@@ -8,6 +8,7 @@ import {Listener, listenerUrls} from "../../common/listener";
 import useStore from "../../common/RootStore";
 import {joinGameSession} from "../Game/services";
 import {getGameSessionDescriptions} from "./services";
+import {isAuthenticated} from "../../common/auth/services";
 
 const GameSessionDescription = observer(({description, navigate, gameStore}) => {
     return (
@@ -17,8 +18,9 @@ const GameSessionDescription = observer(({description, navigate, gameStore}) => 
             <td>{description.currentPlayers}/{description.maxPlayers}</td>
             <td>
                 <button
-                    onClick={() => {
-                        joinGameSession(description.creator)
+                    onClick={() => {!isAuthenticated()
+                        ? toast("Сначала надо войти")
+                        : joinGameSession(description.creator)
                             .then(response => {
                                 gameStore.initialize(response.data);
                                 navigate('/game');
