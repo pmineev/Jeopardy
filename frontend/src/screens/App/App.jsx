@@ -23,11 +23,7 @@ function App() {
                 <Routes>
                     <Route
                         path="/"
-                        element={
-                            isAuthenticated()
-                                ? <Navigate to="games"/>
-                                : <Navigate to="login"/>
-                        }
+                        element={<Navigate to="games"/>}
                     />
                     <Route
                         path="/register"
@@ -54,11 +50,7 @@ function App() {
                         />
                         <Route
                             path="/games"
-                            element={
-                                <PrivateRoute>
-                                    <Games/>
-                                </PrivateRoute>
-                            }
+                            element={<Games/>}
                         />
                         <Route
                             path="/games/new"
@@ -70,11 +62,7 @@ function App() {
                         />
                         <Route
                             path="/lobby"
-                            element={
-                                <PrivateRoute>
-                                    <Lobby/>
-                                </PrivateRoute>
-                            }
+                            element={<Lobby/>}
                         />
                         <Route
                             path="/game"

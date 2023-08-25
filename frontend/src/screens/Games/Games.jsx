@@ -11,6 +11,7 @@ import useStore from "../../common/RootStore";
 import {createGameSession} from "../Game/services";
 import Modal from "../Modal/Modal";
 import {getGameDescriptions} from "./services";
+import {isAuthenticated} from "../../common/auth/services";
 
 const CreateGameSessionForm = observer(({navigate}) => {
     const {gamesStore: store, gamesViewStore: viewStore, gameStore} = useStore();
@@ -82,8 +83,12 @@ const GameDescription = observer(({description}) => {
             <td>
                 <button
                     onClick={() => {
-                        viewStore.toggleCreateGameSessionFormOpen();
-                        store.setChosenGame(description);
+                        if (isAuthenticated()) {
+                            viewStore.toggleCreateGameSessionFormOpen();
+                            store.setChosenGame(description);
+                        }
+                        else
+                            toast("Сначала надо войти")
                     }}
                 >
                     Играть
@@ -143,7 +148,11 @@ const Games = observer(() => {
                 : <h3>список игр пуст</h3>
             }
 
-            <button onClick={() => navigate('/games/new')}>Создать новую игру</button>
+            <button onClick={() => isAuthenticated()
+                ? navigate('/games/new')
+                : toast("Сначала надо войти")}>
+                Создать новую игру
+            </button>
 
 
             <Modal
