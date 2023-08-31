@@ -41,18 +41,18 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up web -d
 ## Технологии
 - [Django](https://www.djangoproject.com/) - бэкенд-фреймворк: маршрутизация, аутентификация, обработка HTTP-запросов,
 доступ к БД.
-    - [Django REST framework]() - дополнение для Django для построения REST API: представления и валидация данных.
+    - [Django REST framework](https://www.django-rest-framework.org/) - дополнение для Django для построения REST API: представления и валидация данных.
     - [Simple JWT](https://django-rest-framework-simplejwt.readthedocs.io/) - дополнение для Django, производит 
 аутентификацию по [JSON Web Token](https://ru.wikipedia.org/wiki/JSON_Web_Token).
     - [Django Channels](https://channels.readthedocs.io/) - дополнение для Django, обрабатывает вебсокеты. 
-Используется для получения сообщений о ходе игры, создании новых игр и игровых сессий.
+Используется для получения сообщений о ходе игры, создании новых игровых сессий.
     - [Daphne](https://github.com/django/daphne/) - HTTP и Websocket сервер.
 - [React](https://react.dev/) - фронтенд-фреймворк.
     - [MobX](https://mobx.js.org/) - хранение состояния.
     - [MobX-State-Tree](https://mobx-state-tree.js.org) - дополнение MobX для структурирования хранилищ.
     - [Axios](https://axios-http.com) - HTTP-клиент.
-    - [React Router](https://reactrouter.com) - маршрутизация.
-    - [Formik](https://formik.org/) - построение форм ввода.
+    - [React Router](https://reactrouter.com) - дополнение для React, обеспечивает маршрутизацию.
+    - [Formik](https://formik.org/) - дополнение для React для построения форм ввода.
     - [yup](https://github.com/jquense/yup) - валидация входных данных.
 
 ## Архитектура
