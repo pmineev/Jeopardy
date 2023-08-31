@@ -24,9 +24,13 @@ class UserDTO(DTO):
     def __init__(self, user: 'User'):
         self.username = user.username
         self.nickname = user.nickname
+        self.is_playing = user.is_playing
+        self.is_hosting = user.is_hosting
 
     def to_response(self):
         return dict(
             username=self.username,
-            nickname=self.nickname
+            nickname=self.nickname,
+            isPlaying=self.is_playing,
+            isHosting=self.is_hosting
         )
