@@ -56,6 +56,10 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up web -d
     - [yup](https://github.com/jquense/yup) - валидация входных данных.
 
 ## Архитектура
+Описание REST API можно посмотреть [здесь](https://editor-next.swagger.io/?url=https://raw.githubusercontent.com/pmineev/Jeopardy/master/backend/static/openapi.yaml).
+
+А [здесь](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/pmineev/Jeopardy/master/backend/static/asyncapi.yaml) - Websocket API. 
+
 Структура проекта организована по принципу feature-first: исходники сгруппированы в каталоги
 по их основной функциональности.
 
@@ -73,3 +77,4 @@ ER-диаграмма моделей:
 - SSL
 - аутентификация по вебсокетам
 - переход на SCSS
+- обновить спецификации API
