@@ -1,6 +1,6 @@
 import {useEffect} from 'react'
 import {useNavigate} from "react-router-dom";
-import {Form, Formik} from "formik";
+import {Field, Form, Formik} from "formik";
 import * as Yup from "yup";
 import {values} from 'mobx';
 import {observer} from "mobx-react-lite";
@@ -11,6 +11,7 @@ import useStore from "../../common/RootStore";
 import {createGameSession} from "../Game/services";
 import Modal from "../Modal/Modal";
 import {getGameDescriptions} from "./services";
+import {isAuthenticated} from "../../common/auth/services";
 
 const CreateGameSessionForm = observer(({navigate}) => {
     const {gamesStore: store, gamesViewStore: viewStore, gameStore} = useStore();
@@ -18,7 +19,8 @@ const CreateGameSessionForm = observer(({navigate}) => {
     return (
         <Formik
             initialValues={{
-                maxPlayers: '2'
+                maxPlayers: '2',
+                host: true
             }}
             validationSchema={Yup.object({
                 maxPlayers: Yup.number()
@@ -28,8 +30,8 @@ const CreateGameSessionForm = observer(({navigate}) => {
                     .typeError('Введите число')
                     .integer('Так тоже не прокатит')
             })}
-            onSubmit={({maxPlayers}) => {
-                createGameSession(store.chosenGame.name, maxPlayers)
+            onSubmit={({maxPlayers, host}) => {
+                createGameSession(store.chosenGame.name, maxPlayers, host)
                     .then(response => {
                         gameStore.initialize(response.data);
                         navigate('/game');
@@ -59,6 +61,10 @@ const CreateGameSessionForm = observer(({navigate}) => {
                     name="maxPlayers"
                     type="text"
                 />
+                <div className='checkbox'>
+                    <Field name="host" type="checkbox"/>
+                    <label htmlFor="host">Быть ведущим</label>
+                </div>
 
                 <button type="submit">Начать игру</button>
             </Form>
@@ -77,8 +83,12 @@ const GameDescription = observer(({description}) => {
             <td>
                 <button
                     onClick={() => {
-                        viewStore.toggleCreateGameSessionFormOpen();
-                        store.setChosenGame(description);
+                        if (isAuthenticated()) {
+                            viewStore.toggleCreateGameSessionFormOpen();
+                            store.setChosenGame(description);
+                        }
+                        else
+                            toast("Сначала надо войти")
                     }}
                 >
                     Играть
@@ -91,16 +101,6 @@ const GameDescription = observer(({description}) => {
 const GamesTable = observer(() => {
     const {gamesStore: store} = useStore();
 
-    useEffect(() => {
-        getGameDescriptions()
-            .then(result => {
-                store.initialize(result.data);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }, []);
-
     return (
         <table className="games-table">
             <thead>
@@ -112,7 +112,7 @@ const GamesTable = observer(() => {
             </tr>
             </thead>
             <tbody>
-            {store.descriptions.size > 0 && values(store.descriptions).map(description =>
+            {values(store.descriptions).map(description =>
                 <GameDescription
                     key={description.name}
                     description={description}
@@ -124,18 +124,35 @@ const GamesTable = observer(() => {
 });
 
 const Games = observer(() => {
+    const {gamesStore: store, gamesViewStore: viewStore} = useStore();
     const navigate = useNavigate();
-    const {gamesViewStore: viewStore} = useStore();
 
-    document.title = 'Игры';
+    useEffect(() => {
+        document.title = 'Игры';
+
+        getGameDescriptions()
+            .then(result => {
+                store.initialize(result.data);
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }, []);
 
     return (
         <div className='games'>
             <h1>Игры</h1>
 
-            <GamesTable/>
+            {store.descriptions.size > 0
+                ? <GamesTable/>
+                : <h3>список игр пуст</h3>
+            }
 
-            <button onClick={() => navigate('/games/new')}>Создать новую игру</button>
+            <button onClick={() => isAuthenticated()
+                ? navigate('/games/new')
+                : toast("Сначала надо войти")}>
+                Создать новую игру
+            </button>
 
 
             <Modal

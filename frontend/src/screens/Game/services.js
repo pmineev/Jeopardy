@@ -6,9 +6,9 @@ const getGameState = () => {
     return axios.get(url);
 };
 
-const createGameSession = (gameName, maxPlayers) => {
+const createGameSession = (gameName, maxPlayers, isHost) => {
     const url = '/game_sessions/';
-    return axios.post(url, {gameName, maxPlayers});
+    return axios.post(url, {gameName, maxPlayers, isHost});
 };
 
 const joinGameSession = (creator) => {
@@ -21,18 +21,37 @@ const leaveGameSession = () => {
     return axios.delete(url);
 };
 
+const startGame = () => {
+    const url = 'game_sessions/current/actions/start/';
+    return axios.post(url);
+};
+
 const chooseQuestion = (themeIndex, questionIndex) => {
     const url = 'game_sessions/current/question/';
     return axios.post(url, {themeIndex, questionIndex});
 };
+const allowAnswers = () => {
+    const url = 'game_sessions/current/actions/allow_answers/';
+    return axios.post(url);
+};
 
 const submitAnswer = (answer) => {
     const url = 'game_sessions/current/answer/';
-    return axios.post(url, {answer});
+    return axios.post(url, answer ? {answer} : undefined);
 };
 
-const getHostImageUrl = (state) => {
-    return baseStaticURL + '/img/kuleshov/' + state + '.jpg';
+const confirmAnswer = () => {
+    const url = 'game_sessions/current/actions/confirm_answer/';
+    return axios.post(url);
+};
+
+const rejectAnswer = () => {
+    const url = 'game_sessions/current/actions/reject_answer/';
+    return axios.post(url);
+};
+
+const getHostImageUrl = (stage) => {
+    return baseStaticURL + '/img/kuleshov/' + stage + '.jpg';
 };
 
 const getAvatarUrl = () => {
@@ -40,6 +59,6 @@ const getAvatarUrl = () => {
 };
 
 export {
-    getGameState, createGameSession, joinGameSession, leaveGameSession, chooseQuestion, submitAnswer,
-    getHostImageUrl, getAvatarUrl
+    getGameState, createGameSession, joinGameSession, leaveGameSession, startGame, chooseQuestion, allowAnswers,
+    confirmAnswer, rejectAnswer, submitAnswer, getHostImageUrl, getAvatarUrl
 };

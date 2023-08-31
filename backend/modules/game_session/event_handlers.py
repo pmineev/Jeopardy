@@ -7,7 +7,9 @@ from backend.infra.timers import Timers, CHOOSING_QUESTION_INTERVAL, FINAL_ROUND
 from backend.modules.game_session.events import GameSessionCreatedEvent, GameSessionDeletedEvent, PlayerJoinedEvent, \
     PlayerLeftEvent, RoundStartedEvent, FinalRoundStartedEvent, CurrentQuestionChosenEvent, \
     PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, \
-    PlayerInactiveEvent, PlayerActiveEvent
+    PlayerInactiveEvent, PlayerActiveEvent, StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent, \
+    FinalRoundAnswersAllowedEvent, RestartAnswerPeriodEvent, StopAnswerPeriodEvent, StartFinalRoundPeriodEvent, \
+    GameEndedEvent
 from backend.modules.game_session.services import GameSessionService
 
 
@@ -49,6 +51,14 @@ def notify_of_current_question_chosen(event: CurrentQuestionChosenEvent):
     notify_to_game_session(event.game_session_id, event.current_question_dto, 'current_question_chosen')
 
 
+def notify_of_answers_allowed(event: AnswersAllowedEvent | FinalRoundAnswersAllowedEvent):
+    notify_to_game_session(event.game_session_id, {}, 'answers_allowed')
+
+
+def notify_of_player_answering(event: PlayerAnsweringEvent):
+    notify_to_game_session(event.game_session_id, event.player_nickname_dto, 'player_answering')
+
+
 def notify_of_player_answered(event: Union[PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent]):
     notify_to_game_session(event.game_session_id, event.player_dto, 'player_answered')
 
@@ -59,6 +69,9 @@ def notify_of_answer_timeout(event: AnswerTimeoutEvent):
 
 def notify_of_final_round_timeout(event: FinalRoundTimeoutEvent):
     notify_to_game_session(event.game_session_id, event.final_round_timeout_dto, 'final_round_timeout')
+
+def notify_of_game_ended(event: GameEndedEvent):
+    notify_to_game_session(event.game_session_id, event.current_question_answer_dto, 'game_ended')
 
 
 def add_creator_to_notifier(event: GameSessionCreatedEvent):
@@ -77,7 +90,7 @@ def remove_group_from_notifier(event: GameSessionDeletedEvent):
     GameSessionConsumer.remove_group(event.game_session_id)
 
 
-def start_question_timer(event: CurrentQuestionChosenEvent):
+def start_question_timer(event: StartAnswerPeriodEvent):
     service = GameSessionService()
 
     Timers.start(key=event.game_session_id,
@@ -100,7 +113,7 @@ def restart_question_timer(event: PlayerIncorrectlyAnsweredEvent):
                  args=(event.game_session_id,))
 
 
-def start_final_round_timer(event: FinalRoundStartedEvent):
+def start_final_round_timer(event: FinalRoundStartedEvent | StartFinalRoundPeriodEvent):
     service = GameSessionService()
 
     Timers.start(key=event.game_session_id,
@@ -119,16 +132,23 @@ def register_handlers():
     EventDispatcher.register_handler(notify_of_round_started, RoundStartedEvent)
     EventDispatcher.register_handler(notify_of_final_round_started, FinalRoundStartedEvent)
     EventDispatcher.register_handler(notify_of_current_question_chosen, CurrentQuestionChosenEvent)
+    EventDispatcher.register_handler(notify_of_answers_allowed, AnswersAllowedEvent)
+    EventDispatcher.register_handler(notify_of_answers_allowed, FinalRoundAnswersAllowedEvent)
+    EventDispatcher.register_handler(notify_of_player_answering, PlayerAnsweringEvent)
     EventDispatcher.register_handler(notify_of_player_answered, PlayerCorrectlyAnsweredEvent)
     EventDispatcher.register_handler(notify_of_player_answered, PlayerIncorrectlyAnsweredEvent)
     EventDispatcher.register_handler(notify_of_answer_timeout, AnswerTimeoutEvent)
     EventDispatcher.register_handler(notify_of_final_round_timeout, FinalRoundTimeoutEvent)
+    EventDispatcher.register_handler(notify_of_game_ended, GameEndedEvent)
     EventDispatcher.register_handler(add_creator_to_notifier, GameSessionCreatedEvent)
     EventDispatcher.register_handler(add_player_to_notifier, PlayerJoinedEvent)
     EventDispatcher.register_handler(remove_player_from_notifier, PlayerLeftEvent)
     EventDispatcher.register_handler(remove_group_from_notifier, GameSessionDeletedEvent)
-    EventDispatcher.register_handler(start_question_timer, CurrentQuestionChosenEvent)
-    EventDispatcher.register_handler(stop_question_timer, PlayerCorrectlyAnsweredEvent)
+    EventDispatcher.register_handler(start_question_timer, StartAnswerPeriodEvent)
+    EventDispatcher.register_handler(start_question_timer, AnswersAllowedEvent)
+    EventDispatcher.register_handler(stop_question_timer, PlayerAnsweringEvent)
+    EventDispatcher.register_handler(stop_question_timer, StopAnswerPeriodEvent)
     EventDispatcher.register_handler(stop_question_timer, GameSessionDeletedEvent)
-    EventDispatcher.register_handler(restart_question_timer, PlayerIncorrectlyAnsweredEvent)
-    EventDispatcher.register_handler(start_final_round_timer, FinalRoundStartedEvent)
+    EventDispatcher.register_handler(restart_question_timer, RestartAnswerPeriodEvent)
+    EventDispatcher.register_handler(start_final_round_timer, StartFinalRoundPeriodEvent)
+    EventDispatcher.register_handler(start_final_round_timer, FinalRoundAnswersAllowedEvent)

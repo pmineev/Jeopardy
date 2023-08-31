@@ -24,6 +24,7 @@ class UserService:
         if self.repo.is_nickname_exists(nickname):
             raise UserNicknameAlreadyExists
 
+        # TODO добавить проверку на длину пароля (надо от 6 символов)
         user = User(username=user_data['username'],
                     nickname=nickname,
                     password=user_data['password'])
@@ -42,6 +43,7 @@ class UserService:
 
             user.nickname = user_data['nickname']
 
+        # TODO добавить проверку на длину пароля (надо от 6 символов)
         if 'password' in user_data:
             user.password = user_data['password']
 

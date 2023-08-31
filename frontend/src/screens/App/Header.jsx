@@ -1,6 +1,6 @@
 import {Link} from "react-router-dom";
 
-import {getUsername} from "../../common/auth/services";
+import {getUsername, isAuthenticated} from "../../common/auth/services";
 
 function Header() {
     const username = getUsername();
@@ -15,10 +15,18 @@ function Header() {
                     Лобби
                 </Link>
             </nav>
-            <Link to='/user'
-                  className='profile'>
-                {username}
-            </Link>
+            {isAuthenticated()
+                ?
+                <Link to='/user'
+                      className='profile'>
+                    {username}
+                </Link>
+                :
+                <Link to='/login'
+                      className='profile'>
+                    Войти
+                </Link>
+            }
         </header>
     );
 }

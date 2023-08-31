@@ -31,8 +31,12 @@ urlpatterns = [
     path('api/game_sessions/current/', GameSessionViewSet.as_view({'get': 'get_state'})),
     path('api/game_sessions/actions/join/', GameSessionViewSet.as_view({'post': 'join'})),
     path('api/game_sessions/current/actions/leave/', GameSessionViewSet.as_view({'delete': 'leave'})),
+    path('api/game_sessions/current/actions/start/', GameSessionViewSet.as_view({'post': 'start'})),
     path('api/game_sessions/current/question/', GameSessionViewSet.as_view({'post': 'choose_question'})),
+    path('api/game_sessions/current/actions/allow_answers/', GameSessionViewSet.as_view({'post': 'allow_answers'})),
     path('api/game_sessions/current/answer/', GameSessionViewSet.as_view({'post': 'submit_answer'})),
+    path('api/game_sessions/current/actions/confirm_answer/', GameSessionViewSet.as_view({'post': 'confirm_answer'})),
+    path('api/game_sessions/current/actions/reject_answer/', GameSessionViewSet.as_view({'post': 'reject_answer'})),
     re_path(r'', TemplateView.as_view(
         template_name='index.html'
     )),

@@ -4,7 +4,7 @@ import {Stage} from "../../common/utils";
 
 const Answer = types
     .model({
-        text: '',
+        text: types.maybeNull(types.string),
         isCorrect: types.maybeNull(types.boolean)
     });
 
@@ -32,10 +32,11 @@ const Question = types
 
 const CurrentQuestion = types
     .model({
-        question: types.reference(Question),
+        question: types.maybe(types.reference(Question)),
         text: types.string,
-        themeIndex: types.integer,
-        questionIndex: types.integer
+        answer: types.maybe(types.string),
+        themeIndex: types.maybeNull(types.integer),
+        questionIndex: types.maybeNull(types.integer)
     })
     .actions(self => ({
         setIsAnswered() {
@@ -62,7 +63,9 @@ const Round = types
 
 const GameStore = types
     .model({
+        maxPlayers: types.maybe(types.integer),
         stage: types.optional(types.enumeration('stage', Object.values(Stage)), Stage.EMPTY),
+        host: types.maybe(types.string),
         players: types.array(Player),
         currentPlayer: types.maybe(types.reference(Player)),
         currentRound: types.maybe(Round),
@@ -80,10 +83,13 @@ const GameStore = types
                 'current_player_chosen': self.onCurrentPlayerChosen,
                 'round_started': self.onRoundStarted,
                 'current_question_chosen': self.onCurrentQuestionChosen,
+                'answers_allowed': self.onAnswersAllowed,
+                'player_answering': self.onPlayerAnswering,
                 'player_answered': self.onPlayerAnswered,
                 'question_timeout': self.onQuestionTimeout,
                 'final_round_started': self.onFinalRoundStarted,
                 'final_round_timeout': self.onFinalRoundTimeout,
+                'game_ended': self.onGameEnded,
             };
 
             handlers[event](data);
@@ -124,27 +130,53 @@ const GameStore = types
 
             self.setCurrentQuestion(data);
 
-            self.stage = Stage.ANSWERING;
+            self.stage = self.host ? Stage.READING_QUESTION : Stage.ANSWERING;
+        },
+        onAnswersAllowed(data) {
+            self.stage = self.stage === Stage.READING_QUESTION ? Stage.ANSWERING : Stage.FINAL_ROUND_ANSWERING
         },
         onPlayerAnswered(data) {
             const player = self.players.find(player => player.nickname === data.nickname);
 
-            self.answeringPlayer = player;
-
             player.score = data.score;
             player.answer = Answer.create({...data.answer})
 
-            if (player.answer.isCorrect) {
-                self.currentQuestion.setIsAnswered();
+            if (self.stage === Stage.ANSWERING || self.stage === Stage.PLAYER_ANSWERING) {
+                self.answeringPlayer = player;
 
-                self.currentPlayer = player;
+                if (player.answer.isCorrect) {
+                    self.currentQuestion.setIsAnswered();
 
-                self.stage = Stage.CORRECT_ANSWER;
+                    self.currentPlayer = player;
+
+                    self.stage = Stage.CORRECT_ANSWER;
+                }
+                else
+                    self.stage = Stage.ANSWERING;
+            }
+            else {
+                const notCheckedPlayers = self.players.filter(player => player.answer.isCorrect === null)
+                console.log(notCheckedPlayers)
+                if (notCheckedPlayers.length > 0)
+                    self.answeringPlayer = notCheckedPlayers.reduce((p1, p2) => p1.score > p2.score ? p1 : p2)
+                else {
+                    self.answeringPlayer = undefined;
+                    self.stage = Stage.END_GAME;
+                }
+            }
+        },
+        onPlayerAnswering(data) {
+            if (self.stage === Stage.ANSWERING) {
+                // TODO отображать отвечающего игрока
+                self.stage =  Stage.PLAYER_ANSWERING;
+            }
+            else {
+                self.answeringPlayer = self.players.find(player => player.nickname === data.nickname);
             }
         },
         onQuestionTimeout(data) {
             self.currentQuestion.setIsAnswered();
-            self.correctAnswer = data.answer;
+            self.currentQuestion.answer = data.answer;
             self.stage = Stage.TIMEOUT;
         },
         onFinalRoundStarted(data) {
@@ -157,21 +189,38 @@ const GameStore = types
                 player.answer = Answer.create({...playerData.answer});
             })
 
-            self.finalRound.answer = data.answer
+            if (self.host) {
+                self.stage = Stage.FINAL_ROUND_ENDED
+            }
+            else {
+                self.finalRound.answer = data.answer
 
-            self.stage = Stage.END_GAME;
+                self.stage = Stage.END_GAME;
+            }
+        },
+        onGameEnded(data) {
+            self.finalRound.answer = data.answer
         },
         initialize(data) {
             self.clear();
 
+            self.maxPlayers = data.maxPlayers;
             self.stage = data.stage;
+            if (data.host)
+                self.host = data.host;
             data.players.forEach(playerData =>
                 self.addPlayer(playerData)
             );
             if (data.currentRound)
                 self.setCurrentRound(data.currentRound);
-            if (data.currentPlayer)
-                self.setCurrentPlayer(data.currentPlayer);
+            if (data.currentPlayer) {
+                if (self.stage === Stage.FINAL_ROUND_ENDED) {
+                    self.answeringPlayer = self.players.find(player =>
+                        player.nickname === data.currentPlayer);
+                }
+                else
+                    self.setCurrentPlayer(data.currentPlayer);
+            }
             if (data.currentQuestion)
                 self.setCurrentQuestion(data.currentQuestion);
             if (data.finalRound)
@@ -205,19 +254,23 @@ const GameStore = types
             self.currentPlayer = self.players.find(player => player.nickname === nickname);
         },
         setCurrentQuestion(data) {
-            const currentQuestion = self.currentRound
-                .themes[data.themeIndex]
-                .questions[data.questionIndex];
+            const currentQuestion = data.themeIndex !== null
+                ? self.currentRound
+                    .themes[data.themeIndex]
+                    .questions[data.questionIndex]
+                : undefined;
             self.currentQuestion = CurrentQuestion.create({
                 question: currentQuestion,
                 ...data
             });
         },
+        setCorrectAnswer(data) {
+            self.currentQuestion.answer = data.answer;
+        },
         setFinalRound(data) {
             self.finalRound = FinalRound.create({...data});
         },
         clearAnswers() {
-            self.correctAnswer = undefined;
             self.answeringPlayer = undefined;
             self.players.forEach(player => {
                 player.answer = undefined;
@@ -237,6 +290,9 @@ const GameStore = types
         },
         get isInitialized() {
             return self.players.length > 0
+        },
+        get isAllPlayersJoined() {
+            return self.players.length === self.maxPlayers
         }
     }));
 

@@ -11,12 +11,14 @@ from backend.modules.game_session.enums import Stage
 from backend.modules.game_session.exceptions import TooManyPlayers, NotCurrentPlayer, WrongQuestionRequest, WrongStage
 from backend.modules.game_session.events import PlayerJoinedEvent, PlayerLeftEvent, RoundStartedEvent, \
     CurrentQuestionChosenEvent, PlayerCorrectlyAnsweredEvent, PlayerIncorrectlyAnsweredEvent, \
-    FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent
+    FinalRoundStartedEvent, AnswerTimeoutEvent, FinalRoundTimeoutEvent, PlayerInactiveEvent, PlayerActiveEvent, \
+    StartAnswerPeriodEvent, AnswersAllowedEvent, PlayerAnsweringEvent, FinalRoundAnswersAllowedEvent, \
+    StopAnswerPeriodEvent, RestartAnswerPeriodEvent, StartFinalRoundPeriodEvent, GameEndedEvent
 
 
 @dataclass
 class Answer:
-    text: str
+    text: Optional[str] = None
     is_correct: Optional[bool] = None
 
 
@@ -31,7 +33,7 @@ class Player(Entity):
         self.user = user
         self.score = score
         self.is_playing = is_playing
-        self.answer = answer
+        self.answer = answer or Answer()
 
     @property
     def username(self) -> str:
@@ -43,7 +45,10 @@ class Player(Entity):
 
 
 class CurrentQuestion(Entity):
-    def __init__(self, question: 'Question', theme_index: int, question_index: int):
+    def __init__(self,
+                 question: 'Question',
+                 theme_index: Optional[int] = None,
+                 question_index: Optional[int] = None):
         super().__init__(question.id)
         self._question = question
         self.theme_index = theme_index
@@ -68,19 +73,21 @@ class GameSession(Entity):
                  max_players: int,
                  stage: Stage = Stage.WAITING,
                  id: Optional[int] = None,
+                 host: Optional['User'] = None,
                  players: Optional[List[Player]] = None,
-                 current_player: Optional[Player] = None,
+                 current_player: Optional[Player] = None,  # TODO сделать свойством и брать объекты только из players
                  current_round: Optional['Round'] = None,
                  current_question: Optional['CurrentQuestion'] = None,
                  answered_questions: Optional[List['CurrentQuestion']] = None):
         super().__init__(id)
         self.creator = creator
+        self.host = host
         self.game = game
         self.max_players = max_players
         self.stage = stage
 
-        if id:
-            self.players = players
+        if id or host:
+            self.players = players or []
         else:
             self.players = [Player(creator)]
 
@@ -89,6 +96,10 @@ class GameSession(Entity):
         self.current_question = current_question
 
         self.answered_questions = answered_questions or []
+
+    @property
+    def is_hosted(self):
+        return self.host is not None
 
     def join(self, user: 'User'):
         player = self._get_player(user)
@@ -105,7 +116,7 @@ class GameSession(Entity):
 
             self.add_event(PlayerJoinedEvent(self, player))
 
-        if self.stage == Stage.WAITING and self._is_all_players_joined():
+        if not self.is_hosted and self.stage == Stage.WAITING and self._is_all_players_joined():
             self.start_game()
 
         print(f'{user.username} has joined')
@@ -117,14 +128,19 @@ class GameSession(Entity):
             self.players.remove(player)
             self.add_event(PlayerLeftEvent(self, player))
         else:
+            # TODO неактивный игрок не должен быть текущим
             player.is_playing = False
             self.add_event(PlayerInactiveEvent(self, player))
 
         print(f'{user.username} has left')
 
     def start_game(self):
+        if self.stage != Stage.WAITING:
+            raise WrongStage()
+
+        # TODO нужна проверка на минимум игроков
         self.current_round = self.game.rounds[0]
-        self.current_player = random.choice(self.players)
+        self.current_player = random.choice(self.players)  # TODO лучше по алфавиту?
         self.stage = Stage.ROUND_STARTED
 
         self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
@@ -138,7 +154,7 @@ class GameSession(Entity):
 
         if self.current_round.order < len(self.game.rounds):
             self.current_round = self.game.rounds[self.current_round.order]
-            self._set_winner_current_player()
+            self._set_winner_current_player()   # TODO неактивный игрок не должен быть текущим
             self.stage = Stage.ROUND_STARTED
 
             self.add_event(RoundStartedEvent(self, self.current_round, self.current_player))
@@ -152,8 +168,11 @@ class GameSession(Entity):
 
         self.current_round = None
         self.current_player = None
+        self.current_question = CurrentQuestion(self.game.final_round)
 
         self.add_event(FinalRoundStartedEvent(self))
+        if not self.is_hosted:
+            self.add_event(StartFinalRoundPeriodEvent(self))
 
         print(f'final round started, q:{self.game.final_round.text}, a:{self.game.final_round.answer}')
 
@@ -176,27 +195,50 @@ class GameSession(Entity):
 
         self.current_question = CurrentQuestion(question, theme_index, question_index)
 
-        self.stage = Stage.ANSWERING
-
         self.add_event(CurrentQuestionChosenEvent(self, self.current_question))
+
+        if self.is_hosted:
+            self.stage = Stage.READING_QUESTION
+        else:
+            self.stage = Stage.ANSWERING
+            self.add_event(StartAnswerPeriodEvent(self))
 
         print(f'{user.username} has chosen question, ti={theme_index} qi={question_index},'
               f' q:{self.current_question.text}, a:{self.current_question.answer}')
+
+    def allow_answers(self):
+        if self.stage == Stage.READING_QUESTION:
+            self.stage = Stage.ANSWERING
+            self.add_event(AnswersAllowedEvent(self))
+        elif self.stage == Stage.FINAL_ROUND:
+            self.stage = Stage.FINAL_ROUND_ANSWERING
+            self.add_event(FinalRoundAnswersAllowedEvent(self))
+        else:
+            raise WrongStage()
 
     def submit_answer(self, user: 'User', answer_text):
         player = self._get_player(user)
 
         if self.stage == Stage.ANSWERING:
-            value = self.current_question.value
+            if self.is_hosted:
+                self.stage = Stage.PLAYER_ANSWERING
+                self.current_player = player
+                print('submit', str([p is self.current_player for p in [*self.players, player]]))
+                
+                self.add_event(PlayerAnsweringEvent(self, player))
 
-            if self.current_question.answer == answer_text:
+                print(f'{user.username} is answering')
+            elif self.current_question.answer == answer_text:
                 answer = Answer(answer_text, is_correct=True)
                 player.answer = answer
-                player.score += value
+                player.score += self.current_question.value
 
                 self.answered_questions.append(self.current_question)
 
                 self.add_event(PlayerCorrectlyAnsweredEvent(self, player))
+                self.add_event(StopAnswerPeriodEvent(self))
+
+                print(f'{user.username} has answered {answer_text}: correct')
 
                 if self.is_no_more_questions():
                     self.set_next_round()
@@ -208,18 +250,75 @@ class GameSession(Entity):
             else:
                 answer = Answer(answer_text, is_correct=False)
                 player.answer = answer
-                player.score -= value
+                player.score -= self.current_question.value
 
                 self.add_event(PlayerIncorrectlyAnsweredEvent(self, player))
+                self.add_event(RestartAnswerPeriodEvent(self))
 
-            print(f'{user.username} has answered {answer_text}:', 'correct' if answer.is_correct else 'wrong')
+                print(f'{user.username} has answered {answer_text}: wrong')
 
-        elif self.stage == Stage.FINAL_ROUND:
+        elif self.stage in [Stage.FINAL_ROUND, Stage.FINAL_ROUND_ANSWERING]:
             player.answer = Answer(answer_text)
 
             print(f'{user.username} final answer: {answer_text}')
         else:
             raise WrongStage
+
+    def confirm_answer(self):
+        player = self._get_player(self.current_player.user)
+        self.current_player = player
+
+        if self.stage == Stage.PLAYER_ANSWERING:
+            self.current_player.answer = Answer(is_correct=True)
+            self.current_player.score += self.current_question.value
+
+            self.answered_questions.append(self.current_question)
+
+            self.add_event(PlayerCorrectlyAnsweredEvent(self, self.current_player))
+            self.add_event(StopAnswerPeriodEvent(self))
+
+            if self.is_no_more_questions():
+                self.set_next_round()
+            else:
+                self.stage = Stage.CHOOSING_QUESTION
+        elif self.stage == Stage.FINAL_ROUND_ENDED:
+            self.current_player.answer.is_correct = True
+            self.current_player.score += self.game.final_round.value
+
+            self.add_event(PlayerCorrectlyAnsweredEvent(self, self.current_player))
+
+            if self._is_all_answers_checked():
+                self.stage = Stage.END_GAME
+                self.add_event(GameEndedEvent(self))
+            else:
+                self._set_next_answering_player()
+        else:
+            raise WrongStage()
+
+    def reject_answer(self):
+        player = self._get_player(self.current_player.user)
+        self.current_player = player
+
+        if self.stage == Stage.PLAYER_ANSWERING:
+            self.current_player.answer = Answer(is_correct=False)
+            self.current_player.score -= self.current_question.value
+            self.stage = Stage.ANSWERING
+
+            self.add_event(PlayerIncorrectlyAnsweredEvent(self, self.current_player))
+            self.add_event(RestartAnswerPeriodEvent(self))
+        elif self.stage == Stage.FINAL_ROUND_ENDED:
+            self.current_player.answer.is_correct = False
+            self.current_player.score -= self.game.final_round.value
+
+            self.add_event(PlayerIncorrectlyAnsweredEvent(self, self.current_player))
+
+            if self._is_all_answers_checked():
+                self.stage = Stage.END_GAME
+                self.add_event(GameEndedEvent(self))
+            else:
+                self._set_next_answering_player()
+        else:
+            raise WrongStage()
 
     def answer_timeout(self):
         self.answered_questions.append(self.current_question)
@@ -236,8 +335,14 @@ class GameSession(Entity):
             self.stage = Stage.CHOOSING_QUESTION
 
     def final_round_timeout(self):
-        self.check_players_final_answers()
-        self.stage = Stage.END_GAME
+        if self.is_hosted:
+            self.stage = Stage.FINAL_ROUND_ENDED
+
+            self._set_next_answering_player()
+            self.add_event(PlayerAnsweringEvent(self, self.current_player))
+        else:
+            self.check_players_final_answers()
+            self.stage = Stage.END_GAME
 
         self.add_event(FinalRoundTimeoutEvent(self))
 
@@ -253,6 +358,7 @@ class GameSession(Entity):
         else:
             return not any(player.is_playing for player in self.players)
 
+    # TODO сделать приватным
     def is_no_more_questions(self) -> bool:
         return len(self.answered_questions) == \
                len(self.current_round.themes) * len(self.current_round.themes[0].questions)
@@ -261,16 +367,12 @@ class GameSession(Entity):
         value = self.game.final_round.value
         answer_text = self.game.final_round.answer
         for player in self.players:
-            if player.answer:
-                if player.answer.text == answer_text:
-                    player.score += value
-                    player.answer.is_correct = True
-                else:
-                    player.score -= value
-                    player.answer.is_correct = False
+            if player.answer.text == answer_text:
+                player.score += value
+                player.answer.is_correct = True
             else:
                 player.score -= value
-                player.answer = Answer('', is_correct=False)
+                player.answer.is_correct = False
 
     def _get_player(self, user: 'User') -> Optional[Player]:
         for player in self.players:
@@ -283,6 +385,18 @@ class GameSession(Entity):
         winner = max(self.players, key=lambda player: player.score)
         self.current_player = winner
 
+    def _set_next_answering_player(self):
+        not_checked_players = filter(lambda p: p.answer.is_correct is None, self.players)
+        if not_checked_players:
+            self.current_player = max(not_checked_players, key=lambda p: p.score)
+        else:
+            self.current_player = None
+        print(self.current_player.nickname if self.current_player else None)
+
+    def _is_all_answers_checked(self):
+        return all(player.answer.is_correct is not None for player in self.players)
+
     def _clear_players_answers(self):
         for player in self.players:
-            player.answer = None
+            player.answer.text = None
+            player.answer.is_correct = None

@@ -8,6 +8,7 @@ import {Listener, listenerUrls} from "../../common/listener";
 import useStore from "../../common/RootStore";
 import {joinGameSession} from "../Game/services";
 import {getGameSessionDescriptions} from "./services";
+import {isAuthenticated} from "../../common/auth/services";
 
 const GameSessionDescription = observer(({description, navigate, gameStore}) => {
     return (
@@ -17,8 +18,9 @@ const GameSessionDescription = observer(({description, navigate, gameStore}) => 
             <td>{description.currentPlayers}/{description.maxPlayers}</td>
             <td>
                 <button
-                    onClick={() => {
-                        joinGameSession(description.creator)
+                    onClick={() => {!isAuthenticated()
+                        ? toast("Сначала надо войти")
+                        : joinGameSession(description.creator)
                             .then(response => {
                                 gameStore.initialize(response.data);
                                 navigate('/game');
@@ -51,6 +53,33 @@ const GameSessionsTable = observer(() => {
     const {lobbyStore: store, gameStore} = useStore();
     const navigate = useNavigate();
 
+    return (
+        <table>
+            <thead>
+            <tr>
+                <th>Создатель</th>
+                <th>Название</th>
+                <th>Игроки</th>
+                <th>Играть</th>
+            </tr>
+            </thead>
+            <tbody>
+            {values(store.descriptions).map(description =>
+                <GameSessionDescription
+                    key={description.creator}
+                    description={description}
+                    navigate={navigate}
+                    gameStore={gameStore}
+                />
+            )}
+            </tbody>
+        </table>
+    )
+});
+
+const Lobby = observer(() => {
+    const {lobbyStore: store} = useStore();
+
     useEffect(() => {
         document.title = 'Лобби'
 
@@ -67,39 +96,14 @@ const GameSessionsTable = observer(() => {
 
         return () => listener.close()
     }, []);
-
-    return (
-        <table>
-            <thead>
-            <tr>
-                <th>Создатель</th>
-                <th>Название</th>
-                <th>Игроки</th>
-                <th>Играть</th>
-            </tr>
-            </thead>
-            <tbody>
-            {store.descriptions.size > 0 && values(store.descriptions).map(description =>
-                <GameSessionDescription
-                    key={description.creator}
-                    description={description}
-                    navigate={navigate}
-                    gameStore={gameStore}
-                />
-            )}
-            </tbody>
-        </table>
-    )
-});
-
-const Lobby = observer(() => {
-    document.title = 'Лобби';
-
     return (
         <div className='lobby'>
             <h1>Лобби</h1>
 
-            <GameSessionsTable/>
+            {store.descriptions.size > 0
+                ? <GameSessionsTable/>
+                : <h3>список игр пуст</h3>
+            }
         </div>
     );
 });

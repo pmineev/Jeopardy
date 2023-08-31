@@ -9,6 +9,20 @@ from backend.core.dtos import DTO
 from backend.modules.game_session.enums import Stage
 
 
+class CurrentQuestionAnswerDTO(DTO):
+    def __init__(self, game_session: 'GameSession'):
+        # TODO условие переместить в сервис, сделать отдельный дто
+        if game_session.stage != Stage.FINAL_ROUND_ANSWERING:
+            self.answer = game_session.current_question.answer
+        else:
+            self.answer = game_session.game.final_round.answer
+
+    def to_response(self):
+        return dict(
+            answer=self.answer
+        )
+
+
 class CorrectAnswerDTO(DTO):
     def __init__(self, question: Union['Question', 'CurrentQuestion']):
         self.answer = question.answer
@@ -36,7 +50,7 @@ class PlayerDTO(DTO):
         self.nickname = player.nickname
         self.score = player.score
         self.is_playing = player.is_playing
-        self.answer = AnswerDTO(player.answer) if player.answer else None
+        self.answer = AnswerDTO(player.answer)
 
     def to_response(self):
         response = dict(
@@ -79,6 +93,15 @@ class CurrentQuestionDTO(DTO):
             themeIndex=self.theme_index,
             questionIndex=self.question_index
         )
+
+
+class HostCurrentQuestionDTO(CurrentQuestionDTO):
+    def __init__(self, question: 'CurrentQuestion'):
+        super().__init__(question)
+        self.answer = question.answer
+
+    def to_response(self):
+        return super().to_response() | dict(answer=self.answer)
 
 
 class QuestionDTO(DTO):
@@ -131,24 +154,31 @@ class RoundStartedDTO(DTO):
 
 class GameStateDTO(DTO):
     def __init__(self, gs: 'GameSession'):
+        self.host = gs.host.nickname if gs.host else None
+        self.max_players = gs.max_players
         self.stage = gs.stage
         self.players = [PlayerDTO(player) for player in gs.players]
         self.current_round = CurrentRoundDTO(gs.current_round, gs.answered_questions) \
             if gs.current_round else None
-        self.current_player = gs.current_player.nickname if gs.current_player else None
         self.current_question = CurrentQuestionDTO(gs.current_question) if gs.current_question else None
 
-        if gs.stage in (Stage.FINAL_ROUND, Stage.END_GAME):
+        # TODO условие переместить в сервис, сделать отдельный дто
+        if gs.stage in (Stage.FINAL_ROUND, Stage.FINAL_ROUND_ANSWERING, Stage.END_GAME):
+            self.current_player = None
             self.final_round = FinalRoundQuestionDTO(gs.game.final_round,
                                                      with_answer=gs.stage == Stage.END_GAME)
         else:
+            self.current_player = gs.current_player.nickname if gs.current_player else None
             self.final_round = None
 
     def to_response(self):
         response = dict(
+            maxPlayers=self.max_players,
             stage=self.stage.name,
             players=[player.to_response() for player in self.players]
         )
+        if self.host:
+            response |= dict(host=self.host)
         if self.current_round:
             response |= dict(currentRound=self.current_round.to_response())
         if self.current_player:
@@ -159,6 +189,13 @@ class GameStateDTO(DTO):
             response |= dict(finalRound=self.final_round.to_response())
 
         return response
+
+
+class HostGameStateDTO(GameStateDTO):
+    def __init__(self, gs: 'GameSession'):
+        super().__init__(gs)
+
+        self.current_question = HostCurrentQuestionDTO(gs.current_question) if gs.current_question else None
 
 
 class GameSessionDescriptionDTO(DTO):
@@ -208,7 +245,7 @@ class ChosenQuestionDTO(DTO):
 class FinalRoundTimeoutDTO(DTO):
     def __init__(self, gs: 'GameSession'):
         self.players = [PlayerDTO(player) for player in gs.players]
-        self.answer = CorrectAnswerDTO(gs.game.final_round)
+        self.answer = CorrectAnswerDTO(gs.game.final_round)  # TODO не отправлять при игре с хостом
 
     def to_response(self):
         return dict(
