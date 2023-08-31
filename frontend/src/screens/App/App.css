@@ -538,6 +538,8 @@ td {
 
 .player-controls textarea {
     resize: none;
+    width: 100%;
+    box-sizing: border-box;
     height: 100%;
     margin: 0;
 }
