@@ -56,7 +56,10 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up web -d
     - [yup](https://github.com/jquense/yup) - валидация входных данных.
 
 ## Архитектура
-ER-диаграмма:
+Структура проекта организована по принципу feature-first: исходники сгруппированы в каталоги
+по их основной функциональности.
+
+ER-диаграмма моделей:
 ![ER diagram](docs/ER.png)
 
 ## TODO
