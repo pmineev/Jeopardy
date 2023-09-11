@@ -12,7 +12,7 @@ import {Stage, toOrdinal} from "../../common/utils";
 import useStore from "../../common/RootStore";
 import GameSessionListener from "./listener";
 import {getNickname} from "../../common/auth/services";
-import {chooseQuestion, getAvatarUrl, getGameState, getHostImageUrl, leaveGameSession, submitAnswer, allowAnswers,
+import {chooseQuestion, getAvatarUrl, getGameState, leaveGameSession, submitAnswer, allowAnswers,
     confirmAnswer, rejectAnswer, startGame} from "./services";
 
 const AnswerForm = () => {
@@ -243,102 +243,17 @@ const Controls = observer(() => {
 
 const HostCard = observer(() => {
     const {gameStore: store} = useStore();
-    let hostText = '';
-    let hostImageURL;
-
-    // TODO перенести это все в стор
-    switch (store.stage) {
-        case Stage.WAITING: {
-            hostText = `Ожидаем игроков...`;
-            hostImageURL = getHostImageUrl(Stage.WAITING);
-            break;
-        }
-        case Stage.CORRECT_ANSWER: {
-            hostText = 'Правильно!';
-            hostImageURL = getHostImageUrl(Stage.ANSWERING);
-            break;
-        }
-        case Stage.TIMEOUT: {
-            hostText = `Правильный ответ: ${store.currentQuestion.answer}. `
-            hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
-            break;
-        }
-        case Stage.ROUND_ENDED: {
-            hostText += 'Раунд закончен.';
-            hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
-            break;
-        }
-        case Stage.FINAL_ROUND_STARTED: {
-            hostText += '';
-            hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
-            break;
-        }
-        case Stage.CHOOSING_QUESTION: {
-            hostText += `${store.currentPlayer.nickname}, выбирайте вопрос.`;
-            hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
-            break;
-        }
-        case Stage.READING_QUESTION:
-        case Stage.ANSWERING:
-        case Stage.PLAYER_ANSWERING:
-        case Stage.FINAL_ROUND_ANSWERING: {
-            hostImageURL = getHostImageUrl(Stage.ANSWERING);
-
-            if (store.host === getNickname()) {
-                if (store.stage === Stage.ANSWERING
-                    || store.stage === Stage.PLAYER_ANSWERING
-                    || store.stage === Stage.FINAL_ROUND_ANSWERING)
-                    hostText = `Правильный ответ: ${store.currentQuestion.answer}.`
-            }
-            else if (store.stage !== Stage.FINAL_ROUND_ANSWERING) {
-                const themeName = store.currentRound.themes[store.currentQuestion.themeIndex].name;
-                const value = store.currentQuestion.value;
-                hostText = `${themeName} за ${value}.`;
-
-                if (store.answeringPlayer)
-                    if (!store.answeringPlayer.answer.isCorrect) {
-                        hostText = 'Неверно.';
-                        hostImageURL = getHostImageUrl('wrong');
-                    }
-            }
-            break;
-        }
-        case Stage.FINAL_ROUND: {
-            hostImageURL = getHostImageUrl(Stage.FINAL_ROUND);
-            hostText = 'Финальный раунд.';
-            break;
-        }
-        case Stage.FINAL_ROUND_ENDED: {
-            hostImageURL = getHostImageUrl(Stage.FINAL_ROUND);
-            if (store.host === getNickname())
-                hostText = `Правильный ответ: ${store.currentQuestion.answer}.\n`
-
-            hostText += `Ответ игрока ${store.answeringPlayer.nickname}: ${store.answeringPlayer.answer?.text ?? '<нет ответа>'}`
-            break;
-        }
-        case Stage.END_GAME: {
-            // TODO несколько победителей при равенстве счета
-            const winner = store.players.reduce((a, b) => a.score > b.score ? a : b);
-            hostText = `Правильный ответ: ${store.currentQuestion.answer || store.finalRound.answer}.\nПобедил ${winner.nickname}!`;
-            hostImageURL = getHostImageUrl(Stage.END_GAME);
-            break;
-        }
-        default: {
-            hostText = '';
-            hostImageURL = getHostImageUrl(Stage.WAITING);
-        }
-    }
 
     return (
         <div className='host-card'>
             <div className='picture'>
                 <img
-                    src={hostImageURL}
+                    src={store.hostImageURL}
                     alt='host'
                 />
             </div>
             <div className='text'>
-                {hostText}
+                {store.hostText}
             </div>
         </div>
     )
