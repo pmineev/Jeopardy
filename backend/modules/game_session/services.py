@@ -66,9 +66,9 @@ class GameSessionService:
 
     def join(self, username: str, join_data):
         user = self.user_repo.get(username)
+        creator = self.user_repo.get(join_data['creator'])
 
-        # TODO брать id сессии из creator.game_session_id
-        game_session = self.repo.get_by_creator(join_data['creator'])
+        game_session = self.repo.get(creator.game_session_id or creator.hosted_game_session_id)
 
         if not (user.is_playing or user.is_hosting):
             game_session.join(user)
