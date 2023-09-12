@@ -129,8 +129,6 @@ const GameStore = types
                                 if (self.host === getNickname()) {
                                     if (stage === Stage.READING_QUESTION)
                                         self.hostText = ''
-                                    else
-                                        self.hostText = `Правильный ответ: ${self.currentQuestion.answer}.`
                                 }
                                 else if (stage !== Stage.FINAL_ROUND_ANSWERING) {
                                     const themeName = self.currentRound.themes[self.currentQuestion.themeIndex].name;
@@ -166,6 +164,20 @@ const GameStore = types
                         }
                     });
                 disposers.push(disposer);
+
+                disposer = when(
+                    () => self.host === getNickname() && self.currentQuestion?.answer,
+                    () => {
+                        switch (self.stage) {
+                            case Stage.ANSWERING:
+                            case Stage.PLAYER_ANSWERING:
+                            case Stage.FINAL_ROUND_ANSWERING:
+                                self.hostText = `Правильный ответ: ${self.currentQuestion.answer}.`
+                        }
+                    }
+                );
+                disposers.push(disposer);
+
                 disposer = when(
                     () => (self.stage === Stage.ANSWERING || self.stage === Stage.PLAYER_ANSWERING) && !self.answeringPlayer.answer.isCorrect,
                     () => {
