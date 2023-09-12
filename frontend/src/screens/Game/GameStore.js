@@ -1,5 +1,5 @@
 import {reaction, when} from "mobx";
-import {applySnapshot, getSnapshot, types} from "mobx-state-tree";
+import {applySnapshot, getSnapshot, onAction, types} from "mobx-state-tree";
 
 import {Stage, toOrdinal} from "../../common/utils";
 import {getHostImageUrl} from "./services";
@@ -90,51 +90,66 @@ const GameStore = types
                     stage => {
                         switch (stage) {
                             case Stage.WAITING: {
+                                self.hostImageURL = getHostImageUrl(Stage.WAITING);
                                 // TODO изменять текст при возможности начать игру
                                 self.hostText = `Ожидаем игроков...`;
-                                self.hostImageURL = getHostImageUrl(Stage.WAITING);
                                 break;
                             }
                             case Stage.CORRECT_ANSWER: {
-                                self.hostText = 'Правильно!';
                                 self.hostImageURL = getHostImageUrl(Stage.ANSWERING);
+                                self.hostText = 'Правильно!';
                                 break;
                             }
                             case Stage.TIMEOUT: {
-                                self.hostText = `Правильный ответ: ${self.currentQuestion.answer}. `
                                 self.hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
+                                self.hostText = `Правильный ответ: ${self.currentQuestion.answer}. `
                                 break;
                             }
                             case Stage.ROUND_ENDED: {
-                                self.hostText += 'Раунд закончен.';
                                 self.hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
+                                self.hostText += 'Раунд закончен.';
                                 break;
                             }
                             case Stage.FINAL_ROUND_STARTED: {
-                                self.hostText += '';
                                 self.hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
+                                self.hostText += '';
                                 break;
                             }
                             case Stage.CHOOSING_QUESTION: {
-                                self.hostText += `${self.currentPlayer.nickname}, выбирайте вопрос.`;
                                 self.hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
+                                self.hostText += `${self.currentPlayer.nickname}, выбирайте вопрос.`;
                                 break;
                             }
-                            case Stage.READING_QUESTION:
-                            case Stage.ANSWERING:
-                            case Stage.PLAYER_ANSWERING:
-                            case Stage.FINAL_ROUND_ANSWERING: {
+                            case Stage.READING_QUESTION: {
                                 self.hostImageURL = getHostImageUrl(Stage.ANSWERING);
 
-                                if (self.host === getNickname()) {
-                                    if (stage === Stage.READING_QUESTION)
-                                        self.hostText = ''
-                                }
-                                else if (stage !== Stage.FINAL_ROUND_ANSWERING) {
+                                const themeName = self.currentRound.themes[self.currentQuestion.themeIndex].name;
+                                const value = self.currentQuestion.value;
+                                self.hostText = `${themeName} за ${value}.`;
+                                break;
+                            }
+                            case Stage.ANSWERING: {
+                                if (self.host !== getNickname()) {
+                                    self.hostImageURL = getHostImageUrl(Stage.ANSWERING);
                                     const themeName = self.currentRound.themes[self.currentQuestion.themeIndex].name;
                                     const value = self.currentQuestion.value;
                                     self.hostText = `${themeName} за ${value}.`;
                                 }
+
+                                break;
+                            }
+                            case Stage.PLAYER_ANSWERING: {
+                                self.hostImageURL = getHostImageUrl(Stage.ANSWERING);
+                                if (self.host !== getNickname()) {
+                                    const themeName = self.currentRound.themes[self.currentQuestion.themeIndex].name;
+                                    const value = self.currentQuestion.value;
+                                    self.hostText = `${themeName} за ${value}.`;
+                                }
+                                break;
+                            }
+                            case Stage.FINAL_ROUND_ANSWERING: {
+                                self.hostImageURL = getHostImageUrl(Stage.ANSWERING);
+                                self.hostText = '';
                                 break;
                             }
                             case Stage.FINAL_ROUND: {
@@ -144,49 +159,74 @@ const GameStore = types
                             }
                             case Stage.FINAL_ROUND_ENDED: {
                                 self.hostImageURL = getHostImageUrl(Stage.FINAL_ROUND);
-                                if (self.host === getNickname())
-                                    self.hostText = `Правильный ответ: ${self.currentQuestion.answer}.\n`
-
-                                self.hostText += `Ответ игрока ${self.answeringPlayer.nickname}: ${self.answeringPlayer.answer?.text ?? '<нет ответа>'}`
                                 break;
                             }
                             case Stage.END_GAME: {
-                                // TODO несколько победителей при равенстве счета
-                                const winner = self.players.reduce((a, b) => a.score > b.score ? a : b);
-                                self.hostText = `Правильный ответ: ${self.currentQuestion.answer || self.finalRound.answer}.\nПобедил ${winner.nickname}!`;
                                 self.hostImageURL = getHostImageUrl(Stage.END_GAME);
                                 break;
                             }
                             default: {
-                                self.hostText = '';
                                 self.hostImageURL = getHostImageUrl(Stage.WAITING);
+                                self.hostText = '';
                             }
                         }
                     });
                 disposers.push(disposer);
 
-                disposer = when(
-                    () => self.host === getNickname() && self.currentQuestion?.answer,
+                disposer = reaction(
+                    () => self.currentQuestion?.answer,
                     () => {
-                        switch (self.stage) {
-                            case Stage.ANSWERING:
-                            case Stage.PLAYER_ANSWERING:
-                            case Stage.FINAL_ROUND_ANSWERING:
-                                self.hostText = `Правильный ответ: ${self.currentQuestion.answer}.`
+                        if (self.host === getNickname())
+                            switch (self.stage) {
+                                case Stage.ANSWERING:
+                                case Stage.PLAYER_ANSWERING:
+                                case Stage.WRONG_ANSWER:
+                                case Stage.FINAL_ROUND_ANSWERING:
+                                    self.hostText = `Правильный ответ: ${self.currentQuestion.answer}.`
+                            }
+                    }
+                );
+                disposers.push(disposer);
+
+                disposer = reaction(
+                    () => self.stage === Stage.WRONG_ANSWER,
+                    () => {
+                        if (self.host !== getNickname() && self.stage === Stage.WRONG_ANSWER) {
+                            self.hostText = 'Неверно.';
+                            self.hostImageURL = getHostImageUrl('wrong');
                         }
                     }
                 );
                 disposers.push(disposer);
 
-                disposer = when(
-                    () => (self.stage === Stage.ANSWERING || self.stage === Stage.PLAYER_ANSWERING) && !self.answeringPlayer.answer.isCorrect,
+                disposer = reaction(
+                    () => self.stage + self.answeringPlayer,
                     () => {
-                        self.hostText = 'Неверно.';
-                        self.hostImageURL = getHostImageUrl('wrong');
+                        if (self.stage === Stage.FINAL_ROUND_ENDED && self.answeringPlayer) {
+                            if (self.host === getNickname())
+                                self.hostText = `Правильный ответ: ${self.currentQuestion.answer}.\n`
+                            else
+                                self.hostText = '';
+
+                            self.hostText += `Ответ игрока ${self.answeringPlayer.nickname}: `
+                                + `${self.answeringPlayer.answer?.text ?? '<нет ответа>'}`
+                        }
                     }
                 );
-
                 disposers.push(disposer);
+
+                disposer = reaction(
+                    () => self.finalRound?.answer,
+                    () => {
+                        if (self.stage === Stage.END_GAME && self.finalRound?.answer) {
+                            // TODO несколько победителей при равенстве счета
+                            const winner = self.players.reduce((a, b) => a.score > b.score ? a : b);
+                            self.hostText = `Правильный ответ: ${self.finalRound.answer}.\nПобедил ${winner.nickname}!`;
+                        }
+                    }
+                );
+                disposers.push(disposer);
+
                 disposer = reaction(
                     () => self.stage,
                     stage => {
@@ -216,6 +256,7 @@ const GameStore = types
                     }
                 );
                 disposers.push(disposer);
+                onAction(self, call => console.log(call, getSnapshot(self)), true)
             },
             beforeDestroy() {
               disposers.forEach(d => d())
@@ -435,7 +476,7 @@ const GameStore = types
             )
         },
         get isInitialized() {
-            return self.players.length > 0
+            return self.stage !== Stage.EMPTY
         },
         get isAllPlayersJoined() {
             return self.players.length === self.maxPlayers
