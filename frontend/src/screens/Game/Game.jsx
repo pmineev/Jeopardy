@@ -261,38 +261,10 @@ const HostCard = observer(() => {
 
 const TextScreen = observer(() => {
     const {gameStore: store} = useStore();
-    const [screenText, setScreenText] = useState('')
-
-    useEffect(() => {
-        switch (store.stage) {
-            case Stage.ROUND_STARTED: {
-                setScreenText(toOrdinal(store.currentRound.order) + ' раунд');
-                break;
-            }
-            case Stage.FINAL_ROUND_STARTED: {
-                setScreenText('Финальный раунд');
-                break;
-            }
-            case Stage.READING_QUESTION:
-            case Stage.ANSWERING:
-            case Stage.PLAYER_ANSWERING: {
-                setScreenText(store.currentQuestion.text);
-                break;
-            }
-            case Stage.FINAL_ROUND:
-            case Stage.FINAL_ROUND_ANSWERING: {
-                setScreenText(store.finalRound.text);
-                break;
-            }
-            default:
-                break;
-        }
-    }, [store.stage])
-
 
     return (
         <div className='text'>
-            {screenText}
+            {store.screenText}
         </div>
     )
 });

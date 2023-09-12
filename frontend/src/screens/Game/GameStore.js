@@ -1,7 +1,7 @@
 import {reaction, when} from "mobx";
 import {applySnapshot, getSnapshot, types} from "mobx-state-tree";
 
-import {Stage} from "../../common/utils";
+import {Stage, toOrdinal} from "../../common/utils";
 import {getHostImageUrl} from "./services";
 import {getNickname} from "../../common/auth/services";
 
@@ -70,6 +70,7 @@ const GameStore = types
         stage: types.optional(types.enumeration('stage', Object.values(Stage)), Stage.EMPTY),
         host: types.maybe(types.string),
         hostText: '',
+        screenText: '',
         hostImageURL: getHostImageUrl(Stage.WAITING),
         players: types.array(Player),
         currentPlayer: types.maybe(types.reference(Player)),
@@ -89,6 +90,7 @@ const GameStore = types
                     stage => {
                         switch (stage) {
                             case Stage.WAITING: {
+                                // TODO изменять текст при возможности начать игру
                                 self.hostText = `Ожидаем игроков...`;
                                 self.hostImageURL = getHostImageUrl(Stage.WAITING);
                                 break;
@@ -169,6 +171,36 @@ const GameStore = types
                     () => {
                         self.hostText = 'Неверно.';
                         self.hostImageURL = getHostImageUrl('wrong');
+                    }
+                );
+
+                disposers.push(disposer);
+                disposer = reaction(
+                    () => self.stage,
+                    stage => {
+                        switch (stage) {
+                            case Stage.ROUND_STARTED: {
+                                self.screenText = toOrdinal(self.currentRound.order) + ' раунд';
+                                break;
+                            }
+                            case Stage.FINAL_ROUND_STARTED: {
+                                self.screenText = 'Финальный раунд';
+                                break;
+                            }
+                            case Stage.READING_QUESTION:
+                            case Stage.ANSWERING:
+                            case Stage.PLAYER_ANSWERING: {
+                                self.screenText = self.currentQuestion.text;
+                                break;
+                            }
+                            case Stage.FINAL_ROUND:
+                            case Stage.FINAL_ROUND_ANSWERING: {
+                                self.screenText = self.finalRound.text;
+                                break;
+                            }
+                            default:
+                                self.screenText = '';
+                        }
                     }
                 );
                 disposers.push(disposer);
