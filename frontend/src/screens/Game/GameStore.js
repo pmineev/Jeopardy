@@ -297,7 +297,7 @@ const GameStore = types
                         self.stage = Stage.CORRECT_ANSWER;
                     }
                     else
-                        self.stage = Stage.ANSWERING;
+                        self.stage = Stage.WRONG_ANSWER;
                 }
                 else {
                     const notCheckedPlayers = self.players.filter(player => player.answer.isCorrect === null)

@@ -518,6 +518,9 @@ const Game = observer(() => {
                     store.clearAnswers();
                 });
                 break;
+            case Stage.WRONG_ANSWER:
+                wait(() => store.setStage(Stage.ANSWERING));
+                break;
             case Stage.CORRECT_ANSWER:
             case Stage.TIMEOUT:
                 const nextStage = store.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
