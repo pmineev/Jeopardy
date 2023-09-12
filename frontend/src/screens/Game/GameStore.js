@@ -127,9 +127,9 @@ const GameStore = types
                                 self.hostImageURL = getHostImageUrl(Stage.ANSWERING);
 
                                 if (self.host === getNickname()) {
-                                    if (stage === Stage.ANSWERING
-                                        || stage === Stage.PLAYER_ANSWERING
-                                        || stage === Stage.FINAL_ROUND_ANSWERING)
+                                    if (stage === Stage.READING_QUESTION)
+                                        self.hostText = ''
+                                    else
                                         self.hostText = `Правильный ответ: ${self.currentQuestion.answer}.`
                                 }
                                 else if (stage !== Stage.FINAL_ROUND_ANSWERING) {
