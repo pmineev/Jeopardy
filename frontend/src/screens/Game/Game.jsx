@@ -497,53 +497,6 @@ const Game = observer(() => {
         }
     }, [store]);
 
-    // TODO перенести в стор
-    useEffect(() => {
-        let timeoutId;
-
-        function wait(callback) {
-            timeoutId = setTimeout(callback, 3000);
-        }
-
-        switch (store.stage) {
-            case Stage.ROUND_ENDED:
-                wait(() => {
-                    const nextStage = store.finalRound ? Stage.FINAL_ROUND_STARTED : Stage.ROUND_STARTED
-                    store.setStage(nextStage)
-                });
-                break;
-            case Stage.ROUND_STARTED:
-                wait(() => {
-                    store.setStage(Stage.CHOOSING_QUESTION);
-                    store.clearAnswers();
-                });
-                break;
-            case Stage.WRONG_ANSWER:
-                wait(() => store.setStage(Stage.ANSWERING));
-                break;
-            case Stage.CORRECT_ANSWER:
-            case Stage.TIMEOUT:
-                const nextStage = store.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
-                wait(() => {
-                    store.setStage(nextStage);
-                    store.clearAnswers();
-                });
-                break;
-            case Stage.FINAL_ROUND_STARTED:
-                wait(() => {
-                    store.setStage(Stage.FINAL_ROUND);
-                    store.clearAnswers();
-                });
-                break;
-            default:
-                break;
-        }
-
-        return () => {
-            clearTimeout(timeoutId);
-        }
-    }, [store, store.stage]);
-
     return (
         <div className='game'>
 

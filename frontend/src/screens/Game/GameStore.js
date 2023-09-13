@@ -256,6 +256,51 @@ const GameStore = types
                     }
                 );
                 disposers.push(disposer);
+
+                let timeoutId;
+                function wait(callback) {
+                    timeoutId = setTimeout(callback, 3000);
+                }
+
+                disposer = reaction(
+                    () => self.stage,
+                    stage => {
+                        switch (stage) {
+                            case Stage.ROUND_ENDED:
+                                wait(() => {
+                                    const nextStage = self.finalRound ? Stage.FINAL_ROUND_STARTED : Stage.ROUND_STARTED
+                                    self.setStage(nextStage)
+                                });
+                                break;
+                            case Stage.ROUND_STARTED:
+                                wait(() => {
+                                    self.setStage(Stage.CHOOSING_QUESTION);
+                                    self.clearAnswers();
+                                });
+                                break;
+                            case Stage.WRONG_ANSWER:
+                                wait(() => self.setStage(Stage.ANSWERING));
+                                break;
+                            case Stage.CORRECT_ANSWER:
+                            case Stage.TIMEOUT:
+                                const nextStage = self.isNoMoreQuestions ? Stage.ROUND_ENDED : Stage.CHOOSING_QUESTION
+                                wait(() => {
+                                    self.setStage(nextStage);
+                                    self.clearAnswers();
+                                });
+                                break;
+                            case Stage.FINAL_ROUND_STARTED:
+                                wait(() => {
+                                    self.setStage(Stage.FINAL_ROUND);
+                                    self.clearAnswers();
+                                });
+                                break;
+                        }
+                    }
+                );
+                disposers.push(disposer);
+                disposer = () => clearTimeout(timeoutId);
+                disposers.push(disposer);
                 onAction(self, call => console.log(call, getSnapshot(self)), true)
             },
             beforeDestroy() {
