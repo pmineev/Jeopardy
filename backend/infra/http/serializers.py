@@ -23,7 +23,7 @@ class QuestionSerializer(Serializer):
     value = IntegerField(min_value=0)
 
 
-class CreatorNicknameSerializer(Serializer):
+class JoinGameSessionSerializer(Serializer):
     creator = CharField()
 
 

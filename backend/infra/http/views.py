@@ -11,7 +11,7 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from backend.infra.http.serializers import RegisterUserCredentialsSerializer, LoginUserCredentialsSerializer, \
     ChangeUserCredentialsSerializer, GameSerializer, CreateGameSessionSerializer, \
-    QuestionChoiceSerializer, AnswerRequestSerializer, CreatorNicknameSerializer
+    QuestionChoiceSerializer, AnswerRequestSerializer, JoinGameSessionSerializer
 from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
 from backend.modules.game.services import GameService
 from backend.modules.game_session.dtos import CreateGameSessionDTO
@@ -170,7 +170,7 @@ class GameSessionViewSet(ViewSet):
         return Response(data=game_state_dto.to_response())
 
     def join(self, request):
-        serializer = CreatorNicknameSerializer(data=request.data)
+        serializer = JoinGameSessionSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
