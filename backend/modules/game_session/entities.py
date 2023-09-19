@@ -240,7 +240,7 @@ class GameSession(Entity):
 
                 print(f'{user.username} has answered {answer_text}: correct')
 
-                if self.is_no_more_questions():
+                if self._is_no_more_questions():
                     self.set_next_round()
                 else:
                     self._clear_players_answers()
@@ -277,7 +277,7 @@ class GameSession(Entity):
             self.add_event(PlayerCorrectlyAnsweredEvent(self, self.current_player))
             self.add_event(StopAnswerPeriodEvent(self))
 
-            if self.is_no_more_questions():
+            if self._is_no_more_questions():
                 self.set_next_round()
             else:
                 self.stage = Stage.CHOOSING_QUESTION
@@ -327,7 +327,7 @@ class GameSession(Entity):
 
         self.current_question = None
 
-        if self.is_no_more_questions():
+        if self._is_no_more_questions():
             self.set_next_round()
         else:
             self._clear_players_answers()
@@ -358,11 +358,6 @@ class GameSession(Entity):
         else:
             return not any(player.is_playing for player in self.players)
 
-    # TODO сделать приватным
-    def is_no_more_questions(self) -> bool:
-        return len(self.answered_questions) == \
-               len(self.current_round.themes) * len(self.current_round.themes[0].questions)
-
     def check_players_final_answers(self):
         value = self.game.final_round.value
         answer_text = self.game.final_round.answer
@@ -392,6 +387,10 @@ class GameSession(Entity):
         else:
             self.current_player = None
         print(self.current_player.nickname if self.current_player else None)
+
+    def _is_no_more_questions(self) -> bool:
+        return len(self.answered_questions) == \
+               len(self.current_round.themes) * len(self.current_round.themes[0].questions)
 
     def _is_all_answers_checked(self):
         return all(player.answer.is_correct is not None for player in self.players)
