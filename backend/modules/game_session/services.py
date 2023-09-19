@@ -1,7 +1,7 @@
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.modules.game_session.dtos import CreateGameSessionDTO
+    from backend.modules.game_session.dtos import CreateGameSessionDTO, JoinGameSessionDTO
 
 from backend.modules.game.repos import game_repo
 from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO, CurrentQuestionAnswerDTO, \
@@ -67,9 +67,9 @@ class GameSessionService:
         else:
             return [GameSessionDescriptionDTO(gs, False, False) for gs in game_sessions]
 
-    def join(self, username: str, join_data):
+    def join(self, username: str, join_data: JoinGameSessionDTO):
         user = self.user_repo.get(username)
-        creator = self.user_repo.get_by_nickname(join_data['creator'])
+        creator = self.user_repo.get_by_nickname(join_data.creator)
 
         game_session = self.repo.get(creator.game_session_id or creator.hosted_game_session_id)
 

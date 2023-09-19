@@ -270,3 +270,8 @@ class CreateGameSessionDTO:
     game_name: str
     max_players: int
     is_host: bool
+
+
+@dataclass
+class JoinGameSessionDTO:
+    creator: str
