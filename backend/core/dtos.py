@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class DTO(ABC):
+class ResponseDTO(ABC):
     @abstractmethod
     def to_response(self):
         pass
