@@ -14,7 +14,7 @@ from backend.infra.http.serializers import RegisterUserCredentialsSerializer, Lo
     QuestionChoiceSerializer, AnswerRequestSerializer, JoinGameSessionSerializer
 from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
 from backend.modules.game.services import GameService
-from backend.modules.game_session.dtos import CreateGameSessionDTO, JoinGameSessionDTO
+from backend.modules.game_session.dtos import CreateGameSessionDTO, JoinGameSessionDTO, QuestionChoiceDTO
 from backend.modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
     WrongQuestionRequest, AlreadyPlaying, WrongStage, AlreadyCreated
 from backend.modules.game_session.services import GameSessionService
@@ -208,7 +208,8 @@ class GameSessionViewSet(ViewSet):
 
         try:
             serializer.is_valid(raise_exception=True)
-            self.service.choose_question(request.user.username, serializer.validated_data)
+            self.service.choose_question(request.user.username,
+                                         QuestionChoiceDTO(**serializer.validated_data))
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except WrongQuestionRequest as e:

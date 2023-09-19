@@ -1,7 +1,7 @@
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.modules.game_session.dtos import CreateGameSessionDTO, JoinGameSessionDTO
+    from backend.modules.game_session.dtos import CreateGameSessionDTO, JoinGameSessionDTO, QuestionChoiceDTO
 
 from backend.modules.game.repos import game_repo
 from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO, CurrentQuestionAnswerDTO, \
@@ -117,7 +117,7 @@ class GameSessionService:
         else:
             raise GameSessionNotFound()
 
-    def choose_question(self, username: str, question_data):
+    def choose_question(self, username: str, question_data: 'QuestionChoiceDTO'):
         user = self.user_repo.get(username)
 
         if not user.is_playing:
@@ -125,10 +125,7 @@ class GameSessionService:
 
         game_session = self.repo.get(user.game_session_id)
 
-        theme_index = question_data['theme_index']
-        question_index = question_data['question_index']
-
-        game_session.choose_question(user, theme_index, question_index)
+        game_session.choose_question(user, question_data.theme_index, question_data.question_index)
 
         self.repo.save(game_session)
 

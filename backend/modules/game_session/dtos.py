@@ -275,3 +275,9 @@ class CreateGameSessionDTO:
 @dataclass
 class JoinGameSessionDTO:
     creator: str
+
+
+@dataclass
+class QuestionChoiceDTO:
+    theme_index: int
+    question_index: int
