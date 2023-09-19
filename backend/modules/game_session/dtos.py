@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -262,3 +263,10 @@ class CreatorNicknameDTO(DTO):
         return dict(
             creator=self.nickname
         )
+
+
+@dataclass
+class CreateGameSessionDTO:
+    game_name: str
+    max_players: int
+    is_host: bool

@@ -1,4 +1,7 @@
-from typing import List
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from backend.modules.game_session.dtos import CreateGameSessionDTO
 
 from backend.modules.game.repos import game_repo
 from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO, CurrentQuestionAnswerDTO, \
@@ -26,7 +29,7 @@ class GameSessionService:
         else:
             raise GameSessionNotFound()
 
-    def create(self, game_session_data, username: str) -> GameStateDTO:
+    def create(self, create_game_session_data: CreateGameSessionDTO, username: str) -> GameStateDTO:
         user = self.user_repo.get(username)
 
         if user.is_playing or user.is_hosting:
@@ -35,12 +38,12 @@ class GameSessionService:
         if self.repo.is_exists(user):
             raise AlreadyCreated
 
-        game = self.game_repo.get(game_session_data['game_name'])
+        game = self.game_repo.get(create_game_session_data.game_name)
 
         game_session = GameSession(creator=user,
-                                   host=user if game_session_data['is_host'] else None,
+                                   host=user if create_game_session_data.is_host else None,
                                    game=game,
-                                   max_players=game_session_data['max_players'])
+                                   max_players=create_game_session_data.max_players)
 
         game_session.add_event(GameSessionCreatedEvent(game_session))
 

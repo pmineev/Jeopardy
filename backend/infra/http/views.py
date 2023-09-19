@@ -14,6 +14,7 @@ from backend.infra.http.serializers import RegisterUserCredentialsSerializer, Lo
     QuestionChoiceSerializer, AnswerRequestSerializer, CreatorNicknameSerializer
 from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
 from backend.modules.game.services import GameService
+from backend.modules.game_session.dtos import CreateGameSessionDTO
 from backend.modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
     WrongQuestionRequest, AlreadyPlaying, WrongStage, AlreadyCreated
 from backend.modules.game_session.services import GameSessionService
@@ -139,7 +140,7 @@ class GameSessionListView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            game_state_dto = self.service.create(serializer.validated_data,
+            game_state_dto = self.service.create(CreateGameSessionDTO(**serializer.validated_data),
                                                  request.user.username)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
