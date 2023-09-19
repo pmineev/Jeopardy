@@ -1,7 +1,8 @@
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.modules.game_session.dtos import CreateGameSessionDTO, JoinGameSessionDTO, QuestionChoiceDTO
+    from backend.modules.game_session.dtos import CreateGameSessionDTO, JoinGameSessionDTO, QuestionChoiceDTO, \
+        AnswerRequestDTO
 
 from backend.modules.game.repos import game_repo
 from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO, CurrentQuestionAnswerDTO, \
@@ -163,11 +164,11 @@ class GameSessionService:
 
             self.repo.delete(game_session)
 
-    def submit_answer(self, username: str, answer_data):
+    def submit_answer(self, username: str, answer_data: 'AnswerRequestDTO'):
         user = self.user_repo.get(username)
         game_session = self.repo.get(user.game_session_id)
 
-        game_session.submit_answer(user, answer_data['answer'] if answer_data else None)
+        game_session.submit_answer(user, answer_data.answer)
 
         self.repo.save(game_session)
 

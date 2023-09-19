@@ -281,3 +281,8 @@ class JoinGameSessionDTO:
 class QuestionChoiceDTO:
     theme_index: int
     question_index: int
+
+
+@dataclass
+class AnswerRequestDTO:
+    answer: str | None = None
