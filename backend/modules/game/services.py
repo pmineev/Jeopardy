@@ -12,7 +12,7 @@ class GameService:
     repo = game_repo
     user_repo = user_repo
 
-    def create(self, game_data, username: str):
+    def create(self, username: str, game_data):
         if not self.user_repo.is_exists(username):
             raise UserNotFound
 

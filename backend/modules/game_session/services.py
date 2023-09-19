@@ -29,7 +29,7 @@ class GameSessionService:
         else:
             raise GameSessionNotFound()
 
-    def create(self, create_game_session_data: CreateGameSessionDTO, username: str) -> GameStateDTO:
+    def create(self, username: str, create_game_session_data: CreateGameSessionDTO) -> GameStateDTO:
         user = self.user_repo.get(username)
 
         if user.is_playing or user.is_hosting:

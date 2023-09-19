@@ -95,7 +95,7 @@ class UserView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            self.service.update(serializer.validated_data, username)
+            self.service.update(username, serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except UserNotFound as e:
@@ -116,7 +116,7 @@ class GameListView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            self.service.create(serializer.validated_data, request.user.username)
+            self.service.create(request.user.username, serializer.validated_data)
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameAlreadyExists as e:
@@ -140,8 +140,8 @@ class GameSessionListView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            game_state_dto = self.service.create(CreateGameSessionDTO(**serializer.validated_data),
-                                                 request.user.username)
+            game_state_dto = self.service.create(request.user.username,
+                                                 CreateGameSessionDTO(**serializer.validated_data))
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameNotFound as e:

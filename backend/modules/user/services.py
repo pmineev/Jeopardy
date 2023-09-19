@@ -31,7 +31,7 @@ class UserService:
 
         self.repo.save(user)
 
-    def update(self, user_data, username: str):
+    def update(self, username: str, user_data):
         if not self.repo.is_exists(username):
             raise UserNotFound
 
