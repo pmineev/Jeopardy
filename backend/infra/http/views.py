@@ -16,6 +16,7 @@ from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
 from backend.modules.game.services import GameService
 from backend.modules.game_session.dtos import CreateGameSessionDTO, JoinGameSessionDTO, QuestionChoiceDTO, \
     AnswerRequestDTO
+from backend.modules.game.dtos import CreateGameDTO
 from backend.modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
     WrongQuestionRequest, AlreadyPlaying, WrongStage, AlreadyCreated
 from backend.modules.game_session.services import GameSessionService
@@ -117,7 +118,8 @@ class GameListView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            self.service.create(request.user.username, serializer.validated_data)
+            self.service.create(request.user.username,
+                                CreateGameDTO(**serializer.validated_data))
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameAlreadyExists as e:
