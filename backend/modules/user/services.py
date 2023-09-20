@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.modules.user.dtos import CreateUserDTO, LoginUserDTO
+    from backend.modules.user.dtos import CreateUserDTO, LoginUserDTO, ChangeUserDTO
 
 from backend.modules.user.dtos import UserDTO, SessionDTO
 from backend.modules.user.entities import User
@@ -38,21 +38,20 @@ class UserService:
         session = self.repo.authenticate(user)
         return SessionDTO(session)
 
-    def update(self, username: str, user_data):
+    def update(self, username: str, user_data: 'ChangeUserDTO'):
         if not self.repo.is_exists(username):
             raise UserNotFound
 
         user = self.repo.get(username)
 
-        if 'nickname' in user_data:
-            if self.repo.is_nickname_exists(user_data['nickname']):
+        if user_data.nickname:
+            if self.repo.is_nickname_exists(user_data.nickname):
                 raise UserNicknameAlreadyExists
 
-            user.nickname = user_data['nickname']
+            user.nickname = user_data.nickname
 
         # TODO добавить проверку на длину пароля (надо от 6 символов)
-        if 'password' in user_data:
-            user.password = user_data['password']
+        user.password = user_data.password
 
         self.repo.save(user)
 

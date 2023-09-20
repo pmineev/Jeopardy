@@ -49,3 +49,8 @@ class LoginUserDTO:
     username: str
     password: str
 
+
+@dataclass
+class ChangeUserDTO:
+    nickname: str | None = None
+    password: str | None = None

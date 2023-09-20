@@ -20,7 +20,7 @@ from backend.modules.game.dtos import CreateGameDTO
 from backend.modules.game_session.exceptions import GameSessionNotFound, TooManyPlayers, NotCurrentPlayer, \
     WrongQuestionRequest, AlreadyPlaying, WrongStage, AlreadyCreated
 from backend.modules.game_session.services import GameSessionService
-from backend.modules.user.dtos import CreateUserDTO, LoginUserDTO
+from backend.modules.user.dtos import CreateUserDTO, LoginUserDTO, ChangeUserDTO
 from backend.modules.user.exceptions import UserAlreadyExists, UserNotFound, UserNicknameAlreadyExists
 from backend.modules.user.services import UserService
 
@@ -97,7 +97,8 @@ class UserView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            self.service.update(username, serializer.validated_data)
+            self.service.update(username,
+                                ChangeUserDTO(**serializer.validated_data))
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except UserNotFound as e:
