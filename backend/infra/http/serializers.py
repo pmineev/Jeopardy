@@ -12,7 +12,7 @@ class LoginUserSerializer(Serializer):
     password = CharField()
 
 
-class ChangeUserCredentialsSerializer(Serializer):
+class ChangeUserSerializer(Serializer):
     nickname = CharField(required=False)
     password = CharField(required=False)
 

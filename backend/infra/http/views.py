@@ -10,7 +10,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from backend.infra.http.serializers import CreateUserSerializer, LoginUserSerializer, \
-    ChangeUserCredentialsSerializer, GameSerializer, CreateGameSessionSerializer, \
+    ChangeUserSerializer, GameSerializer, CreateGameSessionSerializer, \
     QuestionChoiceSerializer, AnswerRequestSerializer, JoinGameSessionSerializer
 from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
 from backend.modules.game.services import GameService
@@ -94,7 +94,7 @@ class UserView(APIView):
         if username != request.user.username:
             return Response(status=status.HTTP_403_FORBIDDEN, data={'code': 'forbidden'})
 
-        serializer = ChangeUserCredentialsSerializer(data=request.data)
+        serializer = ChangeUserSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
