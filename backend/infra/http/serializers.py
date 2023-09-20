@@ -7,7 +7,7 @@ class CreateUserSerializer(Serializer):
     password = CharField()
 
 
-class LoginUserCredentialsSerializer(Serializer):
+class LoginUserSerializer(Serializer):
     username = CharField()
     password = CharField()
 

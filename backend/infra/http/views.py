@@ -9,7 +9,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-from backend.infra.http.serializers import CreateUserSerializer, LoginUserCredentialsSerializer, \
+from backend.infra.http.serializers import CreateUserSerializer, LoginUserSerializer, \
     ChangeUserCredentialsSerializer, GameSerializer, CreateGameSessionSerializer, \
     QuestionChoiceSerializer, AnswerRequestSerializer, JoinGameSessionSerializer
 from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
@@ -51,7 +51,7 @@ class SessionView(ViewSet):
     service = UserService()
 
     def authenticate(self, request):
-        serializer = LoginUserCredentialsSerializer(data=request.data)
+        serializer = LoginUserSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)
