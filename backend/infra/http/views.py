@@ -35,8 +35,7 @@ class UserListView(APIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-            self.service.create(CreateUserDTO(**serializer.validated_data))
-            session_dto = self.service.authenticate(serializer.validated_data)
+            session_dto = self.service.create(CreateUserDTO(**serializer.validated_data))
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except (UserAlreadyExists, UserNicknameAlreadyExists) as e:

@@ -20,7 +20,7 @@ class UserService:
 
         return UserDTO(user)
 
-    def create(self, user_data: 'CreateUserDTO'):
+    def create(self, user_data: 'CreateUserDTO') -> SessionDTO:
         if self.repo.is_exists(user_data.username):
             raise UserAlreadyExists
 
@@ -34,7 +34,9 @@ class UserService:
                     nickname=nickname,
                     password=user_data.password)
 
-        self.repo.save(user)
+        user = self.repo.save(user)
+        session = self.repo.authenticate(user)
+        return SessionDTO(session)
 
     def update(self, username: str, user_data):
         if not self.repo.is_exists(username):
