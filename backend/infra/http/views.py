@@ -9,7 +9,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-from backend.infra.http.serializers import RegisterUserCredentialsSerializer, LoginUserCredentialsSerializer, \
+from backend.infra.http.serializers import CreateUserSerializer, LoginUserCredentialsSerializer, \
     ChangeUserCredentialsSerializer, GameSerializer, CreateGameSessionSerializer, \
     QuestionChoiceSerializer, AnswerRequestSerializer, JoinGameSessionSerializer
 from backend.modules.game.exceptions import GameAlreadyExists, GameNotFound
@@ -31,7 +31,7 @@ class UserListView(APIView):
     service = UserService()
 
     def post(self, request):
-        serializer = RegisterUserCredentialsSerializer(data=request.data)
+        serializer = CreateUserSerializer(data=request.data)
 
         try:
             serializer.is_valid(raise_exception=True)

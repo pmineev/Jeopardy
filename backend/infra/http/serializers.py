@@ -1,7 +1,7 @@
 from rest_framework.serializers import Serializer, CharField, IntegerField, ListField, BooleanField
 
 
-class RegisterUserCredentialsSerializer(Serializer):
+class CreateUserSerializer(Serializer):
     username = CharField()
     nickname = CharField(required=False)
     password = CharField()
