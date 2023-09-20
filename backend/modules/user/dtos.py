@@ -42,3 +42,10 @@ class CreateUserDTO:
     username: str
     password: str
     nickname: str | None = None
+
+
+@dataclass
+class LoginUserDTO:
+    username: str
+    password: str
+

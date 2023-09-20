@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from backend.modules.user.dtos import CreateUserDTO
+    from backend.modules.user.dtos import CreateUserDTO, LoginUserDTO
 
 from backend.modules.user.dtos import UserDTO, SessionDTO
 from backend.modules.user.entities import User
@@ -56,8 +56,9 @@ class UserService:
 
         self.repo.save(user)
 
-    def authenticate(self, user_data) -> SessionDTO:
-        user = User(**user_data)
+    def authenticate(self, user_data: 'LoginUserDTO') -> SessionDTO:
+        user = User(username=user_data.username,
+                    password=user_data.password)
 
         session = self.repo.authenticate(user)
 
