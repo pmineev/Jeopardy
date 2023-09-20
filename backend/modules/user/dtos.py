@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -34,3 +35,10 @@ class UserDTO(ResponseDTO):
             isPlaying=self.is_playing,
             isHosting=self.is_hosting
         )
+
+
+@dataclass
+class CreateUserDTO:
+    username: str
+    password: str
+    nickname: str | None = None
