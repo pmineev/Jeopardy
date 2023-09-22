@@ -107,17 +107,16 @@ const GameStore = types
                             }
                             case Stage.ROUND_ENDED: {
                                 self.hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
-                                self.hostText += 'Раунд закончен.';
+                                self.hostText = 'Раунд закончен.';
                                 break;
                             }
                             case Stage.FINAL_ROUND_STARTED: {
                                 self.hostImageURL = getHostImageUrl(Stage.ROUND_STARTED);
-                                self.hostText += '';
                                 break;
                             }
                             case Stage.CHOOSING_QUESTION: {
                                 self.hostImageURL = getHostImageUrl(Stage.CHOOSING_QUESTION);
-                                self.hostText += `${self.currentPlayer.nickname}, выбирайте вопрос.`;
+                                self.hostText = `${self.currentPlayer.nickname}, выбирайте вопрос.`;
                                 break;
                             }
                             case Stage.READING_QUESTION: {
