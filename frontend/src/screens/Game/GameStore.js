@@ -128,8 +128,8 @@ const GameStore = types
                                 break;
                             }
                             case Stage.ANSWERING: {
+                                self.hostImageURL = getHostImageUrl(Stage.ANSWERING);
                                 if (self.host !== getNickname()) {
-                                    self.hostImageURL = getHostImageUrl(Stage.ANSWERING);
                                     const themeName = self.currentRound.themes[self.currentQuestion.themeIndex].name;
                                     const value = self.currentQuestion.value;
                                     self.hostText = `${themeName} за ${value}.`;
@@ -144,6 +144,10 @@ const GameStore = types
                                     const value = self.currentQuestion.value;
                                     self.hostText = `${themeName} за ${value}.`;
                                 }
+                                break;
+                            }
+                            case Stage.WRONG_ANSWER: {
+                                self.hostImageURL = getHostImageUrl('wrong');
                                 break;
                             }
                             case Stage.FINAL_ROUND_ANSWERING: {
@@ -190,9 +194,8 @@ const GameStore = types
                 disposer = reaction(
                     () => self.stage === Stage.WRONG_ANSWER,
                     () => {
-                        if (self.host !== getNickname() && self.stage === Stage.WRONG_ANSWER) {
+                        if (self.stage === Stage.WRONG_ANSWER && self.host !== getNickname()) {
                             self.hostText = 'Неверно.';
-                            self.hostImageURL = getHostImageUrl('wrong');
                         }
                     }
                 );
