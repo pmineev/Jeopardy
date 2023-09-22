@@ -243,7 +243,10 @@ const GameStore = types
                             }
                             case Stage.READING_QUESTION:
                             case Stage.ANSWERING:
-                            case Stage.PLAYER_ANSWERING: {
+                            case Stage.PLAYER_ANSWERING:
+                            case Stage.CORRECT_ANSWER:
+                            case Stage.WRONG_ANSWER:
+                            case Stage.TIMEOUT: {
                                 self.screenText = self.currentQuestion.text;
                                 break;
                             }
