@@ -32,6 +32,15 @@ class UserRepo(Repository):
         return orm_user.to_domain()
 
     @staticmethod
+    def get_by_nickname(username: str) -> 'User':
+        try:
+            orm_user = ORMUser.objects.get(nickname=username)
+        except ORMUser.DoesNotExist:
+            raise UserNotFound
+
+        return orm_user.to_domain()
+
+    @staticmethod
     def _create(user: 'User') -> 'User':
         orm_django_user = ORMDjangoUser.objects.create_user(username=user.username,
                                                             password=user.password)

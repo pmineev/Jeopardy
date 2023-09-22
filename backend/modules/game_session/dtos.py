@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List, Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -5,11 +6,11 @@ if TYPE_CHECKING:
     from ..game.entities import Round, Theme, Question
     from .entities import GameSession, Player, Answer, CurrentQuestion
 
-from backend.core.dtos import DTO
+from backend.core.dtos import ResponseDTO
 from backend.modules.game_session.enums import Stage
 
 
-class CurrentQuestionAnswerDTO(DTO):
+class CurrentQuestionAnswerDTO(ResponseDTO):
     def __init__(self, game_session: 'GameSession'):
         # TODO условие переместить в сервис, сделать отдельный дто
         if game_session.stage != Stage.FINAL_ROUND_ANSWERING:
@@ -23,7 +24,7 @@ class CurrentQuestionAnswerDTO(DTO):
         )
 
 
-class CorrectAnswerDTO(DTO):
+class CorrectAnswerDTO(ResponseDTO):
     def __init__(self, question: Union['Question', 'CurrentQuestion']):
         self.answer = question.answer
 
@@ -33,7 +34,7 @@ class CorrectAnswerDTO(DTO):
         )
 
 
-class AnswerDTO(DTO):
+class AnswerDTO(ResponseDTO):
     def __init__(self, answer: 'Answer'):
         self.text = answer.text
         self.is_correct = answer.is_correct
@@ -45,7 +46,7 @@ class AnswerDTO(DTO):
         )
 
 
-class PlayerDTO(DTO):
+class PlayerDTO(ResponseDTO):
     def __init__(self, player: 'Player'):
         self.nickname = player.nickname
         self.score = player.score
@@ -64,7 +65,7 @@ class PlayerDTO(DTO):
         return response
 
 
-class FinalRoundQuestionDTO(DTO):
+class FinalRoundQuestionDTO(ResponseDTO):
     def __init__(self, question: 'Question', with_answer=False):
         self.text = question.text
         self.value = question.value
@@ -81,7 +82,7 @@ class FinalRoundQuestionDTO(DTO):
         return response
 
 
-class CurrentQuestionDTO(DTO):
+class CurrentQuestionDTO(ResponseDTO):
     def __init__(self, question: 'CurrentQuestion'):
         self.text = question.text
         self.theme_index = question.theme_index
@@ -104,7 +105,7 @@ class HostCurrentQuestionDTO(CurrentQuestionDTO):
         return super().to_response() | dict(answer=self.answer)
 
 
-class QuestionDTO(DTO):
+class QuestionDTO(ResponseDTO):
     def __init__(self, question: 'Question', is_answered: bool):
         self.value = question.value
         self.is_answered = is_answered
@@ -116,7 +117,7 @@ class QuestionDTO(DTO):
         )
 
 
-class ThemeDTO(DTO):
+class ThemeDTO(ResponseDTO):
     def __init__(self, theme: 'Theme', answered_questions: List['Question']):
         self.name = theme.name
         self.questions = [QuestionDTO(question, question in answered_questions) for question in theme.questions]
@@ -128,7 +129,7 @@ class ThemeDTO(DTO):
         )
 
 
-class CurrentRoundDTO(DTO):
+class CurrentRoundDTO(ResponseDTO):
     def __init__(self, current_round: 'Round', answered_questions: List['Question']):
         self.order = current_round.order
         self.themes = [ThemeDTO(theme, answered_questions) for theme in current_round.themes]
@@ -140,7 +141,7 @@ class CurrentRoundDTO(DTO):
         )
 
 
-class RoundStartedDTO(DTO):
+class RoundStartedDTO(ResponseDTO):
     def __init__(self, current_round: 'Round', current_player: 'Player'):
         self.round = CurrentRoundDTO(current_round, [])
         self.current_player = PlayerNicknameDTO(current_player)
@@ -152,7 +153,7 @@ class RoundStartedDTO(DTO):
         )
 
 
-class GameStateDTO(DTO):
+class GameStateDTO(ResponseDTO):
     def __init__(self, gs: 'GameSession'):
         self.host = gs.host.nickname if gs.host else None
         self.max_players = gs.max_players
@@ -198,7 +199,7 @@ class HostGameStateDTO(GameStateDTO):
         self.current_question = HostCurrentQuestionDTO(gs.current_question) if gs.current_question else None
 
 
-class GameSessionDescriptionDTO(DTO):
+class GameSessionDescriptionDTO(ResponseDTO):
     def __init__(self, gs: 'GameSession', is_playing: bool, is_left: bool):
         self.creator = gs.creator.nickname
         self.game_name = gs.game.name
@@ -218,7 +219,7 @@ class GameSessionDescriptionDTO(DTO):
         )
 
 
-class PlayerNicknameDTO(DTO):
+class PlayerNicknameDTO(ResponseDTO):
     def __init__(self, player: 'Player'):
         self.nickname = player.nickname
 
@@ -228,7 +229,7 @@ class PlayerNicknameDTO(DTO):
         )
 
 
-class ChosenQuestionDTO(DTO):
+class ChosenQuestionDTO(ResponseDTO):
     def __init__(self, question: 'CurrentQuestion'):
         self.text = question.text
         self.theme_index = question.theme_index
@@ -242,7 +243,7 @@ class ChosenQuestionDTO(DTO):
         )
 
 
-class FinalRoundTimeoutDTO(DTO):
+class FinalRoundTimeoutDTO(ResponseDTO):
     def __init__(self, gs: 'GameSession'):
         self.players = [PlayerDTO(player) for player in gs.players]
         self.answer = CorrectAnswerDTO(gs.game.final_round)  # TODO не отправлять при игре с хостом
@@ -254,7 +255,7 @@ class FinalRoundTimeoutDTO(DTO):
         )
 
 
-class CreatorNicknameDTO(DTO):
+class CreatorNicknameDTO(ResponseDTO):
     def __init__(self, user: 'User'):
         self.nickname = user.nickname
 
@@ -262,3 +263,26 @@ class CreatorNicknameDTO(DTO):
         return dict(
             creator=self.nickname
         )
+
+
+@dataclass
+class CreateGameSessionDTO:
+    game_name: str
+    max_players: int
+    is_host: bool
+
+
+@dataclass
+class JoinGameSessionDTO:
+    creator: str
+
+
+@dataclass
+class QuestionChoiceDTO:
+    theme_index: int
+    question_index: int
+
+
+@dataclass
+class AnswerRequestDTO:
+    answer: str | None = None
