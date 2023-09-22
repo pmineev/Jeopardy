@@ -239,7 +239,7 @@ class GameSessionViewSet(ViewSet):
         try:
             serializer.is_valid(raise_exception=True)
             self.service.submit_answer(request.user.username,
-                                       AnswerRequestDTO(serializer.validated_data))
+                                       AnswerRequestDTO(**serializer.validated_data))
         except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={'code': 'invalid_request'})
         except GameSessionNotFound as e:
