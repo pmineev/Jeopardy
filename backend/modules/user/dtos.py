@@ -1,12 +1,13 @@
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .entities import User, Session
 
-from backend.core.dtos import DTO
+from backend.core.dtos import ResponseDTO
 
 
-class SessionDTO(DTO):
+class SessionDTO(ResponseDTO):
     def __init__(self, session: 'Session'):
         self.access = session.access
         self.refresh = session.refresh
@@ -20,7 +21,7 @@ class SessionDTO(DTO):
         )
 
 
-class UserDTO(DTO):
+class UserDTO(ResponseDTO):
     def __init__(self, user: 'User'):
         self.username = user.username
         self.nickname = user.nickname
@@ -34,3 +35,22 @@ class UserDTO(DTO):
             isPlaying=self.is_playing,
             isHosting=self.is_hosting
         )
+
+
+@dataclass
+class CreateUserDTO:
+    username: str
+    password: str
+    nickname: str | None = None
+
+
+@dataclass
+class LoginUserDTO:
+    username: str
+    password: str
+
+
+@dataclass
+class ChangeUserDTO:
+    nickname: str | None = None
+    password: str | None = None

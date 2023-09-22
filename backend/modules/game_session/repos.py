@@ -40,15 +40,6 @@ class GameSessionRepo(Repository):
         return orm_game_session.to_domain()
 
     @staticmethod
-    def get_by_creator(creator_nickname: str) -> 'GameSession':
-        try:
-            orm_game_session = ORMGameSession.objects.get(creator__nickname=creator_nickname)
-        except ORMGameSession.DoesNotExist:
-            raise GameSessionNotFound
-
-        return orm_game_session.to_domain()
-
-    @staticmethod
     def get_all() -> List['GameSession']:
         return [orm_gs.to_domain() for orm_gs in ORMGameSession.objects.all().order_by('pk')]
 

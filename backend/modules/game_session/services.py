@@ -1,4 +1,8 @@
-from typing import List
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from backend.modules.game_session.dtos import CreateGameSessionDTO, JoinGameSessionDTO, QuestionChoiceDTO, \
+        AnswerRequestDTO
 
 from backend.modules.game.repos import game_repo
 from backend.modules.game_session.dtos import GameStateDTO, GameSessionDescriptionDTO, CurrentQuestionAnswerDTO, \
@@ -26,7 +30,7 @@ class GameSessionService:
         else:
             raise GameSessionNotFound()
 
-    def create(self, game_session_data, username: str) -> GameStateDTO:
+    def create(self, username: str, create_game_session_data: 'CreateGameSessionDTO') -> GameStateDTO:
         user = self.user_repo.get(username)
 
         if user.is_playing or user.is_hosting:
@@ -35,12 +39,12 @@ class GameSessionService:
         if self.repo.is_exists(user):
             raise AlreadyCreated
 
-        game = self.game_repo.get(game_session_data['game_name'])
+        game = self.game_repo.get(create_game_session_data.game_name)
 
         game_session = GameSession(creator=user,
-                                   host=user if game_session_data['is_host'] else None,
+                                   host=user if create_game_session_data.is_host else None,
                                    game=game,
-                                   max_players=game_session_data['max_players'])
+                                   max_players=create_game_session_data.max_players)
 
         game_session.add_event(GameSessionCreatedEvent(game_session))
 
@@ -64,11 +68,11 @@ class GameSessionService:
         else:
             return [GameSessionDescriptionDTO(gs, False, False) for gs in game_sessions]
 
-    def join(self, username: str, join_data):
+    def join(self, username: str, join_data: 'JoinGameSessionDTO'):
         user = self.user_repo.get(username)
+        creator = self.user_repo.get_by_nickname(join_data.creator)
 
-        # TODO брать id сессии из creator.game_session_id
-        game_session = self.repo.get_by_creator(join_data['creator'])
+        game_session = self.repo.get(creator.game_session_id or creator.hosted_game_session_id)
 
         if not (user.is_playing or user.is_hosting):
             game_session.join(user)
@@ -114,7 +118,7 @@ class GameSessionService:
         else:
             raise GameSessionNotFound()
 
-    def choose_question(self, username: str, question_data):
+    def choose_question(self, username: str, question_data: 'QuestionChoiceDTO'):
         user = self.user_repo.get(username)
 
         if not user.is_playing:
@@ -122,10 +126,7 @@ class GameSessionService:
 
         game_session = self.repo.get(user.game_session_id)
 
-        theme_index = question_data['theme_index']
-        question_index = question_data['question_index']
-
-        game_session.choose_question(user, theme_index, question_index)
+        game_session.choose_question(user, question_data.theme_index, question_data.question_index)
 
         self.repo.save(game_session)
 
@@ -163,11 +164,11 @@ class GameSessionService:
 
             self.repo.delete(game_session)
 
-    def submit_answer(self, username: str, answer_data):
+    def submit_answer(self, username: str, answer_data: 'AnswerRequestDTO'):
         user = self.user_repo.get(username)
         game_session = self.repo.get(user.game_session_id)
 
-        game_session.submit_answer(user, answer_data['answer'] if answer_data else None)
+        game_session.submit_answer(user, answer_data.answer)
 
         self.repo.save(game_session)
 

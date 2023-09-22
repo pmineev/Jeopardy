@@ -1,18 +1,18 @@
 from rest_framework.serializers import Serializer, CharField, IntegerField, ListField, BooleanField
 
 
-class RegisterUserCredentialsSerializer(Serializer):
+class CreateUserSerializer(Serializer):
     username = CharField()
     nickname = CharField(required=False)
     password = CharField()
 
 
-class LoginUserCredentialsSerializer(Serializer):
+class LoginUserSerializer(Serializer):
     username = CharField()
     password = CharField()
 
 
-class ChangeUserCredentialsSerializer(Serializer):
+class ChangeUserSerializer(Serializer):
     nickname = CharField(required=False)
     password = CharField(required=False)
 
@@ -23,7 +23,7 @@ class QuestionSerializer(Serializer):
     value = IntegerField(min_value=0)
 
 
-class CreatorNicknameSerializer(Serializer):
+class JoinGameSessionSerializer(Serializer):
     creator = CharField()
 
 
