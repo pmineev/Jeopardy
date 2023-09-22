@@ -24,9 +24,6 @@ const AnswerForm = () => {
             onSubmit={({answer}, {setSubmitting, resetForm}) => {
                 if (answer?.length > 0) {
                     submitAnswer(answer)
-                        .then(() => {
-                            setSubmitting(false);
-                        })
                         .catch(errorCode => {
                             switch (errorCode) {
                                 case 'wrong_stage':
